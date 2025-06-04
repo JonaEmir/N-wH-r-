@@ -1,0 +1,184 @@
+/* ========== HEADER ========== */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: transparent;
+  backdrop-filter: none;
+  transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
+}
+
+header.scrolled {
+  background: rgb(255, 255, 255);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* ----- Bloque IZQ (hamburguesa + texto) ----- */
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  width:80px;
+  position:relative;
+  z-index:200;
+}
+
+.menu-label{
+  display:inline-block;
+  width:45px;
+  font-size:12px;
+  font-weight:400;
+  line-height:1;
+  color:#1D1D1D;
+  user-select:none;
+}
+
+.menu-label::before {
+  content: "Menú";
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  color: #1D1D1D;
+  user-select: none;
+  transition: .3s;
+}
+#burger:checked ~ .header-left .menu-label::before {
+  content: "Cerrar";
+}
+
+/* ---------------  HAMBURGUESA  --------------- */
+.burger{
+  position:relative;
+  width:16px;
+  height:12px;
+  cursor:pointer;
+  display:block;
+}
+.burger span{
+  position:absolute;
+  width:100%;
+  height:1px;
+  background:#1D1D1D;
+  transition:.25s;
+}
+.burger span:nth-of-type(1),
+.burger span:nth-of-type(3){background:#000}
+.burger span:nth-of-type(1){top:0;}
+.burger span:nth-of-type(2){top:50%;transform:translateY(-50%);}
+.burger span:nth-of-type(3){bottom:0;}
+
+#burger:checked ~ .header-left .burger span:nth-of-type(1){
+  transform:translateY(5.5px) rotate(45deg);
+}
+#burger:checked ~ .header-left .burger span:nth-of-type(2){
+  opacity:0;
+}
+#burger:checked ~ .header-left .burger span:nth-of-type(3){
+  transform:translateY(-5.5px) rotate(-45deg);
+}
+
+/* 👉  overlay visible (hermanos directos) */
+#burger:checked ~ .page-overlay{
+  opacity:1;pointer-events:auto;
+}
+
+
+
+/* --- Overlay de fondo ----------------------------------- */
+.page-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(3px);
+  opacity:0; transition:opacity .3s;
+  pointer-events:none;
+  z-index:80;
+}
+
+#burger:checked ~ header .page-overlay{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* Opcional: desactivar clics en fondo */
+#burger:checked ~ .hero-banner,
+#burger:checked ~ .carousel-container{
+  pointer-events:none;
+}
+
+/* ----- Logo ----- */
+#Logo {
+  width: 100px;
+  margin-right: 60px;
+}
+
+/* ----- Usuario (svg) ----- */
+.header-right svg { display: block; }
+
+/* ========== NAV MENU ========== */
+.nav-menu{
+  position:fixed; left:0; top:0;
+  height:100vh; width:33vw; max-width:320px;
+  background:#FFF;
+  transform:translateX(-100%);
+  transition:transform .4s ease;
+  display:flex; flex-direction:column;
+  padding:60px 20px;
+  z-index:90;
+}
+
+.menu{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.menu li a{color:#1D1D1D;text-decoration:none;font-size:16px;font-weight:500;}
+
+/* 👉  deslizar panel (hermanos directos) */
+#burger:checked ~ .nav-menu{
+  transform:translateX(0);
+}
+
+.menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+.menu li a {
+  display: block;
+  padding: 10px 0;
+  color: #1D1D1D;
+  text-decoration: none;
+}
+#burger:checked ~ .nav-menu { display: block; }
+
+/* ============================================================ */
+/*        AÑADIDOS PARA QUE FUNCIONE CON #burger DENTRO          */
+/* ============================================================ */
+
+/* 1. Mostrar overlay cuando el checkbox y overlay son hermanos */
+#burger:checked ~ .page-overlay{
+  opacity:1;                      /* ya estaba arriba, lo reforzamos */
+  pointer-events:auto;
+}
+
+/* 2. Deslizar panel lateral con checkbox dentro del header */
+#burger:checked ~ .nav-menu{
+  transform:translateX(0);
+  display:flex;                   /* mantiene flex (en vez de block) */
+}
+
+
+/* ========== EFECTO FADE-IN (logo, burger, usuario) ========== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 3s ease .5s, transform 3s ease .5s;
+}
+.fade-in.fade-active {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -1,0 +1,53 @@
+/* ========== CATEGORÍAS ========== */
+.categorias {
+  padding: 30px 20px;
+  background: #fff;
+  text-align: center;
+}
+
+.categorias h2 {
+  font-size: 1em;
+  margin-bottom: 30px;
+  color: #1D1D1D;
+}
+
+.categoria-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.categoria-card {
+  flex: 1 1 250px;
+  max-width: 250px;
+  height: 320px;
+  overflow: hidden;
+  text-align: center;
+  background: #fdfdfd;
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.categoria-card img,
+.categoria-card video {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-bottom: 1px solid #ddd;
+}
+
+.categoria-card h3 {
+  position: relative;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6em;
+  color: #1D1D1D;
+  margin: 0;
+margin-bottom: 30px;
+}
+
