@@ -1,0 +1,16 @@
+/* ========== IMPORTS PRINCIPALES ========== */
+@import url('/web/inicio/css/header.css');
+
+/*---Seccion para importar reset que tiene los atributos generales---*/
+@import url('/web/inicio/css/reset.css');
+
+/*---Seccion para importar reset que tiene los atributos generales---*/
+@import url('/web/detalles de producto/css/detalles.css');
+
+/* 7. Media queries: responsive adaptado */
+@import url('/web/inicio/css/pre-footer.css');
+
+/* 7. Media queries: responsive adaptado */
+@import url('/web/inicio/css/footer.css');
+
+@import url('/web/detalles de producto/css/media\ queries.css');

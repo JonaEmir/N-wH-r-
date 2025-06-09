@@ -1,0 +1,82 @@
+/* ========== CATEGORÍAS ========== */
+.categorias {
+  padding: 30px 20px;
+  background: #fff;
+  text-align: center;
+}
+
+.categorias h2 {
+  font-size: 1em;
+  margin-bottom: 30px;
+  color: #1D1D1D;
+  text-align: center;
+}
+
+.categoria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.categoria-card {
+  flex: 1 1 250px;
+  max-width: 250px;
+  height: 400px;
+  overflow: hidden;
+  text-align: center;
+  background: #fff;
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.categoria-card img,
+.categoria-card video {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-bottom: 1px solid #ddd;
+}
+
+.categoria-card h3 {
+  font-size: 0.5em;
+  color: #1D1D1D;
+  margin: 10px 0;
+  position: static;
+  transform: none;
+}
+
+/* Animación de entrada */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.categoria-card {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.categoria-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Zoom al pasar el mouse */
+.categoria-card img {
+  transition: transform 0.4s ease;
+}
+
+.categoria-card:hover img {
+  transform: scale(1.05);
+}
