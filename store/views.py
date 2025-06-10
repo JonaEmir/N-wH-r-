@@ -5,16 +5,16 @@ from .models import Producto, Categoria
 import json
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'public/index.html')
 
 def dama(request):
-    return render(request, 'dama.html')
+    return render(request, 'public/dama.html')
 
 def caballero(request):
-    return render(request, 'caballero.html')
+    return render(request, 'public/caballero.html')
 
 def detalles(request):
-    return render(request, 'detalles.html')
+    return render(request, 'public/detalles.html')
 
 
 def get_all_products(request):
