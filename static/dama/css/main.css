@@ -1,0 +1,13 @@
+/* importa tus resets + header genéricos */
+@import url('/static/inicio/css/header.css');
+@import url('/static/inicio/css/reset.css');
+
+/* bloque post header (igual que caballero → renombrado) */
+@import url('/static/dama/css/post-header.css');   /* nuevo */
+
+/* grid y tarjetas – puedes reutilizar la misma hoja */
+@import url('/static/dama/css/productos.css');
+
+@import url('/static/inicio/css/pre-footer.css');
+@import url('/static/inicio/css/footer.css');
+@import url('/static/dama/css/media\ queries.css'); /* nuevo */

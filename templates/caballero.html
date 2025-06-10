@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'caballero/css/main.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+  <title>Caballero</title>
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header>
+    <input type="checkbox" id="burger" hidden>
+
+    <div class="header-left fade-in">
+      <label class="burger" for="burger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <span class="menu-label"></span>
+    </div>
+
+    <div class="header-center">
+      <a href="{% url 'index' %}"><img src="{% static 'images/NowHere.svg' %}" id="Logo" class="fade-in" alt="NöwHėrē"></a>
+    </div>
+
+    <div class="header-right fade-in">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+           stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+           viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+      </svg>
+    </div>
+  </header>
+
+  <!-- ========== NAV MENU ========== -->
+  <nav class="nav-menu">
+    <ul class="menu">
+      <li><a href="{% url 'index' %}">Inicio</a></li>
+      <li><a href="#">Tienda</a></li>
+      <li><a href="#">Dama</a></li>
+      <li><a href="#">Caballero</a></li>
+      <li><a href="#">Ofertas</a></li>
+      <li><a href="#">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-overlay"></div>
+
+  <!-- ========== SECCIÓN CABALLERO ========== -->
+  <section class="caballero-section">
+    <div class="caballero-header">
+      <h2>Hombre</h2>
+
+      <div class="custom-select" id="dropdown">
+        <div class="selected">
+          Todo
+          <svg class="chevron" width="6" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L5 5L9 1" stroke="#1D1D1D" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <ul class="options">
+          <li data-value="all" class="option selected">Todo</li>
+          <li data-value="tenis" class="option">Tenis</li>
+          <li data-value="playeras" class="option">Playeras</li>
+          <li data-value="pantalones" class="option">Pantalones</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="productos-grid"><!-- Tarjetas se inyectan por JS --></div>
+  </section>
+
+  <!-- ========== INFO/FOOTER ========== -->
+  <section class="info-footer">
+    <div class="info-col">
+      <h4 class="accordion-toggle">AYUDA</h4>
+      <div class="accordion-content">
+        <p>¿Tienes dudas sobre tu pedido?</p>
+        <p>Contáctanos vía <a href="#">WhatsApp</a> o envíanos un correo a <a href="mailto:contacto@nowhere.mx">contacto@nowhere.mx</a></p>
+        <p><a href="#">Preguntas Frecuentes</a></p>
+        <p><a href="#">Guía de Tallas</a></p>
+      </div>
+    </div>
+
+    <div class="info-col">
+      <h4 class="accordion-toggle">SERVICIOS</h4>
+      <div class="accordion-content">
+        <p><a href="#">Compra por Mayoreo</a></p>
+        <p><a href="#">Seguimiento de Envíos</a></p>
+        <p><a href="#">Política de Cambios</a></p>
+        <p><a href="#">Atención Personalizada</a></p>
+      </div>
+    </div>
+
+    <div class="info-col">
+      <h4 class="accordion-toggle">INFORMACIÓN</h4>
+      <div class="accordion-content">
+        <p><a href="#">Sobre Nosotros</a></p>
+        <p><a href="#">Métodos de Pago</a></p>
+        <p><a href="#">Privacidad y Seguridad</a></p>
+        <p><a href="#">Términos y Condiciones</a></p>
+      </div>
+    </div>
+
+    <div class="info-col">
+      <h4 class="accordion-toggle">MAYOREO</h4>
+      <div class="accordion-content">
+        <p>¿Eres revendedor o tienda?</p>
+        <p>Mayoreo a partir de 6 pzs.</p>
+        <p><a href="#">Solicita Cotización</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="#">Avisos Legales</a>
+      </div>
+
+      <img src="{% static 'images/NowHere.svg' %}" id="Logo-footer" class="fade-in" alt="NöwHėrē">
+
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://api.whatsapp.com/send/?phone=523322118360&text&type=phone_number&app_absent=0" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script type="module" src="{% static 'inicio/js/main.js' %}" defer></script>
+  <script type="module" src="{% static 'caballero/js/main.js' %}" defer></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+.detalle-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.detalle-imagen {
+  width: 50%;
+  height: 100vh; /* ← Que abarque todo el alto de la pantalla */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detalle-imagen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* rellena el espacio sin deformarse */
+  display: block;
+}
+
+.detalle-info {
+  width: 50%;
+  padding: 60px 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: 'Helvetica Neue', sans-serif;
+  color: #1d1d1d;
+  background: #fff;
+}
+
+.detalle-info h2 {
+  font-size: .8em;
+  font-weight: normal;
+  margin-bottom: 10px;
+}
+
+.detalle-info h3 {
+  font-size: .8em;
+  margin-bottom: 10px;
+}
+
+.detalle-info p {
+  font-size: 0.5em;
+  line-height: 1.6;
+  color: #444;
+}
+
+.detalle-info .boton-contacto {
+  background: black;
+  color: white;
+  padding: 15px;
+  border-radius: 30px;
+  border: none;
+  font-size: .5em;
+  margin-top: 20px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.detalle-info label {
+  font-size: 0.6em;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.detalle-info select {
+  font-size: 0.5em;
+  padding: 6px 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  background-color: #fff;
+  appearance: none;
+}
+
+.guia-tallas{
+     font-size: 0.5em;
+}
+
+
+.volver-atras {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  transform: rotate(90deg) translateY(5px); /* flecha hacia la izquierda */
+  text-decoration: none;
+  z-index: 10;
+}
+
+.volver-atras .chevron {
+  width: 16px;
+  height: 16px;
+  stroke: #1D1D1D;
+  transition: transform 0.2s ease;
+}
+
+.volver-atras:hover .chevron {
+  transform: translateY(6px) scale(1.1); /* movimiento hacia la izquierda + zoom */
+}
+
+
+.detalle-section {
+  opacity: 0;
+  transform: translateY(50px);
+  transition:opacity 3s ease 1.5s, transform 3s ease 1.5s;
+}
+
+.detalle-section.fade-in {
+  opacity: 1;
+  transform: none;
+}
+

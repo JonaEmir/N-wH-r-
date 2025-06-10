@@ -1,0 +1,22 @@
+/* ========== IMPORTS PRINCIPALES ========== */
+@import url('/static/inicio/css/header.css');
+
+/*---Seccion para importar reset que tiene los atributos generales---*/
+@import url('/static/inicio/css/reset.css');
+
+/*---Seccion PostHeader para filtrar---*/
+@import url('/static/caballero/css/post\ header.css');
+
+/*---Seccion para mostrar los productos---*/
+@import url('/static/caballero/css/productos.css');
+
+/* 7. Media queries: responsive adaptado */
+@import url('/static/inicio/css/pre-footer.css');
+
+/* 7. Media queries: responsive adaptado */
+@import url('/static/inicio/css/footer.css');
+
+/* 7. Media queries: responsive adaptado */
+
+@import url('/static/caballero/css/media\ queries.css');
+/*---*/

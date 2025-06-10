@@ -1,0 +1,37 @@
+.info-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 60px 5%;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  font-family: 'Arial', sans-serif;
+  flex-direction: row; /* 👈 Asegura el modo horizontal */
+}
+
+.info-col {
+  flex: 1 1 25%;
+  min-width: 200px;
+  margin-bottom: 30px;
+}
+
+.info-col h4 {
+  font-size: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+  color: #1d1d1d;
+}
+
+.info-col p {
+  font-size: 9px;
+  color: #1d1d1d;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.info-col a {
+  color: #1d1d1d;
+  text-decoration: none;
+}

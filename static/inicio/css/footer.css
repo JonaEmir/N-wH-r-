@@ -1,0 +1,44 @@
+.site-footer {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 40px 5%;
+  font-size: 13px;
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-container p {
+  margin: 0;
+  flex: 1 1 100%;
+  text-align: center;
+}
+
+.footer-links,
+.footer-social {
+  display: flex;
+  gap: 20px;
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.footer-links a,
+.footer-social a {
+  color: #000000;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover,
+.footer-social a:hover {
+  color: #000000;
+}
+
+#Logo-footer {
+  width: 100px;
+}
