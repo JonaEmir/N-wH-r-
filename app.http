@@ -1,0 +1,18 @@
+### obtener productos
+GET http://127.0.0.1:8000/api/productos
+
+
+### Crear productos
+POST http://127.0.0.1:8000/api/productos/crear/
+Content-Type: application/json
+
+{
+  "nombre": "New Balance",
+  "descripcion": "Tenis para correr",
+  "precio": 119.99,
+  "categoria_id": 1,
+  "genero": "Unisex",
+  "en_oferta": false,
+  "imagen": "newBalance.jpg",
+  "stock": 35
+}
