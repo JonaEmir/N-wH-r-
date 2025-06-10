@@ -36,7 +36,7 @@ window.addEventListener('load', () => {
       card.className = 'producto-card';
       card.innerHTML = `
         <div class="imagen-zoom">
-          <a href="/templates/detalles.html">
+          <a href="/detalles/">
             <img src="${p.img}" alt="${p.nombre}" class="zoomable">
           </a>
         </div>

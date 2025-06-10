@@ -20,130 +20,142 @@ header.scrolled {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* ----- Bloque IZQ (hamburguesa + texto) ----- */
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: 70px;
-  position: relative;
-  z-index: 200;
+/* ────────────────────────────────────────────────
+   1. Bloque IZQ  (hamburguesa + texto)
+────────────────────────────────────────────────── */
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  width:70px;
+  position:relative;
+  z-index:200;
 }
 
-.menu-label {
-  display: inline-block;
-  width: 40px;
-  font-size: 10px; /* reducido */
-  font-weight: 400;
-  line-height: 1;
-  color: #1D1D1D;
-  user-select: none;
+/* Texto Menú / Cerrar */
+.menu-label{
+  display:inline-block;
+  padding-left:10px ;
+  width:40px;
+  font-size:8px;
+  font-weight:400;
+  line-height:1;
+  color:#1D1D1D;
+  user-select:none;
 }
+.menu-label::before{content:"Menú"; transition:.3s;}
+/* cambia a “Cerrar” cuando el botón tiene la clase .active */
+.burger.active + .menu-label::before{content:"Cerrar";}
 
-.menu-label::before {
-  content: "Menú";
-  font-size: 10px; /* reducido */
-  font-weight: 400;
-  line-height: 1;
-  color: #1D1D1D;
-  user-select: none;
-  transition: .3s;
+/* ────────────────────────────────────────────────
+   2. Botón HAMBURGUESA
+────────────────────────────────────────────────── */
+.burger{
+  position:relative;
+  width:12px;
+  height:9px;
+  cursor:pointer;
+  border:none;
+  background:none;
+  padding:0;
+  display:block;      /* mantiene tu layout */
 }
-#burger:checked ~ .header-left .menu-label::before {
-  content: "Cerrar";
-}
-
-/* ---------------  HAMBURGUESA  --------------- */
-.burger {
-  position: relative;
-  width: 12px; /* reducido */
-  height: 9px;  /* reducido */
-  cursor: pointer;
-  display: block;
-}
-.burger span {
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  background: #1D1D1D;
-  transition: .25s;
+.burger span{
+  position:absolute;
+  width:100%;
+  height:1px;
+  background:#1D1D1D;
+  transition:.25s;
 }
 .burger span:nth-of-type(1),
-.burger span:nth-of-type(3) { background: #000; }
-.burger span:nth-of-type(1) { top: 0; }
-.burger span:nth-of-type(2) { top: 50%; transform: translateY(-50%); }
-.burger span:nth-of-type(3) { bottom: 0; }
+.burger span:nth-of-type(3){background:#000;}
+.burger span:nth-of-type(1){top:0;}
+.burger span:nth-of-type(2){top:50%; transform:translateY(-50%);}
+.burger span:nth-of-type(3){bottom:0;}
 
-#burger:checked ~ .header-left .burger span:nth-of-type(1) {
-  transform: translateY(4px) rotate(45deg); /* ajustado */
+/* Animación a “X” cuando el botón tiene .active  */
+.burger.active span:nth-of-type(1){transform:translateY(4px) rotate(45deg);}
+.burger.active span:nth-of-type(2){opacity:0;}
+.burger.active span:nth-of-type(3){transform:translateY(-4px) rotate(-45deg);}
+
+/* ────────────────────────────────────────────────
+   3. Overlay de fondo
+────────────────────────────────────────────────── */
+.page-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(3px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s;
+  z-index:200;
 }
-#burger:checked ~ .header-left .burger span:nth-of-type(2) {
-  opacity: 0;
-}
-#burger:checked ~ .header-left .burger span:nth-of-type(3) {
-  transform: translateY(-4px) rotate(-45deg); /* ajustado */
+/* visible cuando añadimos .active desde JS */
+.page-overlay.active{
+  opacity:1;
+  pointer-events:auto;
 }
 
-/* --- Overlay de fondo */
-.page-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.35);
-  backdrop-filter: blur(3px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .3s;
-  z-index: 200;
+/* ────────────────────────────────────────────────
+   4. NAV MENU lateral
+────────────────────────────────────────────────── */
+.nav-menu{
+  position:fixed; left:0; top:0;
+  height:100vh; width: 440px; max-width: 450px;;
+  background:#FFF;
+  transform:translateX(-100%);
+  transition:transform .4s ease;
+  display:flex; flex-direction:column;
+  padding:40px 16px;
+  z-index:500;
 }
-body:has(#burger:checked) .page-overlay,
-#burger:checked ~ .page-overlay {
-  opacity: 1;
-  pointer-events: auto;
+/* se desplaza dentro cuando añadimos .open desde JS */
+.nav-menu.open{transform:translateX(0);}
+
+/* Lista de enlaces (sin cambios) */
+.menu{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:6px;
 }
-#burger:checked ~ .hero-banner,
-#burger:checked ~ .carousel-container {
-  pointer-events: none;
+.menu li a{
+  display:block;
+  padding:8px 0;
+  color:#1D1D1D;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:500;
+}
+
+/* ────────────────────────────────────────────────
+   5. Bloquear interacción con secciones detrás
+      (opcional, como hacías antes)
+────────────────────────────────────────────────── */
+/* si tu hero-banner y carousel están *después* del nav-menu
+   en el DOM: */
+.nav-menu.open ~ .hero-banner,
+.nav-menu.open ~ .carousel-container{
+  pointer-events:none;
 }
 
 /* ----- Logo ----- */
 #Logo {
   width: 80px; /* reducido */
-  margin-right: 40px; /* más compacto */
+  
+}
+
+.header-right {
+  display: flex;
+  align-items: center; /* Alinea verticalmente */
+  gap: 12px; /* Espacio entre el ícono y el botón */
 }
 
 /* ----- Usuario (svg) ----- */
-.header-right svg { display: block; }
+.header-right svg { 
+  display: block; 
 
-/* ========== NAV MENU ========== */
-.nav-menu {
-  position: fixed; left: 0; top: 0;
-  height: 100vh; width: 30vw; max-width: 280px; /* reducido */
-  background: #FFF;
-  transform: translateX(-100%);
-  transition: transform .4s ease;
-  display: flex; flex-direction: column;
-  padding: 40px 16px; /* reducido */
-  z-index: 500;
-}
-
-.menu {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 6px; /* reducido */
-}
-.menu li a {
-  display: block;
-  padding: 8px 0;
-  color: #1D1D1D;
-  text-decoration: none;
-  font-size: 14px; /* reducido */
-  font-weight: 500;
-}
-
-#burger:checked ~ .nav-menu {
-  transform: translateX(0);
-  display: flex;
 }
 
 /* ========== EFECTO FADE-IN (logo, burger, usuario) ========== */
@@ -155,4 +167,256 @@ body:has(#burger:checked) .page-overlay,
 .fade-in.fade-active {
   opacity: 1;
   transform: translateY(0);
+}
+
+/*---Todo el css del boton de cotacto*/
+.btn-contacto {
+  background: none;
+  border: none;
+  color: #1D1D1D;
+  font-size: 8px;      /* 👈 Aquí defines el tamaño de letra */
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+/* Panel lateral derecho */
+.contact-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 440px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.2);
+  transition: right 0.4s ease;
+  z-index: 999;
+  padding: 30px 60px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-panel.open {
+  right: 0;
+}
+
+.contact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;  
+}
+
+.contact-header h2 {
+  font-size: 8px;
+}
+
+.close-btn {
+  font-size: 22px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.contact-content {
+  margin-top: 20px;
+}
+
+.contact-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contact-content input,
+.contact-content textarea {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.contact-content button {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.contact-content {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.contact-content p {
+  margin: 20px 0;
+  font-size: 9px;
+}
+
+.contact-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px ;
+  font-size: 10px;
+}
+
+.contact-line i {
+  font-size: 10px;
+  color: #1D1D1D;
+}
+
+.contact-line a {
+  color: #1D1D1D;
+  text-decoration: none;
+}
+
+.contact-line a:hover {
+  text-decoration: underline;
+}
+
+.contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.contact-list li {
+  margin-bottom: 6px;
+}
+
+.contact-list a {
+  text-decoration: none;
+  color: #1D1D1D;
+  font-size: 9px;
+}
+
+.contact-list a:hover {
+  text-decoration: underline;
+}
+
+.contact-content p strong {
+  margin-top: 30px; /* No es tan recomendable */
+}
+
+/* ========== MEDIA QUERIES ORGANIZADAS ========== */
+
+/* Tablets (≤ 1024px) */
+@media (max-width: 1024px) {
+  header {
+    padding: 10px 20px;
+  }
+}
+
+/* Celulares grandes (≤ 768px) */
+@media (max-width: 768px) {
+  /* Header */
+  .header-left {
+    width: auto;
+  }
+
+  #Logo {
+    width: 120px;
+  }
+
+  /* Contact panel */
+  .contact-panel {
+    width: 100vw;
+    padding: 20px 30px;
+  }
+  .nav-menu{
+    width: 100vw;
+    padding: 20px 30px;
+}
+
+  .contact-header h2 {
+    font-size: 10px;
+  }
+
+  .btn-contacto {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+
+  .contact-content {
+    font-size: 11px;
+  }
+
+  .contact-content input,
+  .contact-content textarea {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .contact-list a,
+  .contact-line {
+    font-size: 11px;
+  }
+}
+
+/* Celulares pequeños (≤ 480px) */
+@media (max-width: 480px) {
+  /* Header */
+  header {
+    flex-wrap: nowrap;
+    padding: 10px 15px;
+  }
+
+  .header-left,
+  .header-center,
+  .header-right {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+  }
+
+  .header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    justify-content: center;
+  }
+
+  #Logo {
+    width: 100px;
+  }
+
+  /* Contact panel */
+  .contact-panel {
+    width: 50vw;
+    padding: 15px 20px;
+  }
+
+  .nav-menu{
+    width: 50vw;
+    padding: 45px 20px;
+  }
+
+  .contact-header h2 {
+    font-size: 9px;
+  }
+
+  .btn-contacto {
+    font-size: 9px;
+  }
+
+  .contact-content {
+    font-size: 10px;
+  }
+
+  .contact-content input,
+  .contact-content textarea {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .contact-content button {
+    padding: 10px;
+  }
+
+  .contact-line,
+  .contact-line i,
+  .contact-list a {
+    font-size: 10px;
+  }
 }

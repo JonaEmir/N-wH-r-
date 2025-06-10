@@ -24,7 +24,7 @@ window.addEventListener('DOMContentLoaded', () => {
   /* --- Ajustar enlace de regreso --- */
   const origen = localStorage.getItem('origenSeccion') || 'caballero';
   const backLink = document.getElementById('volver-atras');
-  backLink.setAttribute('href', `/templates/${origen}.html`);
+  backLink.setAttribute('href', `/${origen}`);
 });
 
 // al hacer click en la flecha, limpia para no acumular valores viejos

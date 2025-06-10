@@ -14,14 +14,13 @@
 
   <!-- HEADER -->
   <header>
-    <input type="checkbox" id="burger" hidden>
-
     <div class="header-left fade-in">
-      <label class="burger" for="burger">
-        <span></span>
-        <span></span>
-        <span></span>
-      </label>
+      <!-- BOTÓN HAMBURGUESA -->
+      <button id="btn-burger" class="burger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Texto “Menú / Cerrar” -->
       <span class="menu-label"></span>
     </div>
 
@@ -30,12 +29,13 @@
     </div>
 
     <div class="header-right fade-in">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-           stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-           viewBox="0 0 24 24">
-        <circle cx="12" cy="8" r="4"/>
-        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
-      </svg>
+      <button id="btn-contacto" class="btn-contacto">Contáctanos</button>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+          stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+          viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+        </svg>
     </div>
   </header>
 
@@ -43,11 +43,41 @@
   <nav class="nav-menu">
     <ul class="menu">
       <li><a href="{% url 'index' %}">Inicio</a></li>
-      <li><a href="#">Dama</a></li>
-      <li><a href="#">Caballero</a></li>
+      <li><a href="{% url 'dama' %}">Dama</a></li>
+      <li><a href="{% url 'caballero' %}">Caballero</a></li>
       <li><a href="#">Contacto</a></li>
     </ul>
   </nav>
+
+  <div id="contact-panel" class="contact-panel">
+    <div class="contact-header">
+      <h2>Llámenos</h2>
+      <span id="close-contact-panel" class="close-btn">×</span>
+    </div>
+
+  <div class="contact-content">
+    <p>Donde sea que esté, nuestro equipo estará encantado de atenderle.</p>
+
+    <div class="contact-line">
+      <i class="fa-solid fa-phone"></i>
+      <span>+52 332 211 8360</span>
+    </div>
+
+    <div class="contact-line">
+      <i class="fa-brands fa-whatsapp"></i>
+      <a href="https://wa.me/3322118360" target="_blank">WhatsApp</a>
+    </div>
+      <hr>
+      <p><strong>¿Necesita ayuda?</strong></p>
+
+      <ul class="contact-list">
+        <li><a href="#">Preguntas Frecuentes</a></li>
+        <li><a href="#">Servicio de Cuidados</a></li>
+        <li><a href="#">Encontrar una Tienda</a></li>
+        <li><a href="mailto:contacto@nowhere.mx">Enviar Correo</a></li>
+      </ul>
+    </div>
+  </div>
 
   <div class="page-overlay"></div>
 
@@ -70,11 +100,11 @@
     <h2>Tu estilo empieza aquí — Explora nuestra colección premium.</h2>
     <div class="categoria-grid">
       <div class="categoria-card">
-        <img src="{% static 'images/20250604_1519_Tenis Louis Vuitton Elegante_simple_compose_01jwycyeyherft32svj1stky60.png' %}" alt="">
-        <h3>Dama</h3>
+       <a href="{% url 'dama' %}"><img src="{% static 'images/20250604_1519_Tenis Louis Vuitton Elegante_simple_compose_01jwycyeyherft32svj1stky60.png' %}" alt=""></a>
+       <h3>Dama</h3>
       </div>
       <div class="categoria-card">
-        <img src="{% static 'images/20250604_1524_Zapatillas de Caballero_remix_01jwyd7hfeegt92gnagk5vm9nb.png' %}" alt="">
+        <a href="{% url 'caballero' %}"><img src="{% static 'images/20250604_1524_Zapatillas de Caballero_remix_01jwyd7hfeegt92gnagk5vm9nb.png' %}" alt=""></a>
         <h3>Caballero</h3>
       </div>
       <div class="categoria-card">

@@ -129,3 +129,28 @@
   border-color: #000; 
 }
 
+/* Pantallas pequeñas (≤ 600px) */
+@media (max-width: 600px) {
+  .categoria-grid,
+  .categorias-dama .categoria-grid,
+  .categorias-hombre .categoria-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .categoria-card,
+  .categorias-dama .categoria-card,
+  .categorias-hombre .categoria-card {
+    width: 100%;
+    height: auto;
+    padding-bottom: 10px;
+  }
+
+  .categoria-card h3 {
+    bottom: 5px;
+    font-size: 0.7em;
+    margin-top: 20px;
+  }
+}
+
+
