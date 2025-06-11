@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crear producto</title>
+  <style>
+    body{font-family:sans-serif;margin:2rem auto;max-width:600px}
+    label{display:block;margin-top:1rem}
+    input,textarea,select{width:100%;padding:.4rem}
+    button{margin-top:1.2rem;padding:.6rem 1.4rem;font-size:1rem}
+    .msg{margin-top:1rem;font-weight:600}
+  </style>
+</head>
+<body>
+  <h1>Nuevo producto</h1>
+
+  <form id="productoForm">
+    <label>Nombre
+      <input type="text" name="nombre" required />
+    </label>
+
+    <label>Descripción
+      <textarea name="descripcion" rows="4" required></textarea>
+    </label>
+
+    <label>Precio
+      <input type="number" name="precio" step="0.01" min="0" required />
+    </label>
+
+    <!--
+      Puedes poblar este <select> dinámicamente con las categorías que tengas
+      (p. ej. llamando al endpoint que expone tus categorías) o escribirlas a mano.
+    -->
+    <label>Categoría
+      <select name="categoria_id" required>
+        <option value="">— selecciona —</option>
+        <option value="1">Camisetas</option>
+        <option value="2">Pantalones</option>
+        <option value="3">Accesorios</option>
+      </select>
+    </label>
+
+    <label>Género
+      <select name="genero" required>
+        <option value="">— selecciona —</option>
+        <option value="H">Hombre</option>
+        <option value="M">Mujer</option>
+        <option value="U">Unisex</option>
+      </select>
+    </label>
+
+    <label>
+      <input type="checkbox" name="en_oferta" /> En oferta
+    </label>
+
+    <!--
+      Si vas a manejar uploads de imagen real,
+      necesitarás un campo type="file" y un endpoint que acepte multipart/form-data.
+      Como tu vista espera una cadena (URL o path), aquí pedimos texto:
+    -->
+    <label>URL de la imagen
+      <input type="text" name="imagen" required />
+    </label>
+
+    <label>Stock
+      <input type="number" name="stock" min="0" required />
+    </label>
+
+    <button type="submit">Guardar</button>
+    <p class="msg" id="mensaje"></p>
+  </form>
+  <script src="/static/alta/registro.js"></script>
+</body>
+</html>

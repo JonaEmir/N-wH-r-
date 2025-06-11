@@ -5,6 +5,7 @@ import { setupZoomEffect } from './zoom-effect.js';
 import { setupAccordion } from './accordion.js';
 import { setupNavigationButtons } from './navigation.js';
 import { setupContactPanel } from './contact-panel.js';
+import { setupLoginPanel } from './usuario.js';
 
 setupScrollRestoration();
 setupHeaderScroll();
@@ -13,3 +14,4 @@ setupZoomEffect();
 setupAccordion();
 setupNavigationButtons();
 setupContactPanel();
+ setupLoginPanel();

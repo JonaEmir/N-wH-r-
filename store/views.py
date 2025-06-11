@@ -16,6 +16,14 @@ def caballero(request):
 def detalles(request):
     return render(request, 'public/detalles.html')
 
+def alta(request):
+    return render(request, 'user/registro.html')
+
+def get_categorias(request):
+    categorias = Categoria.objects.all().values('id', 'nombre')
+    return JsonResponse(list(categorias), safe=False)
+
+
 
 def get_all_products(request):
     if request.method == 'GET':
@@ -56,3 +64,4 @@ def create_product(request):
             return JsonResponse({'id': producto.id, 'message': 'Producto creado con éxito'}, status=201)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+        
