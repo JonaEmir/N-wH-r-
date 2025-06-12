@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario</title>
+    <link rel="stylesheet" href="/static/registro de usuario/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <a href="index.html"><img src="/static/images/NowHere.svg" id="Logo" class="fade-in" alt="NöwHėrē"></a>
+            <h2 >| Creacion de cuenta N:</h2>
+        </div>
+    </header>
+
+    <main>
+    <h1>Cree su cuenta</h1>
+    <p class="lead">Cree su cuenta para acceder a una experiencia personalizada.</p>
+
+    <p class="switch-login">
+      ¿Ya tienes una cuenta en My LV? <a href="#">Inicie sesión aquí</a>
+      <span class="req-note">Campos requeridos*</span>
+    </p>
+
+    <!-- FORMULARIO -->
+    <form id="registroForm" novalidate>
+      <!-- correo -->
+      <div>
+        <label for="email">Correo electrónico*</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+
+      <!-- título -->
+      <div>
+        <label for="titulo">Fórmula de tratamiento*</label>
+        <select id="titulo" name="titulo" required>
+          <option value="">Seleccione su título</option>
+          <option value="sr">Sr.</option>
+          <option value="sra">Sra.</option>
+          <option value="srta">Srta.</option>
+          <option value="mx">Mx.</option>
+        </select>
+        <span class="error-msg" hidden>Falta un campo</span>
+      </div>
+
+      <!-- confirmar correo -->
+      <div>
+        <label for="email2">Confirmación de email*</label>
+        <input type="email" id="email2" name="email2" required>
+      </div>
+
+      <!-- nombre -->
+      <div>
+        <label for="nombre">Nombre*</label>
+        <input type="text" id="nombre" name="nombre" required>
+      </div>
+
+      <!-- contraseña + ojo -->
+      <div class="pwd-wrapper">
+        <label for="pwd">Contraseña*</label>
+        <input type="password" id="pwd" name="pwd" required minlength="8">
+        <button type="button" aria-label="Mostrar/ocultar contraseña">
+          <i class="fa-regular fa-eye"></i>
+        </button>
+      </div>
+
+      <!-- apellidos -->
+      <div>
+        <label for="apellidos">Apellidos*</label>
+        <input type="text" id="apellidos" name="apellidos" required>
+      </div>
+
+      <!-- fecha -->
+      <div>
+        <label for="fecha">Fecha de nacimiento</label>
+        <input type="date" id="fecha" name="fecha">
+      </div>
+
+      <!-- checkbox -->
+      <div class="chk-line">
+        <input type="checkbox" id="promo" name="promo" checked>
+        <label for="promo">
+          Desmarque esta casilla si no desea recibir correos electrónicos
+          (comunicación sobre productos, servicios y eventos).
+        </label>
+      </div>
+
+      <!-- botón -->
+      <div class="actions">
+        <button type="submit" class="btn-primary">Crear cuenta</button>
+      </div>
+    </form>
+  </main>
+
+
+  <!-- FOOTER -->
+  <section class="info-footer">
+    <div class="info-col">
+      <h4 class="accordion-toggle">AYUDA</h4>
+      <div class="accordion-content">
+        <p>¿Tienes dudas sobre tu pedido?</p>
+        <p>Contáctanos vía <a href="https://api.whatsapp.com/send/?phone=523322118360&text&type=phone_number&app_absent=0">WhatsApp</a> o envíanos un correo a <a href="jona.emir@hotmail.com">jona.emir@hotmail.com</a></p>
+        <p><a href="#">Preguntas Frecuentes</a></p>
+        <p><a href="#">Guía de Tallas</a></p>
+      </div>
+    </div>
+    <div class="info-col">
+      <h4 class="accordion-toggle">SERVICIOS</h4>
+      <div class="accordion-content">
+        <p><a href="#">Compra por Mayoreo</a></p>
+        <p><a href="#">Seguimiento de Envíos</a></p>
+        <p><a href="#">Política de Cambios</a></p>
+        <p><a href="#">Atención Personalizada</a></p>
+      </div>
+    </div>
+    <div class="info-col">
+      <h4 class="accordion-toggle">INFORMACION</h4>
+      <div class="accordion-content">
+        <p><a href="#">Sobre Nosotros</a></p>
+        <p><a href="#">Métodos de Pago</a></p>
+        <p><a href="#">Privacidad y Seguridad</a></p>
+        <p><a href="#">Términos y Condiciones</a></p>
+      </div>
+    </div>
+    <div class="info-col">
+      <h4 class="accordion-toggle">Mayoreo</h4>
+      <div class="accordion-content">
+        <p>¿Eres revendedor o tienda?</p>
+        <p>Mayoreo a partir de 6 pzs.</p>
+        <p><a href="#">Solicita Cotización</a></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="#">Avisos Legales</a>
+      </div>
+      <img src="/static/images/NowHere.svg" id="Logo-footer" class="fade-in" alt="NöwHėrē">
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://api.whatsapp.com/send/?phone=523322118360&text&type=phone_number&app_absent=0" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="/static/inicio/js/main.js"></script>
+
+    
+
+
+
+    
+    
+</body>
+</html>
