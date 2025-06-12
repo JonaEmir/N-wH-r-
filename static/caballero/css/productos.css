@@ -64,6 +64,8 @@
   transition: transform 0.3s ease;
 }
 
+/* efecto zoom al pasar el mouse */
 .producto-card:hover .imagen-zoom img {
-  transform: scale(1.1);
+  transform: scale(1.1) !important;
 }
+

@@ -141,7 +141,27 @@
       </div>
     </div>
 
-    <div class="productos-grid"><!-- Tarjetas se inyectan por JS --></div>
+    <div class="productos-grid">
+  {% for producto in productos %}
+    <div class="producto-card" data-categoria="{{ producto.categoria.nombre|lower }}">
+      <div class="imagen-zoom">
+        <a href="{% url 'detalle_producto' producto.id %}?from=caballero">
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="zoomable">
+        </a>
+      </div>
+
+      <div class="info">
+        <h4>{{ producto.nombre }}</h4>
+        <h5>${{ producto.precio }}</h5>
+      </div>
+    </div>
+  {% empty %}
+    <p>No hay productos disponibles.</p>
+  {% endfor %}
+</div>
+
+
+
   </section>
 
   <!-- ========== INFO/FOOTER ========== -->

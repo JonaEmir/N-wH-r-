@@ -119,38 +119,38 @@
 
   <div class="page-overlay"></div>
 
-<!-- DETALLE DE PRODUCTO -->
-<section class="detalle-section">
-  <a href="#" id="volver-atras" class="volver-atras" aria-label="Volver">
-    <svg class="chevron" width="10" height="10" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+<section class="detalle-section "> 
+  <a href="{% url origen %}" class="volver-atras" aria-label="Volver">
+      <svg class="chevron" width="10" height="10" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M1 1L5 5L9 1" stroke="#1D1D1D" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </a>
 
   <div class="detalle-container">
     <div class="detalle-imagen">
-      <img id="detalle-img" alt="Imagen del producto">
+      {% if producto.imagen %}
+        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+      {% endif %}
     </div>
 
     <div class="detalle-info">
-      <p class="sku">001</p>
-      <h2 id="detalle-nombre"></h2>
-      <h3 id="detalle-precio"></h3>
+      <p class="sku">{{ producto.id|stringformat:"03d" }}</p>
+      <h2>{{ producto.nombre }}</h2>
+      <h3>${{ producto.precio }}</h3>
 
+      <!-- selector de tallas si procede -->
       <select id="talla">
-        <option value="default">Seleccione su talla </option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
+        <option value="">Seleccione su talla</option>
+        {% for t in tallas %}
+          <option value="{{ t }}">{{ t }}</option>
+        {% endfor %}
       </select>
+
 
       <a href="#" class="guia-tallas">Guía de tallas</a>
       <button class="boton-contacto">Contactar a un Asesor</button>
 
-      <p id="detalle-descripcion">Descripción del producto...</p>
+      <p>{{ producto.descripcion }}</p>
     </div>
   </div>
 </section>

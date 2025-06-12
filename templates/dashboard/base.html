@@ -1,0 +1,17 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'dashboard/header/css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'dashboard/registro/css/main.css' %}">
+</head>
+<body>
+  {% include 'dashboard/includes/header.html' %}
+  <main class="dashboard-main">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

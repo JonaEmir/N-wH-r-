@@ -11,17 +11,48 @@ def dama(request):
     return render(request, 'public/dama.html')
 
 def caballero(request):
-    return render(request, 'public/caballero.html')
+    productos = Producto.objects.filter(genero__iexact='H')
+    print('▶︎ Productos caballero:', productos.count())
+    return render(request, 'public/caballero.html', {'productos': productos})
 
-def detalles(request):
-    return render(request, 'public/detalles.html')
+
+
+def detalle_producto(request, id):
+    producto = get_object_or_404(Producto, id=id)
+
+    # ─── lista de tallas (puedes ajustarla según tu modelo) ───
+    tallas = ["3", "4", "5", "6", "7", "8"]
+
+    return render(
+        request,
+        'public/detalles.html',
+        {
+            'producto': producto,
+            'origen'  : request.GET.get('from', 'caballero'),
+            'tallas'  : tallas,                # ← ¡ahora sí la envías!
+        }
+    )
 
 def alta(request):
-    return render(request, 'user/registro.html')
+    return render(request, 'dashboard/registro.html')
 
 def get_categorias(request):
     categorias = Categoria.objects.all().values('id', 'nombre')
     return JsonResponse(list(categorias), safe=False)
+
+def lista_productos(request):
+    return render(request, 'dashboard/lista.html')
+
+from django.shortcuts import get_object_or_404
+
+def editar_producto(request, id):
+    producto = get_object_or_404(Producto, id=id)
+    categorias = Categoria.objects.all()
+    return render(request, 'dashboard/editar.html', {
+        'producto': producto,
+        'categorias': categorias
+    })
+
 
 
 
@@ -40,6 +71,7 @@ def get_all_products(request):
                 'en_oferta': p.en_oferta,
                 'stock': p.stock,
                 'created_at': p.created_at.isoformat(),
+                'imagen': p.imagen.url if p.imagen else '',  # ✅ Asegura que sea una URL válida
             })
         return JsonResponse(data, safe=False)
 

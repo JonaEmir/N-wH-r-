@@ -1,0 +1,59 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Crear Producto{% endblock %}
+
+{% block content %}
+<h1>Nuevo producto</h1>
+
+<form id="productoForm" method="post" enctype="multipart/form-data">
+   {% csrf_token %}
+  <label>Nombre
+    <input type="text" name="nombre" required />
+  </label>
+
+  <label>Descripción
+    <textarea name="descripcion" rows="4" required></textarea>
+  </label>
+
+  <label>Precio
+    <input type="number" name="precio" step="0.01" min="0" required />
+  </label>
+
+  <label>Categoría
+    <select name="categoria_id" required>
+      <option value="">— selecciona —</option>
+      <option value="1">Camisetas</option>
+      <option value="2">Pantalones</option>
+      <option value="3">Accesorios</option>
+    </select>
+  </label>
+
+  <label>Género
+    <select name="genero" required>
+      <option value="">— selecciona —</option>
+      <option value="H">Hombre</option>
+      <option value="M">Mujer</option>
+      <option value="U">Unisex</option>
+    </select>
+  </label>
+
+  <label>
+    <input type="checkbox" name="en_oferta" /> En oferta
+  </label>
+
+  <label>Imagen
+    <input type="file" name="imagen" accept="image/*" required />
+  </label>
+
+  <label>Stock
+    <input type="number" name="stock" min="0" required />
+  </label>
+
+  <button type="submit">Guardar</button>
+  <p class="msg" id="mensaje"></p>
+</form>
+
+<script src="{% static 'dashboard/registro/js/registro.js' %}" defer></script>
+
+{% endblock %}

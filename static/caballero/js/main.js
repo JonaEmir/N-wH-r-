@@ -1,103 +1,118 @@
-import { productos } from './productos.js';
+/* caballero/js/main.js
+   Tarjetas llegan ya renderizadas desde el template de Django
+   (bucle {% for producto in productos %}). El script:
+   1) Maneja el dropdown de categorías
+   2) Filtra las tarjetas existentes
+   3) Aplica efecto fade-in a la sección
+   4) Aplica zoom al hacer scroll
+   5) Guarda en localStorage datos mínimos del producto clicado
+*/
 
 window.addEventListener('load', () => {
-  
+
+  /* ====== referencias DOM ====== */
   const dropdown     = document.getElementById('dropdown');
   const selectedDiv  = dropdown.querySelector('.selected');
   const optionsList  = dropdown.querySelector('.options');
   const grid         = document.querySelector('.productos-grid');
-  const categorias   = Object.keys(productos);  // ["tenis", "playeras", "pantalones"]
+  /* todas las tarjetas que YA existen en el HTML */
+  const allCards     = Array.from(grid.querySelectorAll('.producto-card'));
 
-  /* -------- lógica de desplegar/cerrar -------- */
-  selectedDiv.addEventListener('click', () => {
-    dropdown.classList.toggle('open');
-  });
+  /* ---------------------------------------------------
+     1. Apertura / cierre del menú desplegable
+  --------------------------------------------------- */
+  selectedDiv.addEventListener('click', () =>
+    dropdown.classList.toggle('open')
+  );
 
-  // Cierra si se hace clic fuera
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', e => {
     if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
   });
 
-  /* -------- renderizado de productos ---------- */
-  const renderProductos = (categoria) => {
-    grid.innerHTML = '';
-
-    const lista = categoria === 'all'
-      ? categorias.flatMap(c => productos[c])
-      : productos[categoria] || [];
-
-    if (!lista.length) {
-      grid.innerHTML = '<p>No hay productos disponibles.</p>';
-      return;
-    }
-
-    lista.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'producto-card';
-      card.innerHTML = `
-        <div class="imagen-zoom">
-          <a href="/detalles/">
-            <img src="${p.img}" alt="${p.nombre}" class="zoomable">
-          </a>
-        </div>
-        <div class="info">
-          <h4>${p.nombre}</h4>
-          <h5>${p.precio}</h5>
-        </div>`;
-
-      // Escucha clic en el enlace o en la tarjeta
-      card.querySelector('a').addEventListener('click', () => {
-        localStorage.setItem('productoSeleccionado', JSON.stringify(p));
-          localStorage.setItem('origenSeccion', 'caballero'); 
-      });
-
-      grid.appendChild(card);
+  /* ---------------------------------------------------
+     2. Filtrado de tarjetas por categoría
+        (usa el data-atribute que puso el template)
+  --------------------------------------------------- */
+  const renderProductos = categoria => {
+    allCards.forEach(card => {
+      const cat  = card.getAttribute('data-categoria');   // ej. "tenis"
+      const show = categoria === 'all' || cat === categoria;
+      card.style.display = show ? 'block' : 'none';
     });
-
   };
 
-  // Inicial – “Todo”
+  /* estado inicial = mostrar todo */
   renderProductos('all');
 
-  /* -------- cambio de categoría -------------- */
-  optionsList.addEventListener('click', (e) => {
+  /* cambio de categoría en la lista */
+  optionsList.addEventListener('click', e => {
     const option = e.target.closest('.option');
     if (!option) return;
 
-    // marcar selección visual
-    optionsList.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    /* marcar visualmente la opción activa */
+    optionsList.querySelectorAll('.option')
+               .forEach(o => o.classList.remove('selected'));
     option.classList.add('selected');
 
-    // actualizar texto visible
+    /* texto visible en el dropdown */
     selectedDiv.childNodes[0].nodeValue = option.textContent.trim();
 
-    // renderizar
+    /* aplicar filtro */
     renderProductos(option.dataset.value);
 
-    // cerrar menú
     dropdown.classList.remove('open');
+  });
+
+  /* ---------------------------------------------------
+     3. Fade-in de la sección Caballero
+        (la clase .fade-in quita opacity:0 del CSS)
+  --------------------------------------------------- */
+  document.querySelectorAll('.caballero-section')
+          .forEach(sec => sec.classList.add('fade-in'));
+
+  /* ---------------------------------------------------
+     4. Guardar en localStorage el producto clicado
+        -> El template debe pasar data-id, data-nombre, etc.
+           (al menos id para recuperar detalles vía backend)
+  --------------------------------------------------- */
+  allCards.forEach(card => {
+    const link = card.querySelector('a');
+    if (!link) return;
+
+    link.addEventListener('click', () => {
+      /* recogemos datos mínimos desde los data-attributes
+         añadidos en caballero.html (id, nombre y precio) */
+      const productoSeleccionado = {
+        id      : card.dataset.id,
+        nombre  : card.dataset.nombre,
+        precio  : card.dataset.precio
+      };
+      localStorage.setItem('productoSeleccionado',
+                           JSON.stringify(productoSeleccionado));
+      localStorage.setItem('origenSeccion', 'caballero');
+    });
   });
 });
 
-/*  justo después del  window.addEventListener('load', () => {   */
-document.querySelectorAll('.caballero-section')
-        .forEach(sec => sec.classList.add('fade-in'));
-
+/* -----------------------------------------------------
+   5. Efecto zoom al hacer scroll (igual que antes)
+----------------------------------------------------- */
 (() => {
-  const productoCards = document.querySelectorAll('.producto-card');
-
   const onScrollProductos = () => {
-    const windowHeight = window.innerHeight;
+    const productoCards = document.querySelectorAll('.producto-card');
+    const windowHeight  = window.innerHeight;
 
     productoCards.forEach(card => {
       const img = card.querySelector('.zoomable');
       if (!img) return;
 
-      const rect = card.getBoundingClientRect();
-      const visibleRatio = Math.min(Math.max((windowHeight - rect.top) / windowHeight, 0), 1);
+      const rect          = card.getBoundingClientRect();
+      const visibleRatio  = Math.min(
+                              Math.max((windowHeight - rect.top) / windowHeight, 0),
+                              1
+                            );
 
-      // Zoom de 1 a 1.2 basado en visibilidad
-      img.style.transform = `scale(${1 + visibleRatio * 0.2})`;
+      img.style.transform  = `scale(${1 + visibleRatio * 0.2})`;
       img.style.transition = 'transform 0.2s ease-out';
     });
   };
