@@ -16,3 +16,12 @@ Content-Type: application/json
   "imagen": "newBalance.jpg",
   "stock": 35
 }
+
+###
+POST http://127.0.0.1:8000/api/productos/update/3/
+Content-Type: application/x-www-form-urlencoded
+
+nombre=AirMax97&stock=35
+
+### DELETE
+DELETE http://127.0.0.1:8000/api/productos/delete/2/

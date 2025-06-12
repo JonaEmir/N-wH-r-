@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  {% load static %}
   <meta charset="UTF-8" />
   <title>Crear producto</title>
   <style>
@@ -14,7 +15,8 @@
 <body>
   <h1>Nuevo producto</h1>
 
-  <form id="productoForm">
+  <form id="productoForm" method="post" enctype="multipart/form-data" action="/ruta/a/create_product/">
+
     <label>Nombre
       <input type="text" name="nombre" required />
     </label>
@@ -58,8 +60,8 @@
       necesitarás un campo type="file" y un endpoint que acepte multipart/form-data.
       Como tu vista espera una cadena (URL o path), aquí pedimos texto:
     -->
-    <label>URL de la imagen
-      <input type="text" name="imagen" required />
+    <label>imagen
+      <input type="file" name="imagen" accept="image/*" required />
     </label>
 
     <label>Stock

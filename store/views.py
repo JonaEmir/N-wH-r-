@@ -38,7 +38,6 @@ def get_all_products(request):
                 'categoria': p.categoria.nombre,
                 'genero': p.genero,
                 'en_oferta': p.en_oferta,
-                'imagen': p.imagen,
                 'stock': p.stock,
                 'created_at': p.created_at.isoformat(),
             })
@@ -48,20 +47,88 @@ def get_all_products(request):
 def create_product(request):
     if request.method == 'POST':
         try:
-            body = json.loads(request.body)
-            categoria = Categoria.objects.get(id=body['categoria_id'])
+            nombre = request.POST['nombre']
+            descripcion = request.POST['descripcion']
+            precio = request.POST['precio']
+            categoria_id = request.POST['categoria_id']
+            genero = request.POST['genero']
+            en_oferta = request.POST.get('en_oferta') == 'on'  # o puedes hacer bool(int()) si es 0/1
+            imagen = request.FILES['imagen']  # <- archivo viene aquí
+            stock = request.POST['stock']
+
+            categoria = Categoria.objects.get(id=categoria_id)
 
             producto = Producto.objects.create(
-                nombre=body['nombre'],
-                descripcion=body['descripcion'],
-                precio=body['precio'],
+                nombre=nombre,
+                descripcion=descripcion,
+                precio=precio,
                 categoria=categoria,
-                genero=body['genero'],
-                en_oferta=body.get('en_oferta', False),
-                imagen=body['imagen'],
-                stock=body['stock']
+                genero=genero,
+                en_oferta=en_oferta,
+                imagen=imagen,
+                stock=stock
             )
             return JsonResponse({'id': producto.id, 'message': 'Producto creado con éxito'}, status=201)
+        except Categoria.DoesNotExist:
+            return JsonResponse({'error': 'Categoría no encontrada'}, status=404)
+        except KeyError as e:
+            return JsonResponse({'error': f'Campo faltante: {str(e)}'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
-        
+
+@csrf_exempt
+def update_productos(request, id):
+    if request.method == 'POST':
+        try:
+            producto = Producto.objects.get(id=id)
+            print(producto)
+            print(request.POST['nombre'])
+            # Accedemos a los campos si están presentes en el request
+            if 'nombre' in request.POST:
+                producto.nombre = request.POST['nombre']
+
+            if 'descripcion' in request.POST:
+                producto.descripcion = request.POST['descripcion']
+
+            if 'precio' in request.POST:
+                producto.precio = request.POST['precio']
+
+            if 'categoria_id' in request.POST:
+                categoria = Categoria.objects.get(id=request.POST['categoria_id'])
+                producto.categoria = categoria
+
+            if 'genero' in request.POST:
+                producto.genero = request.POST['genero']
+
+            if 'en_oferta' in request.POST:
+                producto.en_oferta = request.POST.get('en_oferta') == 'on'
+
+            if 'stock' in request.POST:
+                producto.stock = request.POST['stock']
+
+            if 'imagen' in request.FILES:
+                producto.imagen = request.FILES['imagen']
+
+            producto.save()
+            return JsonResponse({'mensaje': f'Producto {producto.nombre} actualizado correctamente'}, status=200)
+
+        except Producto.DoesNotExist:
+            return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+        except Categoria.DoesNotExist:
+            return JsonResponse({'error': 'Categoría no encontrada'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+
+@csrf_exempt
+def delete_productos(request, id):
+    if request.method == 'DELETE':
+        try:
+            producto = Producto.objects.get(id=id)  
+            nombre=producto.nombre
+            producto.delete()
+            return JsonResponse({'mensaje': f'Producto {nombre} eliminado correctamente'}, status=200)
+        except Producto.DoesNotExist:
+            return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)

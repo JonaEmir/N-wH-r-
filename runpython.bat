@@ -1,2 +1,3 @@
 @echo off
-.\venv\Scripts\python.exe %*
+call venv\Scripts\activate
+python %*
