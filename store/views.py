@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Producto, Categoria
+from .models import Producto, Categoria, Cliente, ContactoCliente
 import json
 
 def index(request):
@@ -83,7 +83,7 @@ def update_productos(request, id):
             producto = Producto.objects.get(id=id)
             print(producto)
             print(request.POST['nombre'])
-            # Accedemos a los campos si están presentes en el request
+            # Accedemos a los campos si están presentes en el request buscar setattr para codigo mas limpio     
             if 'nombre' in request.POST:
                 producto.nombre = request.POST['nombre']
 
@@ -132,3 +132,32 @@ def delete_productos(request, id):
             return JsonResponse({'error': 'Producto no encontrado'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+
+
+
+def get_all_clients(request):
+    if request.method == 'GET':
+        clientes = Cliente.objects.all()
+        data = []
+
+        for cliente in clientes:
+            try:
+                contacto = cliente.contactocliente  # accede al contacto relacionado
+                data.append({
+                    'username': cliente.username,
+                    'password': cliente.password,
+                    'nombre': contacto.nombre,
+                    'email': contacto.email,
+                    'mensaje': contacto.mensaje
+                })
+            except ContactoCliente.DoesNotExist:
+                # Si el cliente no tiene contacto asociado
+                data.append({
+                    'username': cliente.username,
+                    'password': cliente.password,
+                    'nombre': None,
+                    'email': None,
+                    'mensaje': None
+                })
+
+        return JsonResponse(data, safe=False)
