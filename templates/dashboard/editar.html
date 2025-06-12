@@ -1,0 +1,68 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Editar Producto{% endblock %}
+
+{% block content %}
+<h1>Editar producto: {{ producto.nombre }}</h1>
+
+<form id="editarForm" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="hidden" name="id" value="{{ producto.id }}">
+
+  <label>Nombre
+    <input type="text" name="nombre" value="{{ producto.nombre }}" required />
+  </label>
+
+  <label>Descripción
+    <textarea name="descripcion" rows="4" required>{{ producto.descripcion }}</textarea>
+  </label>
+
+  <label>Precio
+    <input type="number" name="precio" step="0.01" min="0" value="{{ producto.precio }}" required />
+  </label>
+
+  <label>Categoría
+    <select name="categoria_id" required>
+      {% for categoria in categorias %}
+        <option value="{{ categoria.id }}" {% if categoria.id == producto.categoria.id %}selected{% endif %}>
+          {{ categoria.nombre }}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label>Género
+    <select name="genero" required>
+      <option value="H" {% if producto.genero == 'H' %}selected{% endif %}>Hombre</option>
+      <option value="M" {% if producto.genero == 'M' %}selected{% endif %}>Mujer</option>
+      <option value="U" {% if producto.genero == 'U' %}selected{% endif %}>Unisex</option>
+    </select>
+  </label>
+
+  <label>En oferta
+    <input type="checkbox" name="en_oferta" {% if producto.en_oferta %}checked{% endif %} />
+  </label>
+
+  <label>Stock
+    <input type="number" name="stock" value="{{ producto.stock }}" min="0" required />
+  </label>
+
+  <label>Imagen actual:<br>
+    {% if producto.imagen %}
+      <img src="{{ producto.imagen.url }}" alt="Imagen actual" width="150"><br>
+    {% else %}
+      No hay imagen
+    {% endif %}
+  </label>
+
+  <label>Subir nueva imagen (opcional)
+    <input type="file" name="imagen" accept="image/*" />
+  </label>
+
+  <button type="submit">Actualizar</button>
+  <p class="msg" id="mensaje"></p>
+</form>
+
+<script src="{% static 'dashboard/editar/js/editar.js' %}" defer></script>
+{% endblock %}
