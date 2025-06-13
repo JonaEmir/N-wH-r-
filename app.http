@@ -25,3 +25,47 @@ nombre=AirMax97&stock=35
 
 ### DELETE
 DELETE http://127.0.0.1:8000/api/productos/delete/2/
+
+### GET clientes
+GET http://127.0.0.1:8000/clientes
+
+### Crear cliente
+
+POST http://127.0.0.1:8000/clientes/crear
+Content-Type: application/json
+
+{
+  "username": "New Balance",
+  "password": "Tenis para correr"
+}
+
+
+###
+POST http://127.0.0.1:8000/clientes/update/1
+Content-Type: application/json
+
+{
+  "username": "Angel"
+}
+
+
+
+### Crear contacto
+
+POST http://127.0.0.1:8000/contact/create/1
+Content-Type: application/json
+
+{
+  "nombre": "Angel Adrian",
+  "email": "adrian@gmail.com",
+  "mensaje": "Hola hoña"
+}
+
+
+###
+POST http://127.0.0.1:8000/contact/update/1
+Content-Type: application/json
+
+{
+  "email": "adrian@gmail.com"
+}

@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Producto, Categoria, Cliente, ContactoCliente
 import json
+from django.contrib.auth.hashers import make_password
+
 
 def index(request):
     return render(request, 'public/index.html')
@@ -113,8 +115,6 @@ def update_productos(request, id):
     if request.method == 'POST':
         try:
             producto = Producto.objects.get(id=id)
-            print(producto)
-            print(request.POST['nombre'])
             # Accedemos a los campos si están presentes en el request buscar setattr para codigo mas limpio     
             if 'nombre' in request.POST:
                 producto.nombre = request.POST['nombre']
@@ -193,3 +193,96 @@ def get_all_clients(request):
                 })
 
         return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def create_client(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) #Aqui si se puede parsear el json por que l cabezal es apication json no multipl    
+            print(data)
+            username = data.get('username')
+            password = data.get('password')
+
+            if not username or not password:
+                return JsonResponse({'error': 'Faltan campos obligatorios'}, status=400)
+            cliente = Cliente.objects.create(
+                username=username,
+                password=make_password(password)
+            )
+            return JsonResponse({'username': cliente.username, 'message': 'Cliente creado con éxito'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)})
+    
+@csrf_exempt
+def update_client(request, id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) #Aqui si se puede parsear el json por que l cabezal es apication json no multipl    
+            username = data.get('username')
+            password = data.get('password')
+            cliente=Cliente.objects.get(id = id)
+            if username:
+                cliente.username = username
+            if password:
+                cliente.password = make_password(password)
+            cliente.save()
+            return JsonResponse({'mensaje':f'Cliente {id} actualizado correctamente'},  status=200)
+        except Exception as err:
+            return JsonResponse({'error': str(err)})
+
+@csrf_exempt
+def delete_client(request, id):
+    if request.method == 'DELETE':
+        try:
+            cliente = Cliente.objects.get(id=id)  
+            username=cliente.nombre
+            cliente.delete()
+            return JsonResponse({'mensaje': f'cliente {username} eliminado correctamente'}, status=200) 
+        except Cliente.DoesNotExist:
+            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+
+@csrf_exempt
+def create_contact(request, id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) #Aqui si se puede parsear el json por que l cabezal es apication json no multipl    
+            print(data)
+            cliente = Cliente.objects.get(id=id)  #asigna todo el objeto de clientes con id iual al id del argumento
+            nombre = data.get('nombre')
+            email = data.get('email')
+            mensaje = data.get('mensaje')
+            if not nombre or not email or not mensaje:
+                return JsonResponse({'error': 'Faltan campos obligatorios'}, status=400)
+            contacto = ContactoCliente.objects.create(
+                cliente=cliente,
+                nombre=nombre,
+                email=email,
+                mensaje= mensaje
+            )
+            return JsonResponse({'Contacto ': contacto.nombre, 'message': 'Creado con éxito'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)})
+    
+@csrf_exempt
+def update_contact(request, id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) #Aqui si se puede parsear el json por que l cabezal es apication json no multipl
+            nombre = data.get('nombre')
+            email = data.get('email')
+            mensaje = data.get('mensaje')
+            contacto=ContactoCliente.objects.get(cliente__id=id)
+            if nombre:
+                contacto.nombre = nombre
+            if email:
+                contacto.email = email
+            if mensaje:
+                contacto.mensaje = mensaje
+            contacto.save()
+            return JsonResponse({'mensaje':f'Cliente {id} actualizado correctamente'},  status=200)
+        except Exception as err:
+            return JsonResponse({'error': str(err)})
