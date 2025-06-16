@@ -92,7 +92,8 @@
     <h3>Ya Tengo una Cuenta</h3>
     <span class="required-note">Campos requeridos*</span>
 
-    <form method="POST" action="#">
+    <form id="loginForm" method="POST" action="#">
+      {% csrf_token %}
       <label for="username">Iniciar sesión*</label>
       <input type="text" id="username" name="username" required>
 
@@ -117,7 +118,7 @@
   <div class="login-section">
     <h3>No tengo cuenta</h3>
     <p>Disfrute de beneficios adicionales y de una experiencia más intensa creando una cuenta personal.</p>
-    <button class="register-btn">Crear cuenta MyLV</button>
+    <a href="{% url 'registrarse' %}" class="register-btn">Crear cuenta N:</a>
   </div>
 </div>
 
@@ -149,7 +150,28 @@
       </div>
     </div>
 
-    <div class="productos-grid"><!-- Tarjetas se inyectan por JS --></div>
+    <div class="productos-grid">
+  {% for p in productos %}
+    <div class="producto-card"
+         data-categoria="{{ p.categoria.nombre|slugify }}"
+         data-id="{{ p.id }}"
+         data-nombre="{{ p.nombre }}"
+         data-precio="{{ p.precio }}">
+      <div class="imagen-zoom">
+        <a href="{% url 'detalle_producto' p.id %}">
+          <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}" class="zoomable">
+        </a>
+      </div>
+      <div class="info">
+        <h4>{{ p.nombre }}</h4>
+        <h5>${{ p.precio|floatformat:2 }}</h5>
+      </div>
+    </div>
+  {% empty %}
+    <p>No hay productos disponibles.</p>
+  {% endfor %}
+</div>
+
   </section>
 
   <!-- ========== INFO-FOOTER ========== -->

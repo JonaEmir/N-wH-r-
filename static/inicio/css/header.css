@@ -538,6 +538,8 @@ input[type="password"] {
 }
 
 .register-btn {
+  display: block;              /* Para que ocupe el 100% del ancho si quieres */
+  margin: 0 auto;              /* Centra horizontalmente */
   border: 1px solid #000;
   color: #000;
   background: none;
@@ -545,7 +547,9 @@ input[type="password"] {
   font-size: 10px;
   border-radius: 30px;
   cursor: pointer;
-  width: 100%;
+  width: 100%;                 /* Puedes cambiarlo a otro valor si no lo quieres full width */
+  text-align: center;          /* Centra el texto dentro */
+  text-decoration: none;       /* Quita subrayado del <a> */
 }
 
 hr {

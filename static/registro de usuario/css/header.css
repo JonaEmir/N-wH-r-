@@ -1,4 +1,10 @@
-/* ========== HEADER ========== */
+:root {
+  --c-text: #333333;     /* o cualquier color visible */
+  --c-grey: #888888;
+  --c-danger: #e63946;
+  --width-max: 1024px;
+}
+
 header {
   position: fixed;
   top: 0;
@@ -89,6 +95,7 @@ header {
 
     .switch-login{
         margin-bottom:.5rem;
+        font-size: 10px;
     }
 
     .switch-login a{color:var(--c-text);
@@ -97,7 +104,7 @@ header {
 
     .req-note{
         float:right;
-        font-size:.85rem;
+        font-size:.55rem;
         color:var(--c-grey);
     }
 
@@ -105,19 +112,20 @@ header {
     form{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-      gap:1.5rem 2rem;
+      gap:.5rem 1.5rem;
+      font-size: 10px;
 
     }
     label{display:block;
         margin-bottom:.35rem;
-        font-size:.87rem;
+        font-size:.57rem;
     }
 
     input,select{
       width:100%;
-      padding:.9rem .95rem;
-      font-size:1rem;
-      border:1px solid var(--c-border);
+      padding:.5rem .45rem;
+      font-size:.50rem;
+      border:1px solid;
       border-radius:4px;
       background:#fff;
       transition:border-color .2s;

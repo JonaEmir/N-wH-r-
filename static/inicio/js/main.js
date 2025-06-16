@@ -6,6 +6,7 @@ import { setupAccordion } from './accordion.js';
 import { setupNavigationButtons } from './navigation.js';
 import { setupContactPanel } from './contact-panel.js';
 import { setupLoginPanel } from './usuario.js';
+import { getCSRFToken} from './login.js'
 
 setupScrollRestoration();
 setupHeaderScroll();
@@ -15,3 +16,4 @@ setupAccordion();
 setupNavigationButtons();
 setupContactPanel();
  setupLoginPanel();
+ getCSRFToken();

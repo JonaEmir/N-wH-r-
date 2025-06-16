@@ -1,69 +1,70 @@
-import { productos } from './productos.js';
+/* dama/js/main.js
+   - filtra las tarjetas ya impresas por Django
+   - gestiona dropdown y zoom igual que caballero
+*/
 
 window.addEventListener('load', () => {
   const dropdown     = document.getElementById('dropdown');
   const selectedDiv  = dropdown.querySelector('.selected');
   const optionsList  = dropdown.querySelector('.options');
   const grid         = document.querySelector('.productos-grid');
-  const categorias   = Object.keys(productos);
+  const allCards     = Array.from(grid.querySelectorAll('.producto-card'));
 
-  /* abrir / cerrar dropdown */
+  /* ▸ abrir / cerrar dropdown */
   selectedDiv.addEventListener('click', () => dropdown.classList.toggle('open'));
   document.addEventListener('click', e => {
     if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
   });
 
-  /* render de tarjetas */
+  /* ▸ filtrado por data-categoria */
   const renderProductos = cat => {
-    grid.innerHTML = '';
-
-    const lista = cat === 'all'
-      ? categorias.flatMap(c => productos[c])
-      : productos[cat] || [];
-
-    if (!lista.length) {
-      grid.innerHTML = '<p>No hay productos disponibles.</p>';
-      return;
-    }
-
-    lista.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'producto-card';
-      card.innerHTML = `
-        <div class="imagen-zoom">
-          <a href="/detalles/">
-            <img src="${p.img}" alt="${p.nombre}" class="zoomable">
-          </a>
-        </div>
-        <div class="info">
-          <h4>${p.nombre}</h4>
-          <h5>${p.precio}</h5>
-        </div>`;
-
-      card.querySelector('a').addEventListener('click', () => {
-        localStorage.setItem('productoSeleccionado', JSON.stringify(p));
-        localStorage.setItem('origenSeccion', 'dama'); 
-      });
-
-      grid.appendChild(card);
+    allCards.forEach(card => {
+      const c = card.dataset.categoria;
+      card.style.display = (cat === 'all' || c === cat) ? 'block' : 'none';
     });
   };
-
   renderProductos('all');
 
   optionsList.addEventListener('click', e => {
     const option = e.target.closest('.option');
     if (!option) return;
 
-    optionsList.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    optionsList.querySelectorAll('.option')
+               .forEach(o => o.classList.remove('selected'));
     option.classList.add('selected');
-
     selectedDiv.childNodes[0].nodeValue = option.textContent.trim();
     renderProductos(option.dataset.value);
-
     dropdown.classList.remove('open');
   });
-});
 
-/* activar fade-in */
-document.querySelectorAll('.dama-section').forEach(sec => sec.classList.add('fade-in'));
+  /* ▸ fade-in de la sección */
+  document.querySelectorAll('.dama-section')
+          .forEach(sec => sec.classList.add('fade-in'));
+
+  /* ▸ zoom on scroll */
+  const onScroll = () => {
+    const wH = window.innerHeight;
+    allCards.forEach(card => {
+      const img  = card.querySelector('.zoomable');
+      const rect = card.getBoundingClientRect();
+      const r    = Math.min(Math.max((wH - rect.top) / wH, 0), 1);
+      img.style.transform  = `scale(${1 + r * 0.2})`;
+      img.style.transition = 'transform 0.2s ease-out';
+    });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ▸ guardar producto clicado */
+  allCards.forEach(card => {
+    const link = card.querySelector('a');
+    link && link.addEventListener('click', () => {
+      localStorage.setItem('productoSeleccionado', JSON.stringify({
+        id     : card.dataset.id,
+        nombre : card.dataset.nombre,
+        precio : card.dataset.precio
+      }));
+      localStorage.setItem('origenSeccion', 'dama');
+    });
+  });
+});

@@ -1,23 +1,31 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.contrib.auth.hashers import check_password
+from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .models import Producto, Categoria, Cliente, ContactoCliente, Usuario
 import json
 from django.contrib.auth.hashers import make_password
 
 
+
 def index(request):
     return render(request, 'public/index.html')
 
+# store/views.py
 def dama(request):
-    return render(request, 'public/dama.html')
+    productos = Producto.objects.filter(genero__iexact='M')   # ← usa la letra que corresponda a mujer
+    print('▶︎ Productos dama:', productos.count())
+    return render(request, 'public/dama.html', {'productos': productos})
+
 
 def caballero(request):
     productos = Producto.objects.filter(genero__iexact='H')
     print('▶︎ Productos caballero:', productos.count())
     return render(request, 'public/caballero.html', {'productos': productos})
 
-
+def registrarse(request):
+    return render (request, 'public/registro-usuario.html')
 
 def detalle_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
@@ -361,3 +369,58 @@ def delete_user(request, id):
             return JsonResponse({'error': str(e)}, status=400)
     
 
+@require_POST          # fuerza solo POST
+def login_client(request):
+    """
+    Comprueba usuario y contraseña de Cliente.
+    Devuelve:
+      200 OK  → éxito
+      404     → usuario no registrado
+      401     → contraseña incorrecta
+    """
+    import json
+    try:
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+
+        if not username or not password:
+            return JsonResponse({"error": "Faltan campos"}, status=400)
+
+        try:
+            cliente = Cliente.objects.get(username=username)
+        except Cliente.DoesNotExist:
+            return JsonResponse({"error": "Usuario no registrado"}, status=404)
+
+        if not check_password(password, cliente.password):
+            return JsonResponse({"error": "Campos incorrectos"}, status=401)
+
+        # marcar sesión (opcional pero recomendado)
+        request.session["cliente_id"] = cliente.id
+        request.session["cliente_username"] = cliente.username
+
+        return JsonResponse({"message": "Inicio de sesión exitoso"}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+    #Muestra en index.html 4 productos de cada seccion, para dama y para mujer
+def index(request):
+    # 4 productos caballero (género = 'H')
+    cab_home  = (
+        Producto.objects
+        .filter(genero__iexact='H', stock__gt=0)
+        .order_by('?')[:4]
+    )
+
+    # 4 productos dama (género = 'M')  ← ajusta la letra si tu modelo usa otra
+    dama_home = (
+        Producto.objects
+        .filter(genero__iexact='M', stock__gt=0)
+        .order_by('?')[:4]
+    )
+
+    return render(request, 'public/index.html', {
+        "cab_home" : cab_home,
+        "dama_home": dama_home,
+    })

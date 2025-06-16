@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import index, dama, caballero, detalle_producto, alta, editar_producto, get_all_products, create_product, get_categorias, update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
+from .views import index, dama, caballero, detalle_producto, login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
 
 
 urlpatterns = [
@@ -10,6 +10,12 @@ urlpatterns = [
     path('', index, name='index'),
     path('dama/', dama, name='dama'),
     path('caballero/', caballero, name='caballero'),
+    path('registrarse/', registrarse, name='registrarse'),
+    path('create-client', create_client),
+    path('login-client', login_client, name='login_client'),
+
+
+
 
     path('producto/<int:id>/', detalle_producto, name='detalle_producto'),
 

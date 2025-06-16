@@ -89,7 +89,8 @@
     <h3>Ya Tengo una Cuenta</h3>
     <span class="required-note">Campos requeridos*</span>
 
-    <form method="POST" action="#">
+    <form id="loginForm" method="POST" action="#">
+      {% csrf_token %}
       <label for="username">Iniciar sesión*</label>
       <input type="text" id="username" name="username" required>
 
@@ -114,7 +115,7 @@
   <div class="login-section">
     <h3>No tengo cuenta</h3>
     <p>Disfrute de beneficios adicionales y de una experiencia más intensa creando una cuenta personal.</p>
-    <button class="register-btn">Crear cuenta N:</button>
+    <a href="{% url 'registrarse' %}" class="register-btn">Crear cuenta N:</a>
   </div>
 </div>
 
@@ -166,36 +167,32 @@
     </video>
   </section>
 
-  <!-- CATEGORÍAS DAMA -->
-  <section class="categorias-dama">
-    <h3>Mujer</h3>
-    <h2>Calzado</h2>
-    <div class="categoria-grid">
+ <!-- CATEGORÍAS DAMA -->
+<section class="categorias-dama">
+  <h3>Mujer</h3>
+  <h2>Calzado</h2>
+
+  <div class="categoria-grid">
+    {% for p in dama_home %}
       <div class="categoria-card">
-        <img src="{% static 'images/20250606_1250_Tenis con Fondo Blanco_remix_01jx397rvafaftea1bkqr8812z.png' %}" alt="">
-        <h4>Samba</h4>
-        <h5>MXN 700.00</h5>
+        <a href="{% url 'detalle_producto' p.id %}">
+          <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
+        </a>
+        <h4>{{ p.nombre }}</h4>
+        <h5>${{ p.precio|floatformat:2 }}</h5>
       </div>
-      <div class="categoria-card">
-        <img src="{% static 'images/20250606_1401_Tenis Lateral con Sombras_remix_01jx3d8tjre2bvjx26yf60kk98.png' %}" alt="">
-        <h4>Guess</h4>
-        <h5>MXN 1,000.00</h5>
-      </div>
-      <div class="categoria-card">
-        <img src="{% static 'images/20250606_1401_Tenis Blanco Lateral_remix_01jx3d80v2e7qrddwh674ba92a.png' %}" alt="">
-        <h4>Blazers</h4>
-        <h5>MXN 1,200.00</h5>
-      </div>
-      <div class="categoria-card">
-        <img src="{% static 'images/20250606_1723_Bolso con Fresas_remix_01jx3rtmnyewab2ghz6rrkh00z.png' %}" alt="">
-        <h4>Bolsa Coach</h4>
-        <h5>MXN 1,100.00</h5>
-      </div>
-    </div>
-    <div class="boton-dama">
-      <button class="btn-seleccion" data-seccion="dama">Descubrir Selección</button>
-    </div>
-  </section>
+    {% empty %}
+      <p>No hay productos de dama disponibles.</p>
+    {% endfor %}
+  </div>
+
+  <div class="boton-dama">
+    <button class="btn-seleccion" data-seccion="dama">
+      Descubrir Selección
+    </button>
+  </div>
+</section>
+
 
   <!-- BANNER CABALLERO -->
   <section class="banner3-section banner-zoom">
@@ -203,35 +200,31 @@
   </section>
 
   <!-- CATEGORÍAS HOMBRE -->
-  <section class="categorias-hombre">
-    <h3>Hombre</h3>
-    <h2>Calzado</h2>
-    <div class="categoria-grid">
+<section class="categorias-hombre">
+  <h3>Hombre</h3>
+  <h2>Calzado</h2>
+
+  <div class="categoria-grid">
+    {% for p in cab_home %}
       <div class="categoria-card">
-        <img src="{% static 'images/20250606_1250_Tenis con Fondo Blanco_remix_01jx397rvafaftea1bkqr8812z.png' %}" alt="">
-        <h4>Samba</h4>
-        <h5>MXN 700.00</h5>
+        <a href="{% url 'detalle_producto' p.id %}">
+          <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
+        </a>
+        <h4>{{ p.nombre }}</h4>
+        <h5>${{ p.precio|floatformat:2 }}</h5>
       </div>
-      <div class="categoria-card">
-        <img src="{% static 'images/20250606_1401_Tenis Lateral con Sombras_remix_01jx3d8tjre2bvjx26yf60kk98.png' %}" alt="">
-        <h4>Guess</h4>
-        <h5>MXN 1,000.00</h5>
-      </div>
-      <div class="categoria-card">
-        <img src="{% static 'images/20250606_1401_Tenis Blanco Lateral_remix_01jx3d80v2e7qrddwh674ba92a.png' %}" alt="">
-        <h4>Blazers</h4>
-        <h5>MXN 1,200.00</h5>
-      </div>
-      <div class="categoria-card">
-        <img src="{% static 'images/20250606_1723_Bolso con Fresas_remix_01jx3rtmnyewab2ghz6rrkh00z.png' %}" alt="">
-        <h4>Bolsa Coach</h4>
-        <h5>MXN 1,100.00</h5>
-      </div>
-    </div>
-    <div class="boton-hombre">
-      <button class="btn-seleccion" data-seccion="caballero">Descubrir Selección</button>
-    </div>
-  </section>
+    {% empty %}
+      <p>No hay productos de caballero disponibles.</p>
+    {% endfor %}
+  </div>
+
+  <div class="boton-hombre">
+    <button class="btn-seleccion" data-seccion="caballero">
+      Descubrir Selección
+    </button>
+  </div>
+</section>
+
 
   <!-- FOOTER -->
   <section class="info-footer">
@@ -289,3 +282,4 @@
   <script type="module" src="{% static 'inicio/js/main.js' %}"></script>
 </body>
 </html>
+
