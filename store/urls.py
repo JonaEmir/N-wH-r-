@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import index, dama, caballero, detalle_producto, alta, editar_producto, get_all_products, create_product, get_categorias, update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact
+from .views import index, dama, caballero, detalle_producto, alta, editar_producto, get_all_products, create_product, get_categorias, update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
 
 
 urlpatterns = [
@@ -32,7 +32,13 @@ urlpatterns = [
     path('clientes/delete/<int:id>', delete_client, name ="delete_client"),
     path('contact/create/<int:id>', create_contact, name ="create_contact"),
     path('contact/update/<int:id>', update_contact, name ="update_contact"),
+    path('user/get', get_user, name ="get_user"),
+    path('user/create', create_user, name ="create_user"),
+    #path('user/update/<int:id>', update_user, name ="update_user"),
+    #path('user/delete/<int:id>', delete_user, name ="delete_user"),
     path('registro', alta, name='alta')
+
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

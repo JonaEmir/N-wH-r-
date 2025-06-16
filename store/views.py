@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Producto, Categoria, Cliente, ContactoCliente
+from .models import Producto, Categoria, Cliente, ContactoCliente, Usuario
 import json
 from django.contrib.auth.hashers import make_password
 
@@ -286,3 +286,78 @@ def update_contact(request, id):
             return JsonResponse({'mensaje':f'Cliente {id} actualizado correctamente'},  status=200)
         except Exception as err:
             return JsonResponse({'error': str(err)})
+
+
+
+
+def get_user(request):
+    if request.method == 'GET':
+        usuarios = Usuario.objects.all()
+        data = []
+
+        for usuario in usuarios:
+            try:
+                data.append({
+                    'username': usuario.username,
+                    'password': usuario.password,
+                    'role' : usuario.role
+                })
+            except Exception as e:
+                # Si el cliente no tiene contacto asociado
+                return JsonResponse({'error': str(e)})
+
+        return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def create_user(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) #Aqui si se puede parsear el json por que l cabezal es apication json no multipl    
+            print(data)
+            username = data.get('username')
+            password = data.get('password')
+            role = data.get('role')
+
+            if not username or not password or not role:
+                return JsonResponse({'error': 'Faltan campos obligatorios'}, status=400)
+            user = Usuario.objects.create(
+                username=username,
+                password=make_password(password),
+                role=role
+            )
+            return JsonResponse({'username': user.username, 'message': 'Cliente creado con éxito'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)})
+    
+@csrf_exempt
+def update_user(request, id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body) #Aqui si se puede parsear el json por que l cabezal es apication json no multipl    
+            username = data.get('username')
+            password = data.get('password')
+            user=Usuario.objects.get(id = id)
+            if username:
+                user.username = username
+            if password:
+                user.password = make_password(password)
+            user.save()
+            return JsonResponse({'mensaje':f'user {id} actualizado correctamente'},  status=200)
+        except Exception as err:
+            return JsonResponse({'error': str(err)})
+
+@csrf_exempt
+def delete_user(request, id):
+    if request.method == 'DELETE':
+        try:
+            usuario = Usuario.objects.get(id=id)  
+            username=usuario.username
+            usuario.delete()
+            return JsonResponse({'mensaje': f'usuario {username} eliminado correctamente'}, status=200) 
+        except usuario.DoesNotExist:
+            return JsonResponse({'error': 'usuario no encontrado'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    
+
