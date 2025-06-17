@@ -2,10 +2,17 @@ window.addEventListener('DOMContentLoaded', () => {
   const producto = JSON.parse(localStorage.getItem('productoSeleccionado'));
   if (!producto) return;
 
-  // Ejemplo: insertamos en elementos del DOM
-  document.getElementById('detalle-img').src = producto.img;
-  document.getElementById('detalle-nombre').textContent = producto.nombre;
-  document.getElementById('detalle-precio').textContent = producto.precio;
+  const img    = document.getElementById('detalle-img');
+  const nombre = document.getElementById('detalle-nombre');
+  const precio = document.getElementById('detalle-precio');
+
+  if (img)    img.src = producto.img;
+  if (nombre) nombre.textContent = producto.nombre;
+  if (precio) precio.textContent = producto.precio;
+
+  const backLink = document.getElementById('volver-atras');
+  const origen = localStorage.getItem('origenSeccion') || 'caballero';
+  if (backLink) backLink.setAttribute('href', `/${origen}`);
 });
 
 window.addEventListener('load', () => {
@@ -14,20 +21,14 @@ window.addEventListener('load', () => {
   });
 });
 
-window.addEventListener('DOMContentLoaded', () => {
-  /* --- Cargar info producto (lo que ya tienes) --- */
-  const producto = JSON.parse(localStorage.getItem('productoSeleccionado'));
-  if (producto) {
-    /* …pintar imagen, nombre, precio… */
+document.addEventListener('DOMContentLoaded', () => {
+  const volver = document.getElementById('volver-atras');
+  if (volver) {
+    volver.addEventListener('click', (e) => {
+      e.preventDefault(); // Evita comportamiento por defecto del enlace
+      history.back();     // Vuelve a la página anterior
+    });
   }
-
-  /* --- Ajustar enlace de regreso --- */
-  const origen = localStorage.getItem('origenSeccion') || 'caballero';
-  const backLink = document.getElementById('volver-atras');
-  backLink.setAttribute('href', `/${origen}`);
 });
 
-// al hacer click en la flecha, limpia para no acumular valores viejos
-document.getElementById('volver-atras').addEventListener('click', () => {
-  localStorage.removeItem('origenSeccion');
-});
+

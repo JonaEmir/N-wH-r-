@@ -4,42 +4,45 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Producto, Categoria, Cliente, ContactoCliente, Usuario, Variante, Atributo, AtributoValor
 import json
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.hashers import check_passwordAdd  
+from django.contrib.auth.hashers import check_password 
 from django.views.decorators.http import require_POST
+from django.db.models import Prefetch
+from random import sample
+from django.http import HttpResponseNotFound
+
+
+
 # …
 
 
 def index(request):
     return render(request, 'public/index.html')
 
-def dama(request):
-    productos = Producto.objects.filter(genero__iexact='M')   # ← usa la letra que corresponda a mujerAdd commentMore actions
-    print('▶︎ Productos dama:', productos.count())
-    return render(request, 'public/dama.html', {'productos': productos})
 
-def caballero(request):
-    productos = Producto.objects.filter(genero__iexact='H')
-    print('▶︎ Productos caballero:', productos.count())
-    return render(request, 'public/caballero.html', {'productos': productos})
 
 def registrarse(request):
     return render (request, 'public/registro-usuario.html')
 
 def detalle_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
-
-    # ─── lista de tallas (puedes ajustarla según tu modelo) ───
     tallas = ["3", "4", "5", "6", "7", "8"]
+
+    # lee el origen (dama o caballero), y por seguridad lo validamos
+    origen_raw = request.GET.get('from', '')
+    origen = origen_raw.lower()
+    if origen not in ['dama', 'caballero']:
+        origen = 'caballero'  # valor por defecto si viene mal
 
     return render(
         request,
         'public/detalles.html',
         {
             'producto': producto,
-            'origen'  : request.GET.get('from', 'caballero'),
-            'tallas'  : tallas,                # ← ¡ahora sí la envías!
+            'origen': origen,
+            'tallas': tallas,
         }
     )
+
 
 def alta(request):
     return render(request, 'dashboard/registro.html')
@@ -107,20 +110,28 @@ def create_product(request):
         return JsonResponse({'error': 'Método no permitido'}, status=405)
 
     try:
+        # ─── Datos básicos del producto ─────────────────────────────
         nombre      = request.POST['nombre']
         descripcion = request.POST['descripcion']
         precio      = request.POST['precio']
         categoria   = Categoria.objects.get(id=request.POST['categoria_id'])
         genero      = request.POST['genero']
         en_oferta   = request.POST.get('en_oferta') == 'on'
-        imagen      = request.FILES.get('imagen', None)
-        stock       = int(request.POST['stock'])
+        imagen      = request.FILES.get('imagen')
+
+        # ─── Arrays de tallas y stocks (si existen) ─────────────────
+        tallas = request.POST.getlist('tallas')
+        stocks = request.POST.getlist('stocks')
+
+        # Normaliza a ints
+        stocks = [int(s) for s in stocks]
 
     except KeyError as ke:
         return JsonResponse({'error': f'Falta campo {ke}'}, status=400)
     except Categoria.DoesNotExist:
         return JsonResponse({'error': 'Categoría no encontrada'}, status=404)
 
+    # ─── Crea el producto ──────────────────────────────────────────
     producto = Producto.objects.create(
         nombre=nombre,
         descripcion=descripcion,
@@ -131,20 +142,50 @@ def create_product(request):
         imagen=imagen,
     )
 
-    atributo, _ = Atributo.objects.get_or_create(nombre='Talla')
-    valor, _    = AtributoValor.objects.get_or_create(
-        atributo=atributo,
-        valor='Única'
-    )
+    # ─── Atributo “Talla” (solo se crea/obtiene una vez) ───────────
+    atributo_talla, _ = Atributo.objects.get_or_create(nombre='Talla')
 
-    variante = Variante.objects.create(
-        producto=producto,
-        precio=precio,    # ← CORREGIDO
-        stock=stock,
-    )
-    variante.attrs.create(atributo_valor=valor)
+    # ────────────────────────────────────────────────────────────────
+    # CASO A) Arrays tallas+stocks recibidos y longitudes iguales
+    # ────────────────────────────────────────────────────────────────
+    if tallas and len(tallas) == len(stocks):
+        for talla, stock in zip(tallas, stocks):
+            valor_talla, _ = AtributoValor.objects.get_or_create(
+                atributo=atributo_talla,
+                valor=talla
+            )
+            variante = Variante.objects.create(
+                producto=producto,
+                precio=precio,
+                stock=stock,
+            )
+            variante.attrs.create(atributo_valor=valor_talla)
 
-    return JsonResponse({'id': producto.id, 'message': 'Producto y variante creados'}, status=201)
+    # ────────────────────────────────────────────────────────────────
+    # CASO B) Formulario simple: solo llega “stock” (y opcionalmente “talla”)
+    # ────────────────────────────────────────────────────────────────
+    else:
+        try:
+            stock_unico = int(request.POST['stock'])
+        except (KeyError, ValueError):
+            return JsonResponse({'error': 'Falta campo stock'}, status=400)
+
+        talla_unica = request.POST.get('talla', 'Única')
+        valor_talla, _ = AtributoValor.objects.get_or_create(
+            atributo=atributo_talla,
+            valor=talla_unica
+        )
+        variante = Variante.objects.create(
+            producto=producto,
+            precio=precio,
+            stock=stock_unico,
+        )
+        variante.attrs.create(atributo_valor=valor_talla)
+
+    return JsonResponse(
+        {'id': producto.id, 'message': 'Producto y variantes creados'}, 
+        status=201
+    )
 
 
 @csrf_exempt
@@ -467,21 +508,59 @@ def login_client(request):
     
     #Muestra en index.html 4 productos de cada seccion, para dama y para mujer
 def index(request):
-    # 4 productos caballero (género = 'H')
-    cab_home  = (
-        Producto.objects
-        .filter(genero__iexact='H', stock__gt=0)
-        .order_by('?')[:4]
+    # Query base: un producto por fila
+    qs_h = Producto.objects.filter(
+        genero__iexact='H',
+        variantes__stock__gt=0
+    ).distinct().prefetch_related(
+        Prefetch('variantes', Variante.objects.all())
     )
 
-    # 4 productos dama (género = 'M')  ← ajusta la letra si tu modelo usa otra
-    dama_home = (
-        Producto.objects
-        .filter(genero__iexact='M', stock__gt=0)
-        .order_by('?')[:4]
+    qs_m = Producto.objects.filter(
+        genero__iexact='M',
+        variantes__stock__gt=0
+    ).distinct().prefetch_related(
+        Prefetch('variantes', Variante.objects.all())
     )
+
+    # Elegimos 4 aleatorios sin repetir
+    cab_home  = sample(list(qs_h), min(4, qs_h.count()))
+    dama_home = sample(list(qs_m), min(4, qs_m.count()))
 
     return render(request, 'public/index.html', {
-        "cab_home" : cab_home,
-        "dama_home": dama_home,
+        'cab_home': cab_home,
+        'dama_home': dama_home,
     })
+
+
+from django.http import HttpResponseNotFound
+from django.shortcuts import render
+from .models import Producto
+
+def genero_view(request, genero):  # genero = 'dama' o 'caballero'
+    genero_map = {
+        'dama': 'M',
+        'caballero': 'H',
+    }
+
+    genero_codigo = genero_map.get(genero.lower())
+    if not genero_codigo:
+        return HttpResponseNotFound("Género no válido")
+
+    qs = Producto.objects.filter(
+        genero__iexact=genero_codigo,
+        variantes__stock__gt=0
+    ).select_related('categoria').distinct()
+
+    categorias = sorted({p.categoria.nombre for p in qs})
+
+    return render(
+        request,
+        'public/productos_genero.html',
+        {
+            'seccion'   : genero,
+            'titulo'    : 'Mujer' if genero == 'dama' else 'Hombre',
+            'categorias': categorias,
+            'productos' : qs,
+        }
+    )

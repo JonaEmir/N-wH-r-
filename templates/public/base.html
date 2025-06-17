@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NöwHėrē – Calzado de Lujo{% endblock %}</title>
+
+  <!-- CSS principal (puedes usar block para override si necesitas) -->
+  <link rel="stylesheet" href="{% static 'inicio/css/index.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  {% include "public/includes/header.html" %}
+
+  {% block content %}{% endblock %}
+
+  {% include "public/includes/footer.html" %}
+
+  <script type="module" src="{% static 'inicio/js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+
+</body>
+</html>

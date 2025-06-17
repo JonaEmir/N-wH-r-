@@ -10,7 +10,9 @@
 <form id="productoForm"
       method="post"
       enctype="multipart/form-data"
-      action="{% url 'create_product' %}">
+      action="{% url 'create_product' %}"
+      data-cats-url="{% url 'get_categorias' %}">
+
   {% csrf_token %}
 
   <label>Nombre

@@ -16,15 +16,35 @@ document.addEventListener('DOMContentLoaded', async () => {
       const card = document.createElement('div');
       card.classList.add('producto-card');
 
+      // Mostrar variantes detalladas
+      let variantesHTML = '';
+      if (p.variantes.length > 0) {
+        variantesHTML += `<ul>`;
+        p.variantes.forEach(v => {
+          const talla = v.atributos?.Talla || '—';
+          variantesHTML += `
+            <li>
+              <strong>Talla:</strong> ${talla} |
+              <strong>Precio:</strong> $${v.precio} |
+              <strong>Stock:</strong> ${v.stock}
+            </li>
+          `;
+        });
+        variantesHTML += `</ul>`;
+      } else {
+        variantesHTML = '<p>No hay variantes registradas.</p>';
+      }
+
       card.innerHTML = `
         <img src="${p.imagen}" alt="Imagen de ${p.nombre}" height="120">
         <h3>${p.nombre}</h3>
         <p><strong>Descripción:</strong> ${p.descripcion}</p>
-        <p><strong>Precio:</strong> $${p.precio}</p>
         <p><strong>Categoría:</strong> ${p.categoria}</p>
         <p><strong>Género:</strong> ${p.genero}</p>
-        <p><strong>Stock:</strong> ${p.stock}</p>
         <p><strong>Oferta:</strong> ${p.en_oferta ? 'Sí' : 'No'}</p>
+        <p><strong>Stock total:</strong> ${p.stock_total}</p>
+        <p><strong>Variantes:</strong></p>
+        ${variantesHTML}
         <button onclick="editarProducto(${p.id})">✏️ Editar</button>
         <button onclick="eliminarProducto(${p.id})">🗑️ Eliminar</button>
         <hr>

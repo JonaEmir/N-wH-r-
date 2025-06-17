@@ -1,0 +1,63 @@
+{% extends "public/base.html" %}
+{% load static %}
+
+{# --------------------------------------------------------- #
+   BLOQUES QUE SOBRESCRIBEN LO DEFINIDO EN base.html
+# --------------------------------------------------------- #}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'productos_genero/css/main.css' %}">
+{% endblock %}
+
+{% block content %}
+  {# ========= SECCIÓN GENÉRICA (sección Mujer u Hombre) ========= #}
+  <section class="{{ seccion }}-section">
+    <div class="{{ seccion }}-header">
+      <h2>{{ titulo }}</h2>
+
+      {# ---------- dropdown de categorías dinámico ---------- #}
+      <div class="custom-select" id="dropdown">
+        <div class="selected">
+          Todo
+          <svg class="chevron" width="6" height="6" viewBox="0 0 10 6" fill="none"
+               xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L5 5L9 1" stroke="#1D1D1D" stroke-width="0.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <ul class="options">
+          <li data-value="all" class="option selected">Todo</li>
+          {% for cat in categorias %}
+            <li data-value="{{ cat|slugify }}" class="option">{{ cat }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    {# ---------- grid de productos ---------- #}
+    <div class="productos-grid">
+      {% for p in productos %}
+        <div class="producto-card" data-categoria="{{ p.categoria|slugify }}">
+          <div class="imagen-zoom">
+            <a href="{% url 'detalle_producto' p.id %}?from={{ seccion }}">
+              <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}" class="zoomable">
+            </a>
+          </div>
+          <div class="info">
+            <h4>{{ p.nombre }}</h4>
+            <h5>${{ p.precio|floatformat:2 }}</h5>
+          </div>
+        </div>
+      {% empty %}
+        <p>No hay productos disponibles.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script type="module" src="{% static 'productos_genero/js/main.js' %}" defer></script>
+{% endblock %}

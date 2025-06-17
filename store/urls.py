@@ -1,16 +1,16 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import index, dama, caballero, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
+from .views import index, genero_view, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
 
 
 urlpatterns = [
     #Paths de frontEnd
     #Parte visual del cliente
     path('', index, name='index'),
-    path('dama/', dama, name='dama'),
-    path('caballero/', caballero, name='caballero'),
+    path('coleccion/<str:genero>/', genero_view, name='coleccion_genero'),
     path('registrarse/', registrarse, name='registrarse'),
+
     path('create-client', create_client),
     path('login-client', login_client, name='login_client'),
 

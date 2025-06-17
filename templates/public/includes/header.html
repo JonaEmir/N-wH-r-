@@ -1,0 +1,109 @@
+{% load static %}
+<!-- HEADER -->
+<header>
+  <div class="header-left fade-in">
+    <button id="btn-burger" class="burger" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="menu-label"></span>
+  </div>
+
+  <div class="header-center">
+    <a href="{% url 'index' %}">
+      <img src="{% static 'images/NowHere.svg' %}" id="Logo" class="fade-in" alt="NöwHėrē">
+    </a>
+  </div>
+
+  <div class="header-right fade-in">
+    <button id="btn-contacto" class="btn-contacto">Contáctanos</button>
+    <svg id="btn-login" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+      stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+    </svg>
+  </div>
+</header>
+
+<!-- NAV MENU -->
+<nav class="nav-menu">
+  <ul class="menu">
+    <li><a href="{% url 'index' %}">Inicio</a></li>
+    <li><a href="{% url 'coleccion_genero' 'dama' %}">Dama</a></li>
+    <li><a href="{% url 'coleccion_genero' 'caballero' %}">Caballero</a></li>
+  </ul>
+</nav>
+
+<!-- CONTACT PANEL -->
+<div id="contact-panel" class="contact-panel">
+  <div class="contact-header">
+    <h2>Llámenos</h2>
+    <span id="close-contact-panel" class="close-btn">×</span>
+  </div>
+
+  <div class="contact-content">
+    <p>Donde sea que esté, nuestro equipo estará encantado de atenderle.</p>
+
+    <div class="contact-line">
+      <i class="fa-solid fa-phone"></i>
+      <span>+52 332 211 8360</span>
+    </div>
+
+    <div class="contact-line">
+      <i class="fa-brands fa-whatsapp"></i>
+      <a href="https://wa.me/3322118360" target="_blank">WhatsApp</a>
+    </div>
+
+    <hr>
+    <p><strong>¿Necesita ayuda?</strong></p>
+    <ul class="contact-list">
+      <li><a href="#">Preguntas Frecuentes</a></li>
+      <li><a href="#">Servicio de Cuidados</a></li>
+      <li><a href="#">Encontrar una Tienda</a></li>
+      <li><a href="mailto:contacto@nowhere.mx">Enviar Correo</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- LOGIN PANEL -->
+<div id="login-panel" class="login-panel">
+  <div class="login-header">
+    <h2>Identificación</h2>
+    <span id="close-login-panel" class="close-btn">×</span>
+  </div>
+
+  <div class="login-section">
+    <h3>Ya Tengo una Cuenta</h3>
+    <span class="required-note">Campos requeridos*</span>
+
+    <form id="loginForm" method="POST" action="#">
+      {% csrf_token %}
+      <label for="username">Iniciar sesión*</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Contraseña*</label>
+      <div class="password-wrapper">
+        <input type="password" id="password" name="password" required>
+        <button type="button" class="toggle-password" aria-label="Mostrar contraseña">👁️</button>
+      </div>
+
+      <a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+
+      <p class="login-alt-text">O use un enlace de acceso único para iniciar sesión:<br>
+        <a href="#" class="email-login-link">Enviarme el enlace por correo electrónico</a>
+      </p>
+
+      <button type="submit" class="login-btn">Iniciar sesión</button>
+    </form>
+  </div>
+
+  <hr>
+
+  <div class="login-section">
+    <h3>No tengo cuenta</h3>
+    <p>Disfrute de beneficios adicionales y de una experiencia más intensa creando una cuenta personal.</p>
+    <a href="{% url 'registrarse' %}" class="register-btn">Crear cuenta N:</a>
+  </div>
+</div>
+
+<div class="page-overlay"></div>

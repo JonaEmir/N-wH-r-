@@ -5,10 +5,10 @@
 @import url('/static/inicio/css/reset.css');
 
 /*---Seccion PostHeader para filtrar---*/
-@import url('/static/caballero/css/post\ header.css');
+@import url('/static/productos_genero/css/post\ header.css');
 
 /*---Seccion para mostrar los productos---*/
-@import url('/static/caballero/css/productos.css');
+@import url('/static/productos_genero/css/productos.css');
 
 /* 7. Media queries: responsive adaptado */
 @import url('/static/inicio/css/pre-footer.css');
@@ -18,5 +18,5 @@
 
 /* 7. Media queries: responsive adaptado */
 
-@import url('/static/caballero/css/media\ queries.css');
+@import url('/static/productos_genero/css/media\ queries.css');
 /*---*/
