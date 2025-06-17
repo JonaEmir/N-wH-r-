@@ -6,6 +6,8 @@
 /* 2. Header: navegación superior y menú */
 @import url('./header.css');
 
+@import url('./logged.css');
+
 /* 3. Banner principal de la página */
 @import url('./banners.css');
 
@@ -20,6 +22,3 @@
 
 /* 7. Media queries: responsive adaptado */
 @import url('./footer.css');
-
-
-

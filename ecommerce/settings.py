@@ -128,3 +128,43 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ───────── Seguridad de sesión y cookies ──────────
+SESSION_COOKIE_SECURE       = False   # ⚠️ Activa (True) solo en producción con HTTPS
+CSRF_COOKIE_SECURE          = False   # ⚠️ Activa (True) solo en producción con HTTPS
+SESSION_COOKIE_HTTPONLY     = True    # Protege contra JS, mantenlo activo
+CSRF_COOKIE_HTTPONLY        = True    # Protege contra JS, mantenlo activo
+SESSION_COOKIE_SAMESITE     = "Lax"   # Puedes dejarlo así en local
+CSRF_COOKIE_SAMESITE        = "Lax"
+
+# ───────── Cabeceras hardening ──────────
+SECURE_BROWSER_XSS_FILTER   = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS             = "DENY"
+
+# ───────── Redirección forzada a HTTPS ──────────
+SECURE_SSL_REDIRECT         = False  # ⚠️ Activa (True) en producción con HTTPS
+
+# ───────── HSTS (HTTP Strict Transport Security) ──────────
+SECURE_HSTS_SECONDS             = 0      # ⚠️ Sube a 31536000 en producción
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False  # ⚠️ True en producción
+SECURE_HSTS_PRELOAD            = False  # ⚠️ True en producción
+
+# ───────── Tiempo de sesión ──────────
+SESSION_COOKIE_AGE = 60 * 60 * 2   # 2 h de inactividad
+
+# ───────── Producción: desactivar DEBUG y definir hosts ──────────
+DEBUG = True                      # ⚠️ Cambia a False en producción
+ALLOWED_HOSTS = []               # ⚠️ Agrega tu dominio aquí en producción
+
+# ⚠️ Cuando tengas HTTPS y dominio personalizado, reemplaza por:
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_SSL_REDIRECT = True
+# SECURE_HSTS_SECONDS = 31536000
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+# DEBUG = False
+# ALLOWED_HOSTS = ["nowhere.mx", "www.nowhere.mx"]
+# CSRF_TRUSTED_ORIGINS = ["https://nowhere.mx"]  # Si usas frontend externo

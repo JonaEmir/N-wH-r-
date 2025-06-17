@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import index, genero_view, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
+from .views import index, genero_view, login_user, logout_user, logout_client, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
 
 
 urlpatterns = [
@@ -10,6 +10,8 @@ urlpatterns = [
     path('', index, name='index'),
     path('coleccion/<str:genero>/', genero_view, name='coleccion_genero'),
     path('registrarse/', registrarse, name='registrarse'),
+    path('logout-client', logout_client, name="logout_client"),
+
 
     path('create-client', create_client),
     path('login-client', login_client, name='login_client'),
@@ -17,6 +19,10 @@ urlpatterns = [
     path('producto/<int:id>/', detalle_producto, name='detalle_producto'),
 
     #Parte visual del admin
+    path('dashboard/login/', login_user, name='login_user'),
+    path('logout-user', logout_user, name='logout_user'),
+
+
     path('dashboard/registro/', alta, name='dashboard_alta'),
     path('dashboard/lista/', lista_productos, name='dashboard_productos'),
     path('dashboard/productos/editar/<int:id>/', editar_producto, name='editar_producto'),

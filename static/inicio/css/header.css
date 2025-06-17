@@ -561,3 +561,35 @@ hr {
 .login-section p{
 font-size: 12px;
 }
+
+/*Estilos para logged*/
+.cliente-panel {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 300px;
+  height: 100%;
+  background: #fff;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  z-index: 998;
+  transition: left 0.4s ease;
+  padding: 60px 20px;
+  overflow-y: auto;
+}
+
+.cliente-panel.active {
+  left: 0;
+}
+
+.cliente-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cliente-info p {
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+

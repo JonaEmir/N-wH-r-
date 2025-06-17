@@ -1,32 +1,41 @@
-/* ----------- util: leer cookie csrf ----------- */
+/* -------- token desde el input oculto -------- */
 export function getCSRFToken() {
-  const match = document.cookie.match(/csrftoken=([^;]+)/);
-  return match ? match[1] : '';
+  const input = document.querySelector('#loginForm input[name="csrfmiddlewaretoken"]');
+  return input ? input.value : '';
 }
 
-/* ----------- envío del login ----------- */
-document.getElementById("loginForm").addEventListener("submit", async function (e) {
+/* -------- envío del formulario de login -------- */
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
+  const errorBox = document.getElementById("login-error");
 
-  const res = await fetch("/login-client", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": getCSRFToken()   // 💡 token seguro
-    },
-    body: JSON.stringify({ username, password })
-  });
+  if (!username || !password) {
+    errorBox.textContent = "⚠️ Por favor, completa todos los campos.";
+    return;
+  }
 
-  const data = await res.json();
+  try {
+    const res = await fetch("/login-client", {
+      method: "POST",
+      credentials: "same-origin",          // envía las cookies (csrftoken y sessionid)
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),     // token correcto
+      },
+      body: JSON.stringify({ username, password }),
+    });
 
-  if (res.ok) {
-    alert("✅ Bienvenido/a " + username);
-    document.getElementById("login-panel").classList.remove("active");
-    // aquí podrías recargar la página o actualizar el UI para mostrar “Mi cuenta”
-  } else {
-    alert("❌ " + data.error);
+    const data = await res.json().catch(() => ({})); // por si la respuesta no es JSON
+
+    if (res.ok) {
+      window.location.reload();            // 🔁 recarga la página
+    } else {
+      errorBox.textContent = `❌ ${data.error || "Error desconocido"}`;
+    }
+  } catch (err) {
+    errorBox.textContent = `❌ Error inesperado: ${err}`;
   }
 });

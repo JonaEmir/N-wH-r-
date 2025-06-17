@@ -16,12 +16,24 @@
 
   <div class="header-right fade-in">
     <button id="btn-contacto" class="btn-contacto">Contáctanos</button>
+
+    {% if request.session.cliente_username %}
+    <div class="usuario-dropdown">
+      <svg id="btn-user-menu" class="user-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
+           stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+           viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+      </svg>
+    </div>
+    {% else %}
     <svg id="btn-login" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-      stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-      viewBox="0 0 24 24">
+         stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+         viewBox="0 0 24 24">
       <circle cx="12" cy="8" r="4"/>
       <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
     </svg>
+    {% endif %}
   </div>
 </header>
 
@@ -94,6 +106,7 @@
       </p>
 
       <button type="submit" class="login-btn">Iniciar sesión</button>
+      <p id="login-error" class="error-msg"></p>
     </form>
   </div>
 
@@ -106,4 +119,28 @@
   </div>
 </div>
 
+<!-- CLIENTE PANEL (nuevo estilo idéntico al login-panel) -->
+<div id="cliente-panel" class="login-panel">
+  <div class="login-header">
+    <h2>Mi Perfil</h2>
+    <span id="close-cliente-panel" class="close-btn">×</span>
+  </div>
+
+  <div class="login-section">
+    <h3>Información de la cuenta</h3>
+    <p><strong>Usuario:</strong> {{ request.session.cliente_username }}</p>
+    <p><strong>Email:</strong> (pendiente de integrar)</p>
+  </div>
+
+  <hr>
+
+  <div class="login-section">
+    <form method="POST" action="{% url 'logout_client' %}">
+      {% csrf_token %}
+      <button type="submit" class="logout-btn">Cerrar sesión</button>
+    </form>
+  </div>
+</div>
+
+<!-- Overlay común -->
 <div class="page-overlay"></div>

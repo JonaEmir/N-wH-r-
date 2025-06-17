@@ -7,6 +7,10 @@ import { setupNavigationButtons } from './navigation.js';
 import { setupContactPanel } from './contact-panel.js';
 import { setupLoginPanel } from './usuario.js';
 import { getCSRFToken} from './login.js'
+import { setupClientePanel } from './logged.js';
+
+
+
 
 setupScrollRestoration();
 setupHeaderScroll();
@@ -15,5 +19,7 @@ setupZoomEffect();
 setupAccordion();
 setupNavigationButtons();
 setupContactPanel();
- setupLoginPanel();
- getCSRFToken();
+setupLoginPanel();
+setupClientePanel();
+getCSRFToken();
+

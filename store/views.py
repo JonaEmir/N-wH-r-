@@ -1,27 +1,115 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from .models import Producto, Categoria, Cliente, ContactoCliente, Usuario, Variante, Atributo, AtributoValor
 import json
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password 
 from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
+
+
 from django.db.models import Prefetch
 from random import sample
 from django.http import HttpResponseNotFound
+from django.shortcuts import redirect
+
+#Importaciones para manejar con seguridad que cualquier usuario no identificado o mal identificado acceda a rutas que no debe
+from functools import wraps
 
 
 
-# …
+#Evitar que un usuario no autenticado acceda a rutas privadas (como el dashboard).
+#Mostrar contenido distinto si el cliente ya inició sesión.
+#Permitir cerrar sesión limpiamente.
+
+def login_required_client(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get("cliente_id"):
+            return redirect("index")
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+def login_required_user(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        user_id = request.session.get("user_id")
+        if not user_id:
+            return redirect("login_user")
+
+        # Validar que el usuario tenga rol 'admin'
+        try:
+            user = Usuario.objects.get(id=user_id)
+            if user.role != "admin":
+                return redirect("login_user")
+        except Usuario.DoesNotExist:
+            return redirect("login_user")
+
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
+
+#Estamos creando y declarando las rutas para el inicio de sesion del Administrador
+@require_http_methods(["GET", "POST"])
+def login_user(request):
+    if request.method == "GET":
+        return render(request, "dashboard/login.html")
+
+    # POST
+    username = request.POST.get("username")
+    password = request.POST.get("password")
+
+    if not username or not password:
+        return render(request, "dashboard/login.html", {"error": "Campos obligatorios"})
+
+    try:
+        user = Usuario.objects.get(username=username)
+        if not check_password(password, user.password):
+            raise ValueError("Contraseña incorrecta")
+    except Exception:
+        return render(request, "dashboard/login.html", {"error": "Credenciales inválidas"})
+
+    request.session["user_id"] = user.id
+    request.session["user_username"] = user.username
+    return redirect("dashboard_productos")
+
+
+
+#Muestra en index.html 4 productos de cada seccion, para dama y para mujer
 def index(request):
-    return render(request, 'public/index.html')
+    # Query base: un producto por fila
+    qs_h = Producto.objects.filter(
+        genero__iexact='H',
+        variantes__stock__gt=0
+    ).distinct().prefetch_related(
+        Prefetch('variantes', Variante.objects.all())
+    )
+
+    qs_m = Producto.objects.filter(
+        genero__iexact='M',
+        variantes__stock__gt=0
+    ).distinct().prefetch_related(
+        Prefetch('variantes', Variante.objects.all())
+    )
+
+    # Elegimos 4 aleatorios sin repetir
+    cab_home  = sample(list(qs_h), min(4, qs_h.count()))
+    dama_home = sample(list(qs_m), min(4, qs_m.count()))
+
+    return render(request, 'public/index.html', {
+        'cab_home': cab_home,
+        'dama_home': dama_home,
+    })
 
 
 
 def registrarse(request):
-    return render (request, 'public/registro-usuario.html')
+    if request.session.get("cliente_id"):
+        return redirect("index")
+    return render(request, "public/registro-usuario.html")
+
 
 def detalle_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
@@ -43,7 +131,7 @@ def detalle_producto(request, id):
         }
     )
 
-
+@login_required_user
 def alta(request):
     return render(request, 'dashboard/registro.html')
 
@@ -51,11 +139,11 @@ def get_categorias(request):
     categorias = Categoria.objects.all().values('id', 'nombre')
     return JsonResponse(list(categorias), safe=False)
 
+@login_required_user
 def lista_productos(request):
     return render(request, 'dashboard/lista.html')
 
-
-
+@login_required_user
 def editar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     categorias = Categoria.objects.all()
@@ -65,7 +153,8 @@ def editar_producto(request, id):
     })
 
 
-
+@login_required_user          # (opcional, según tu negocio)
+@require_GET
 def get_all_products(request):
     if request.method != 'GET':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -103,8 +192,8 @@ def get_all_products(request):
 
     return JsonResponse(data, safe=False)
 
-
-@csrf_exempt
+@login_required_user
+@require_http_methods(["POST"])
 def create_product(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -187,8 +276,8 @@ def create_product(request):
         status=201
     )
 
-
-@csrf_exempt
+@login_required_user
+@require_http_methods(["POST"])
 def update_productos(request, id):
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -218,8 +307,8 @@ def update_productos(request, id):
         status=200
     )
 
-
-@csrf_exempt
+@login_required_user 
+@require_http_methods(["POST"])
 def update_variant(request, variante_id):
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -239,8 +328,8 @@ def update_variant(request, variante_id):
         status=200
     )
 
-
-@csrf_exempt
+@login_required_user
+@require_http_methods(["DELETE"])
 def delete_productos(request, id):
     if request.method != 'DELETE':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -249,7 +338,8 @@ def delete_productos(request, id):
     return JsonResponse({'mensaje': f'Producto {producto.nombre} y sus variantes eliminados'}, status=200)
 
 
-
+@login_required_user
+@require_GET
 def get_all_clients(request):
     if request.method == 'GET':
         clientes = Cliente.objects.all()
@@ -257,19 +347,16 @@ def get_all_clients(request):
 
         for cliente in clientes:
             try:
-                contacto = cliente.contactocliente  # accede al contacto relacionado
+                contacto = cliente.contactocliente
                 data.append({
                     'username': cliente.username,
-                    'password': cliente.password,
                     'nombre': contacto.nombre,
                     'email': contacto.email,
                     'mensaje': contacto.mensaje
                 })
             except ContactoCliente.DoesNotExist:
-                # Si el cliente no tiene contacto asociado
                 data.append({
                     'username': cliente.username,
-                    'password': cliente.password,
                     'nombre': None,
                     'email': None,
                     'mensaje': None
@@ -278,7 +365,7 @@ def get_all_clients(request):
         return JsonResponse(data, safe=False)
 
 
-@csrf_exempt
+@require_http_methods(["POST"])
 def create_client(request):
     if request.method == 'POST':
         try:
@@ -296,8 +383,8 @@ def create_client(request):
             return JsonResponse({'username': cliente.username, 'message': 'Cliente creado con éxito'}, status=201)
         except Exception as e:
             return JsonResponse({'error': str(e)})
-    
-@csrf_exempt
+
+@require_http_methods(["POST"])
 def update_client(request, id):
     if request.method == 'POST':
         try:
@@ -314,7 +401,8 @@ def update_client(request, id):
         except Exception as err:
             return JsonResponse({'error': str(err)})
 
-@csrf_exempt
+
+@require_http_methods(["DELETE"])
 def delete_client(request, id):
     if request.method == 'DELETE':
         try:
@@ -354,8 +442,7 @@ def detalle_client(request, id):
     }, status=200)
 
     
-
-@csrf_exempt
+@require_http_methods(["POST"])
 def create_contact(request, id):
     if request.method == 'POST':
         try:
@@ -376,8 +463,8 @@ def create_contact(request, id):
             return JsonResponse({'Contacto ': contacto.nombre, 'message': 'Creado con éxito'}, status=201)
         except Exception as e:
             return JsonResponse({'error': str(e)})
-    
-@csrf_exempt
+
+@require_http_methods(["POST"])
 def update_contact(request, id):
     if request.method == 'POST':
         try:
@@ -400,26 +487,22 @@ def update_contact(request, id):
 
 
 
+@login_required_user
+@require_GET
 def get_user(request):
-    if request.method == 'GET':
-        usuarios = Usuario.objects.all()
-        data = []
+    usuarios = Usuario.objects.all()
+    data = []
 
-        for usuario in usuarios:
-            try:
-                data.append({
-                    'username': usuario.username,
-                    'password': usuario.password,
-                    'role' : usuario.role
-                })
-            except Exception as e:
-                # Si el cliente no tiene contacto asociado
-                return JsonResponse({'error': str(e)})
+    for usuario in usuarios:
+        data.append({
+            'username': usuario.username,
+            'role': usuario.role
+        })
 
-        return JsonResponse(data, safe=False)
+    return JsonResponse(data, safe=False)
 
-
-@csrf_exempt
+@login_required_user
+@require_http_methods(["POST"])
 def create_user(request):
     if request.method == 'POST':
         try:
@@ -439,8 +522,9 @@ def create_user(request):
             return JsonResponse({'username': user.username, 'message': 'Cliente creado con éxito'}, status=201)
         except Exception as e:
             return JsonResponse({'error': str(e)})
-    
-@csrf_exempt
+
+@login_required_user
+@require_http_methods(["POST"])
 def update_user(request, id):
     if request.method == 'POST':
         try:
@@ -457,7 +541,8 @@ def update_user(request, id):
         except Exception as err:
             return JsonResponse({'error': str(err)})
 
-@csrf_exempt
+@login_required_user
+@require_http_methods(["DELETE"])
 def delete_user(request, id):
     if request.method == 'DELETE':
         try:
@@ -506,37 +591,6 @@ def login_client(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
     
-    #Muestra en index.html 4 productos de cada seccion, para dama y para mujer
-def index(request):
-    # Query base: un producto por fila
-    qs_h = Producto.objects.filter(
-        genero__iexact='H',
-        variantes__stock__gt=0
-    ).distinct().prefetch_related(
-        Prefetch('variantes', Variante.objects.all())
-    )
-
-    qs_m = Producto.objects.filter(
-        genero__iexact='M',
-        variantes__stock__gt=0
-    ).distinct().prefetch_related(
-        Prefetch('variantes', Variante.objects.all())
-    )
-
-    # Elegimos 4 aleatorios sin repetir
-    cab_home  = sample(list(qs_h), min(4, qs_h.count()))
-    dama_home = sample(list(qs_m), min(4, qs_m.count()))
-
-    return render(request, 'public/index.html', {
-        'cab_home': cab_home,
-        'dama_home': dama_home,
-    })
-
-
-from django.http import HttpResponseNotFound
-from django.shortcuts import render
-from .models import Producto
-
 def genero_view(request, genero):  # genero = 'dama' o 'caballero'
     genero_map = {
         'dama': 'M',
@@ -564,3 +618,12 @@ def genero_view(request, genero):  # genero = 'dama' o 'caballero'
             'productos' : qs,
         }
     )
+
+@require_http_methods(["POST"])
+def logout_client(request):
+    request.session.flush()  # elimina todos los datos de sesión
+    return redirect('index')  # redirige al home
+
+def logout_user(request):
+    request.session.flush()
+    return redirect("index")
