@@ -1,3 +1,4 @@
+{# templates/dashboard/registro.html #}
 {% extends 'dashboard/base.html' %}
 {% load static %}
 
@@ -6,8 +7,12 @@
 {% block content %}
 <h1>Nuevo producto</h1>
 
-<form id="productoForm" method="post" enctype="multipart/form-data">
-   {% csrf_token %}
+<form id="productoForm"
+      method="post"
+      enctype="multipart/form-data"
+      action="{% url 'create_product' %}">
+  {% csrf_token %}
+
   <label>Nombre
     <input type="text" name="nombre" required />
   </label>
@@ -23,9 +28,6 @@
   <label>Categoría
     <select name="categoria_id" required>
       <option value="">— selecciona —</option>
-      <option value="1">Camisetas</option>
-      <option value="2">Pantalones</option>
-      <option value="3">Accesorios</option>
     </select>
   </label>
 
@@ -46,14 +48,27 @@
     <input type="file" name="imagen" accept="image/*" required />
   </label>
 
-  <label>Stock
-    <input type="number" name="stock" min="0" required />
-  </label>
+  <fieldset>
+    <legend>Variantes (talla + stock)</legend>
+    <div id="tallasContainer">
+      <div class="talla-row">
+        <label>
+          Talla
+          <input type="text" name="tallas" required placeholder="Ej. 38" />
+        </label>
+        <label>
+          Stock
+          <input type="number" name="stocks" min="0" required placeholder="Ej. 10" />
+        </label>
+        <button type="button" class="removeTalla">✖</button>
+      </div>
+    </div>
+    <button type="button" id="addTalla">+ Añadir talla</button>
+  </fieldset>
 
   <button type="submit">Guardar</button>
   <p class="msg" id="mensaje"></p>
 </form>
 
 <script src="{% static 'dashboard/registro/js/registro.js' %}" defer></script>
-
 {% endblock %}
