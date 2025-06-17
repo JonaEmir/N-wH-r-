@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import index, dama, caballero, detalle_producto, login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
+from .views import index, dama, caballero, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
 
 
 urlpatterns = [
@@ -13,9 +13,6 @@ urlpatterns = [
     path('registrarse/', registrarse, name='registrarse'),
     path('create-client', create_client),
     path('login-client', login_client, name='login_client'),
-
-
-
 
     path('producto/<int:id>/', detalle_producto, name='detalle_producto'),
 
@@ -30,9 +27,11 @@ urlpatterns = [
     path('api/productos/', get_all_products, name='get_all_products'),
     path('api/productos/crear/', create_product, name='create_product'),
     path('api/productos/update/<int:id>/', update_productos, name='update_product'),
+    path('api/variantes/update/<int:variante_id>/', update_variant, name='update_variant'),
     path('api/productos/delete/<int:id>/', delete_productos, name='delete_product'),
     path('api/categorias/', get_categorias, name='get_categorias'),
     path('clientes', get_all_clients, name="get_all_clients"),
+    path('clientes/<int:id>/', detalle_client,  name='detalle_client'),
     path('clientes/crear', create_client, name ="create_client"),
     path('clientes/update/<int:id>', update_client, name ="update_client"),
     path('clientes/delete/<int:id>', delete_client, name ="delete_client"),

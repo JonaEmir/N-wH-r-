@@ -1,23 +1,21 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from django.contrib.auth.hashers import check_password
-from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from .models import Producto, Categoria, Cliente, ContactoCliente, Usuario
+from .models import Producto, Categoria, Cliente, ContactoCliente, Usuario, Variante, Atributo, AtributoValor
 import json
 from django.contrib.auth.hashers import make_password
-
+from django.contrib.auth.hashers import check_passwordAdd  
+from django.views.decorators.http import require_POST
+# …
 
 
 def index(request):
     return render(request, 'public/index.html')
 
-# store/views.py
 def dama(request):
-    productos = Producto.objects.filter(genero__iexact='M')   # ← usa la letra que corresponda a mujer
+    productos = Producto.objects.filter(genero__iexact='M')   # ← usa la letra que corresponda a mujerAdd commentMore actions
     print('▶︎ Productos dama:', productos.count())
     return render(request, 'public/dama.html', {'productos': productos})
-
 
 def caballero(request):
     productos = Producto.objects.filter(genero__iexact='H')
@@ -53,7 +51,7 @@ def get_categorias(request):
 def lista_productos(request):
     return render(request, 'dashboard/lista.html')
 
-from django.shortcuts import get_object_or_404
+
 
 def editar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
@@ -65,113 +63,149 @@ def editar_producto(request, id):
 
 
 
-
 def get_all_products(request):
-    if request.method == 'GET':
-        productos = Producto.objects.all()
-        data = []
-        for p in productos:
-            data.append({
-                'id': p.id,
-                'nombre': p.nombre,
-                'descripcion': p.descripcion,
-                'precio': float(p.precio),
-                'categoria': p.categoria.nombre,
-                'genero': p.genero,
-                'en_oferta': p.en_oferta,
-                'stock': p.stock,
-                'created_at': p.created_at.isoformat(),
-                'imagen': p.imagen.url if p.imagen else '',  # ✅ Asegura que sea una URL válida
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    productos = Producto.objects.prefetch_related('variantes__attrs__atributo_valor__atributo')
+    data = []
+    for p in productos:
+        variantes = []
+        for v in p.variantes.all():
+            # recoger los atributos de la variante (talla, color…)
+            attrs = {
+                attr.atributo_valor.atributo.nombre: attr.atributo_valor.valor
+                for attr in v.attrs.all()
+            }
+            variantes.append({
+                'id': v.id,
+                'sku': v.sku,
+                'precio': float(v.precio or p.precio),
+                'stock': v.stock,
+                'atributos': attrs,
             })
-        return JsonResponse(data, safe=False)
+
+        data.append({
+            'id': p.id,
+            'nombre': p.nombre,
+            'descripcion': p.descripcion,
+            'categoria': p.categoria.nombre,
+            'genero': p.genero,
+            'en_oferta': p.en_oferta,
+            'imagen': p.imagen.url if p.imagen else '',
+            'created_at': p.created_at.isoformat(),
+            'stock_total': p.stock_total,
+            'variantes': variantes,
+        })
+
+    return JsonResponse(data, safe=False)
+
 
 @csrf_exempt
 def create_product(request):
-    if request.method == 'POST':
-        try:
-            nombre = request.POST['nombre']
-            descripcion = request.POST['descripcion']
-            precio = request.POST['precio']
-            categoria_id = request.POST['categoria_id']
-            genero = request.POST['genero']
-            en_oferta = request.POST.get('en_oferta') == 'on'  # o puedes hacer bool(int()) si es 0/1
-            imagen = request.FILES['imagen']  # <- archivo viene aquí
-            stock = request.POST['stock']
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-            categoria = Categoria.objects.get(id=categoria_id)
+    try:
+        nombre      = request.POST['nombre']
+        descripcion = request.POST['descripcion']
+        precio      = request.POST['precio']
+        categoria   = Categoria.objects.get(id=request.POST['categoria_id'])
+        genero      = request.POST['genero']
+        en_oferta   = request.POST.get('en_oferta') == 'on'
+        imagen      = request.FILES.get('imagen', None)
+        stock       = int(request.POST['stock'])
 
-            producto = Producto.objects.create(
-                nombre=nombre,
-                descripcion=descripcion,
-                precio=precio,
-                categoria=categoria,
-                genero=genero,
-                en_oferta=en_oferta,
-                imagen=imagen,
-                stock=stock
-            )
-            return JsonResponse({'id': producto.id, 'message': 'Producto creado con éxito'}, status=201)
-        except Categoria.DoesNotExist:
-            return JsonResponse({'error': 'Categoría no encontrada'}, status=404)
-        except KeyError as e:
-            return JsonResponse({'error': f'Campo faltante: {str(e)}'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+    except KeyError as ke:
+        return JsonResponse({'error': f'Falta campo {ke}'}, status=400)
+    except Categoria.DoesNotExist:
+        return JsonResponse({'error': 'Categoría no encontrada'}, status=404)
+
+    producto = Producto.objects.create(
+        nombre=nombre,
+        descripcion=descripcion,
+        precio=precio,
+        categoria=categoria,
+        genero=genero,
+        en_oferta=en_oferta,
+        imagen=imagen,
+    )
+
+    atributo, _ = Atributo.objects.get_or_create(nombre='Talla')
+    valor, _    = AtributoValor.objects.get_or_create(
+        atributo=atributo,
+        valor='Única'
+    )
+
+    variante = Variante.objects.create(
+        producto=producto,
+        precio=precio,    # ← CORREGIDO
+        stock=stock,
+    )
+    variante.attrs.create(atributo_valor=valor)
+
+    return JsonResponse({'id': producto.id, 'message': 'Producto y variante creados'}, status=201)
+
 
 @csrf_exempt
 def update_productos(request, id):
-    if request.method == 'POST':
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    producto = get_object_or_404(Producto, id=id)
+
+    # Campos del Producto
+    for field in ('nombre', 'descripcion', 'precio', 'genero'):
+        if field in request.POST:
+            setattr(producto, field, request.POST[field])
+
+    if 'en_oferta' in request.POST:
+        producto.en_oferta = request.POST.get('en_oferta') == 'on'
+
+    if 'categoria_id' in request.POST:
         try:
-            producto = Producto.objects.get(id=id)
-            # Accedemos a los campos si están presentes en el request buscar setattr para codigo mas limpio     
-            if 'nombre' in request.POST:
-                producto.nombre = request.POST['nombre']
-
-            if 'descripcion' in request.POST:
-                producto.descripcion = request.POST['descripcion']
-
-            if 'precio' in request.POST:
-                producto.precio = request.POST['precio']
-
-            if 'categoria_id' in request.POST:
-                categoria = Categoria.objects.get(id=request.POST['categoria_id'])
-                producto.categoria = categoria
-
-            if 'genero' in request.POST:
-                producto.genero = request.POST['genero']
-
-            if 'en_oferta' in request.POST:
-                producto.en_oferta = request.POST.get('en_oferta') == 'on'
-
-            if 'stock' in request.POST:
-                producto.stock = request.POST['stock']
-
-            if 'imagen' in request.FILES:
-                producto.imagen = request.FILES['imagen']
-
-            producto.save()
-            return JsonResponse({'mensaje': f'Producto {producto.nombre} actualizado correctamente'}, status=200)
-
-        except Producto.DoesNotExist:
-            return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+            producto.categoria = Categoria.objects.get(id=request.POST['categoria_id'])
         except Categoria.DoesNotExist:
             return JsonResponse({'error': 'Categoría no encontrada'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+
+    if 'imagen' in request.FILES:
+        producto.imagen = request.FILES['imagen']
+
+    producto.save()
+    return JsonResponse(
+        {'mensaje': f'Producto {producto.id} actualizado correctamente'},
+        status=200
+    )
+
+
+@csrf_exempt
+def update_variant(request, variante_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    variante = get_object_or_404(Variante, id=variante_id)
+
+    if 'stock' in request.POST:
+        variante.stock = int(request.POST['stock'])
+    if 'precio' in request.POST:
+        variante.precio = request.POST['precio']
+    if 'sku' in request.POST:
+        variante.sku = request.POST['sku']
+
+    variante.save()
+    return JsonResponse(
+        {'message': f'Variante {variante.id} actualizada correctamente'},
+        status=200
+    )
 
 
 @csrf_exempt
 def delete_productos(request, id):
-    if request.method == 'DELETE':
-        try:
-            producto = Producto.objects.get(id=id)  
-            nombre=producto.nombre
-            producto.delete()
-            return JsonResponse({'mensaje': f'Producto {nombre} eliminado correctamente'}, status=200)
-        except Producto.DoesNotExist:
-            return JsonResponse({'error': 'Producto no encontrado'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    producto = get_object_or_404(Producto, id=id)
+    producto.delete()
+    return JsonResponse({'mensaje': f'Producto {producto.nombre} y sus variantes eliminados'}, status=200)
 
 
 
@@ -251,6 +285,33 @@ def delete_client(request, id):
             return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+    
+
+def detalle_client(request, id):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    # Trae el cliente o devuelve 404
+    cliente = get_object_or_404(Cliente, id=id)
+
+    # Intenta cargar el contacto asociado
+    try:
+        contacto = cliente.contactocliente
+        nombre  = contacto.nombre
+        email   = contacto.email
+        mensaje = contacto.mensaje
+    except ContactoCliente.DoesNotExist:
+        nombre = email = mensaje = None
+
+    # Responde con JSON
+    return JsonResponse({
+        'id'      : cliente.id,
+        'username': cliente.username,
+        'nombre'  : nombre,
+        'email'   : email,
+        'mensaje' : mensaje,
+    }, status=200)
+
     
 
 @csrf_exempt
@@ -369,7 +430,7 @@ def delete_user(request, id):
             return JsonResponse({'error': str(e)}, status=400)
     
 
-@require_POST          # fuerza solo POST
+@require_POST          # fuerza solo POSTAdd commentMore actions
 def login_client(request):
     """
     Comprueba usuario y contraseña de Cliente.

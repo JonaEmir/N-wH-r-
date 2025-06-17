@@ -1,58 +1,169 @@
 from django.db import models
 
+# ——————————————————————————————————————
+# Modelos de usuario y cliente
+# ——————————————————————————————————————
+
 class Cliente(models.Model):
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.username
+
 class Usuario(models.Model):
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=255)
-    role = models.CharField(max_length=50)
+    role     = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.username} ({self.role})"
+
+
+# ——————————————————————————————————————
+# Categorías y Productos
+# ——————————————————————————————————————
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.nombre
+
 class Producto(models.Model):
-    nombre = models.CharField(max_length=255)
+    nombre      = models.CharField(max_length=255)
     descripcion = models.TextField()
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    genero = models.CharField(max_length=50)
-    en_oferta = models.BooleanField(default=False)
-    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
-    stock = models.IntegerField()
+    precio      = models.DecimalField(max_digits=10, decimal_places=2)
+    categoria   = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    genero      = models.CharField(max_length=50)
+    en_oferta   = models.BooleanField(default=False)
+    imagen      = models.ImageField(upload_to='productos/', blank=True, null=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.nombre
+
+    @property
+    def stock_total(self):
+        """
+        Suma el stock de todas sus variantes.
+        Útil para mostrar stock global de un producto con variantes.
+        """
+        return sum( var.stock for var in self.variantes.all() )
+
+
+# ——————————————————————————————————————
+# Sistema de variantes (tallas, colores, etc.)
+# ——————————————————————————————————————
+
+class Atributo(models.Model):
+    """
+    Define un tipo de atributo de variante (ej. 'Talla', 'Color').
+    """
+    nombre = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nombre
+
+class AtributoValor(models.Model):
+    """
+    Valores específicos de un atributo (ej. talla '38', color 'Rojo').
+    """
+    atributo = models.ForeignKey(Atributo, on_delete=models.CASCADE, related_name="valores")
+    valor     = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.atributo.nombre}: {self.valor}"
+
+class Variante(models.Model):
+    """
+    Cada Variante es una versión de Producto con atributos (talla, color…)
+    y su propio stock/precio/SKU si fuera necesario.
+    """
+    producto   = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name="variantes")
+    sku        = models.CharField(max_length=100, blank=True, null=True,
+                                  help_text="Código interno o UPC opcional")
+    precio     = models.DecimalField(max_digits=10, decimal_places=2,
+                                     blank=True, null=True,
+                                     help_text="Si varía de precio respecto al Producto")
+    stock      = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        attrs = ", ".join(str(av) for av in self.attrs.all())
+        return f"{self.producto.nombre} ({attrs})" if attrs else self.producto.nombre
+
+class VarianteAtributo(models.Model):
+    """
+    Relaciona cada Variante con sus valores de atributo.
+    """
+    variante       = models.ForeignKey(Variante, on_delete=models.CASCADE, related_name="attrs")
+    atributo_valor = models.ForeignKey(AtributoValor, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("variante", "atributo_valor")
+
+    def __str__(self):
+        return f"{self.variante} → {self.atributo_valor}"
+
+
+# ——————————————————————————————————————
+# Carrito, Wishlist y Órdenes
+# ——————————————————————————————————————
 
 class Carrito(models.Model):
-    cliente = models.OneToOneField(Cliente, on_delete=models.CASCADE)
-    status = models.CharField(max_length=50, default="vacio")
+    cliente    = models.OneToOneField(Cliente, on_delete=models.CASCADE)
+    status     = models.CharField(max_length=50, default="vacio")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Carrito de {self.cliente.username} ({self.status})"
 
 class CarritoProducto(models.Model):
-    carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    carrito  = models.ForeignKey(Carrito, on_delete=models.CASCADE)
+    variante = models.ForeignKey(Variante, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.variante} en {self.carrito}"
 
 class Wishlist(models.Model):
-    user = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    product = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cliente  = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.cliente.username} quiere {self.producto.nombre}"
 
 class Orden(models.Model):
-    carrito = models.OneToOneField(Carrito, on_delete=models.CASCADE)
-    user = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=50)
+    carrito        = models.OneToOneField(Carrito, on_delete=models.CASCADE)
+    cliente        = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    total_amount   = models.DecimalField(max_digits=10, decimal_places=2)
+    status         = models.CharField(max_length=50)
     payment_method = models.CharField(max_length=50)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at     = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Orden #{self.id} - {self.cliente.username}"
 
 class OrdenDetalle(models.Model):
-    order = models.ForeignKey(Orden, on_delete=models.CASCADE)
-    product = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    cantidad = models.IntegerField()
-    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    order          = models.ForeignKey(Orden, on_delete=models.CASCADE, related_name="detalles")
+    variante       = models.ForeignKey(Variante, on_delete=models.CASCADE)
+    cantidad       = models.IntegerField()
+    precio_unitario= models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.cantidad}×{self.variante} en Orden #{self.order.id}"
+
+
+# ——————————————————————————————————————
+# Contacto de clientes
+# ——————————————————————————————————————
 
 class ContactoCliente(models.Model):
-    cliente = models.OneToOneField(Cliente, on_delete=models.CASCADE, primary_key=True)
-    nombre = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
-    mensaje = models.TextField()
+    cliente    = models.OneToOneField(Cliente, on_delete=models.CASCADE, primary_key=True)
+    nombre     = models.CharField(max_length=255)
+    email      = models.CharField(max_length=255)
+    mensaje    = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Contacto de {self.cliente.username}"
