@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import index, genero_view, login_user, logout_user, logout_client, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
+from .views import detalle_carrito, create_carrito, update_carrito, delete_carrito, index, genero_view, login_user, logout_user, logout_client, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
 
 
 urlpatterns = [
@@ -47,6 +47,12 @@ urlpatterns = [
     path('user/create', create_user, name ="create_user"),
     #path('user/update/<int:id>', update_user, name ="update_user"),
     #path('user/delete/<int:id>', delete_user, name ="delete_user"),
+    #Paths carrito
+    path('carrito/<int:id>/', detalle_carrito,  name='detalle_carrito'),
+    path('carrito/crear', create_carrito, name ="create_carrito"),
+    path('carrito/update/<int:id>', update_carrito, name ="update_carrito,delete_carrito"),
+    path('carrito/delete/<int:id>', delete_carrito, name ="delete_carrito"),
+
     path('registro', alta, name='alta')
 
     
