@@ -1,24 +1,17 @@
-{#  public/detalles.html  #}
 {% extends "public/base.html" %}
 {% load static %}
 
-{# ---------- <title> de la pestaña ---------- #}
 {% block title %}Detalles – {{ producto.nombre }}{% endblock %}
 
-{# ---------- CSS exclusivo de esta vista ---------- #}
 {% block extra_css %}
-  {# deja el espacio tal cual; solo Django lo codificará como %20 internamente #}
-  <link rel="stylesheet"
-        href="{% static 'detalles de producto/css/main.css' %}">
+  <link rel="stylesheet" href="{% static 'detalles de producto/css/main.css' %}">
 {% endblock %}
 
-{# ---------- CONTENIDO principal ---------- #}
 {% block content %}
 <section class="detalle-section">
 
-  {# flecha para volver a la colección desde la que se abrió #}
-  <a href="{% url 'coleccion_genero' origen %}"
-     class="volver-atras" aria-label="Volver">
+  <!-- Flecha para volver -->
+  <a href="{% url 'coleccion_genero' origen %}" class="volver-atras" aria-label="Volver">
     <svg class="chevron" width="10" height="10" viewBox="0 0 10 6"
          fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M1 1L5 5L9 1"
@@ -40,7 +33,8 @@
       <h2>{{ producto.nombre }}</h2>
       <h3>${{ producto.precio|floatformat:2 }}</h3>
 
-      <select id="talla">
+      <label for="selector-talla">Seleccione su talla</label>
+      <select id="selector-talla">
         <option value="">Seleccione su talla</option>
         {% for t in tallas %}
           <option value="{{ t }}">{{ t }}</option>
@@ -50,15 +44,18 @@
       <a href="#" class="guia-tallas">Guía de tallas</a>
       <button class="boton-contacto">Contactar a un Asesor</button>
 
-      <p>{{ producto.descripcion }}</p>
+      <p class="descripcion">{{ producto.descripcion }}</p>
     </div>
 
   </div>
 </section>
+
+<!-- Variantes JSON para el JS -->
+<script id="variantes-data" type="application/json">
+  {{ variantes_json|safe }}
+</script>
 {% endblock %}
 
-{# ---------- JS exclusivo de esta vista ---------- #}
 {% block extra_js %}
-  <script type="module"
-          src="{% static 'detalles de producto/js/main.js' %}" defer></script>
+  <script type="module" src="{% static 'detalles de producto/js/main.js' %}" defer></script>
 {% endblock %}

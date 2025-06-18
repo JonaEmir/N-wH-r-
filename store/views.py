@@ -112,23 +112,49 @@ def registrarse(request):
 
 
 def detalle_producto(request, id):
-    producto = get_object_or_404(Producto, id=id)
-    tallas = ["3", "4", "5", "6", "7", "8"]
+    producto = get_object_or_404(
+        Producto.objects.prefetch_related(
+            Prefetch(
+                "variantes__attrs__atributo_valor__atributo",
+                # solo cargamos los atributos vinculados
+            )
+        ),
+        id=id,
+    )
 
-    # lee el origen (dama o caballero), y por seguridad lo validamos
-    origen_raw = request.GET.get('from', '')
-    origen = origen_raw.lower()
-    if origen not in ['dama', 'caballero']:
-        origen = 'caballero'  # valor por defecto si viene mal
+    # ─── 1. Lista de tallas disponibles ───────────────────────────
+    atributo_talla = Atributo.objects.filter(nombre__iexact="Talla").first()
+    tallas = set()
+
+    variantes_serializadas = []    # para el JS
+    for v in producto.variantes.all():
+        attrs = {av.atributo_valor.atributo.nombre: av.atributo_valor.valor
+                 for av in v.attrs.all()}
+
+        talla = attrs.get("Talla")
+        if talla:
+            tallas.add(talla)
+
+        variantes_serializadas.append({
+            "id"    : v.id,
+            "talla" : talla,
+            "precio": float(v.precio or producto.precio),
+            "stock" : v.stock,
+        })
+
+    # lee el origen para el <a volver>
+    origen_raw = request.GET.get("from", "")
+    origen = origen_raw.lower() if origen_raw.lower() in ["dama", "caballero"] else "caballero"
 
     return render(
         request,
-        'public/detalles.html',
+        "public/detalles.html",
         {
-            'producto': producto,
-            'origen': origen,
-            'tallas': tallas,
-        }
+            "producto"       : producto,
+            "origen"         : origen,
+            "tallas"         : sorted(tallas, key=lambda x: float(x)),
+            "variantes_json" : json.dumps(variantes_serializadas),
+        },
     )
 
 @login_required_user
