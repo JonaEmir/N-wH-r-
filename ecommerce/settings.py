@@ -156,7 +156,8 @@ SESSION_COOKIE_AGE = 60 * 60 * 2   # 2 h de inactividad
 
 # ───────── Producción: desactivar DEBUG y definir hosts ──────────
 DEBUG = True                      # ⚠️ Cambia a False en producción
-ALLOWED_HOSTS = []               # ⚠️ Agrega tu dominio aquí en producción
+ALLOWED_HOSTS = [ ]
+             # ⚠️ Agrega tu dominio aquí en producción
 
 # ⚠️ Cuando tengas HTTPS y dominio personalizado, reemplaza por:
 # SESSION_COOKIE_SECURE = True
