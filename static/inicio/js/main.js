@@ -12,6 +12,7 @@ import { setupClientePanel } from './logged.js';
 
 
 
+
 setupScrollRestoration();
 setupHeaderScroll();
 setupBurgerMenu();

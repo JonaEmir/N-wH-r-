@@ -20,7 +20,8 @@ urlpatterns = [
 
     #Parte visual del admin
     path('dashboard/login/', login_user, name='login_user'),
-    path('logout-user', logout_user, name='logout_user'),
+    path('dashboard/logout/', logout_user, name='logout_user')  # ✅ más claro y consistente
+,
 
 
     path('dashboard/registro/', alta, name='dashboard_alta'),

@@ -41,3 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
+// Activar la animación de entrada
+document.querySelectorAll(".detalle-section").forEach(sec => {
+  sec.classList.add("fade-in");
+});

@@ -6,6 +6,11 @@
 {% block content %}
 <h1>📦 Lista de Productos</h1>
 
+<!-- 💡 ESTE formulario invisible fuerza a Django a generar el token CSRF correcto -->
+<form style="display: none;">
+  {% csrf_token %}
+</form>
+
 <div id="productos-container">
   <p>Cargando productos...</p>
 </div>

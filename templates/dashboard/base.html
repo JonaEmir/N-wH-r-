@@ -7,7 +7,17 @@
   <title>{% block title %}Dashboard{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'dashboard/header/css/main.css' %}">
   <link rel="stylesheet" href="{% static 'dashboard/registro/css/main.css' %}">
+
+  <!-- CSRF token (disponible en meta y cookie) -->
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <script>
+    // Asegura que el token esté disponible como cookie para uso en JavaScript
+    if (!document.cookie.includes('csrftoken')) {
+      document.cookie = "csrftoken={{ csrf_token }}; path=/";
+    }
+  </script>
 </head>
+
 <body>
   {% include 'dashboard/includes/header.html' %}
   <main class="dashboard-main">

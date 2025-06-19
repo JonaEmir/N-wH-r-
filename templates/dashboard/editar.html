@@ -45,7 +45,7 @@
   </label>
 
   <label>Stock
-    <input type="number" name="stock" value="{{ producto.stock }}" min="0" required />
+    <input type="number" name="stock" value="{{ producto.stock }}" min="0"  />
   </label>
 
   <label>Imagen actual:<br>
@@ -59,6 +59,35 @@
   <label>Subir nueva imagen (opcional)
     <input type="file" name="imagen" accept="image/*" />
   </label>
+
+  <h2>Variantes</h2>
+
+{% if producto.variantes.all %}
+  {% for variante in producto.variantes.all %}
+    <fieldset>
+      <legend>Variante #{{ forloop.counter }}</legend>
+
+      <input type="hidden" name="variante_id" value="{{ variante.id }}">
+
+      <label>Talla:
+        {{ variante.attrs.first.atributo_valor.valor }}
+        <!-- Asumimos solo 1 atributo (Talla) por variante -->
+      </label>
+
+      <label>Precio
+        <input type="number" name="variante_precio_{{ variante.id }}" step="0.01"
+               value="{{ variante.precio|default:producto.precio }}">
+      </label>
+
+      <label>Stock
+        <input type="number" name="variante_stock_{{ variante.id }}" min="0"
+               value="{{ variante.stock }}">
+      </label>
+    </fieldset>
+  {% endfor %}
+{% else %}
+  <p>No hay variantes registradas.</p>
+{% endif %}
 
   <button type="submit">Actualizar</button>
   <p class="msg" id="mensaje"></p>

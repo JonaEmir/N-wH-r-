@@ -1,87 +1,122 @@
-document.addEventListener('DOMContentLoaded', async () => {
+/* lista.js – dashboard de productos */
+document.addEventListener('DOMContentLoaded', cargarProductos);
+
+/* ---------- CARGA Y RENDER ---------- */
+async function cargarProductos() {
   try {
-    const res = await fetch('/api/productos/');
+    const res = await fetch('/api/productos/', { credentials: 'same-origin' });
     if (!res.ok) throw new Error('Error al obtener productos');
     const productos = await res.json();
 
     const container = document.getElementById('productos-container');
     container.innerHTML = '';
 
-    if (productos.length === 0) {
+    if (!productos.length) {
       container.innerHTML = '<p>No hay productos registrados.</p>';
       return;
     }
 
-    productos.forEach(p => {
-      const card = document.createElement('div');
-      card.classList.add('producto-card');
-
-      // Mostrar variantes detalladas
-      let variantesHTML = '';
-      if (p.variantes.length > 0) {
-        variantesHTML += `<ul>`;
-        p.variantes.forEach(v => {
-          const talla = v.atributos?.Talla || '—';
-          variantesHTML += `
-            <li>
-              <strong>Talla:</strong> ${talla} |
-              <strong>Precio:</strong> $${v.precio} |
-              <strong>Stock:</strong> ${v.stock}
-            </li>
-          `;
-        });
-        variantesHTML += `</ul>`;
-      } else {
-        variantesHTML = '<p>No hay variantes registradas.</p>';
-      }
-
-      card.innerHTML = `
-        <img src="${p.imagen}" alt="Imagen de ${p.nombre}" height="120">
-        <h3>${p.nombre}</h3>
-        <p><strong>Descripción:</strong> ${p.descripcion}</p>
-        <p><strong>Categoría:</strong> ${p.categoria}</p>
-        <p><strong>Género:</strong> ${p.genero}</p>
-        <p><strong>Oferta:</strong> ${p.en_oferta ? 'Sí' : 'No'}</p>
-        <p><strong>Stock total:</strong> ${p.stock_total}</p>
-        <p><strong>Variantes:</strong></p>
-        ${variantesHTML}
-        <button onclick="editarProducto(${p.id})">✏️ Editar</button>
-        <button onclick="eliminarProducto(${p.id})">🗑️ Eliminar</button>
-        <hr>
-      `;
-
-      container.appendChild(card);
-    });
+    productos.forEach(p => container.appendChild(crearCard(p)));
   } catch (err) {
-    document.getElementById('productos-container').innerHTML = `<p>Error: ${err.message}</p>`;
+    document.getElementById('productos-container').innerHTML =
+      `<p>Error: ${err.message}</p>`;
   }
-});
+}
 
+function crearCard(p) {
+  const card = document.createElement('div');
+  card.className = 'producto-card';
+
+  /* variantes detalladas */
+  const variantesHTML = p.variantes.length
+    ? '<ul>' + p.variantes.map(v => {
+        const talla = v.atributos?.Talla ?? '—';
+        return `<li><strong>Talla:</strong> ${talla} |
+                     <strong>Precio:</strong> $${v.precio} |
+                     <strong>Stock:</strong> ${v.stock}</li>`;
+      }).join('') + '</ul>'
+    : '<p>No hay variantes registradas.</p>';
+
+  card.innerHTML = `
+    <img src="${p.imagen}" alt="Imagen de ${p.nombre}" height="120">
+    <h3>${p.nombre}</h3>
+    <p><strong>Descripción:</strong> ${p.descripcion}</p>
+    <p><strong>Categoría:</strong> ${p.categoria}</p>
+    <p><strong>Género:</strong> ${p.genero}</p>
+    <p><strong>Oferta:</strong> ${p.en_oferta ? 'Sí' : 'No'}</p>
+    <p><strong>Stock total:</strong> ${p.stock_total}</p>
+    <p><strong>Variantes:</strong></p>
+    ${variantesHTML}
+    <button class="btn-editar">✏️ Editar</button>
+    <button class="btn-eliminar">🗑️ Eliminar</button>
+    <hr>
+  `;
+
+  /* listeners */
+  card.querySelector('.btn-editar')
+      .addEventListener('click', () => editarProducto(p.id));
+  card.querySelector('.btn-eliminar')
+      .addEventListener('click', () => eliminarProducto(p.id, card));
+
+  return card;
+}
+
+/* ---------- ACCIONES ---------- */
 function editarProducto(id) {
   window.location.href = `/dashboard/productos/editar/${id}/`;
 }
 
-async function eliminarProducto(id) {
+async function eliminarProducto(id, cardEl) {
   if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
 
   try {
     const res = await fetch(`/api/productos/delete/${id}/`, {
-      method: 'DELETE',
+      method: 'POST',                     // ← POST con CSRF
+      credentials: 'same-origin',
       headers: {
-        'X-CSRFToken': getCookie('csrftoken'),
-      },
+        'X-CSRFToken': getCSRFToken(),
+        'Content-Type': 'application/json'
+      }
     });
 
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(`Error ${res.status}: ${msg}`);
+    }
+
     const data = await res.json();
-    alert(data.mensaje || data.error);
-    location.reload();
+    toast(data.mensaje || 'Producto eliminado ✔️');
+    cardEl.remove();
   } catch (err) {
-    alert('Error al eliminar producto: ' + err.message);
+    toast('No se pudo eliminar: ' + err.message, true);
   }
 }
 
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
+/* ---------- CSRF ---------- */
+function getCSRFToken() {
+  /* 1) cookie */
+  const cookie = document.cookie.split(';')
+    .map(c => c.trim())
+    .find(c => c.startsWith('csrftoken='));
+  if (cookie) return decodeURIComponent(cookie.split('=')[1]);
+
+  /* 2) meta tag (fallback) */
+  return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
+/* ---------- NOTIFICACIÓN PEQUEÑA ---------- */
+function toast(msg, err = false) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText =
+    `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+     padding:10px 20px;border-radius:4px;font-size:14px;
+     background:${err ? '#c0392b' : '#27ae60'};color:#fff;
+     z-index:9999;opacity:0;transition:opacity .3s`;
+  document.body.appendChild(t);
+  requestAnimationFrame(() => t.style.opacity = 1);
+  setTimeout(() => {
+    t.style.opacity = 0;
+    setTimeout(() => t.remove(), 300);
+  }, 2500);
 }

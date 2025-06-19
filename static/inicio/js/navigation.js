@@ -3,7 +3,8 @@ export function setupNavigationButtons() {
     btn.addEventListener('click', () => {
       const seccion = btn.dataset.seccion;
       localStorage.setItem('origenSeccion', seccion);
-      window.location.href = `/${seccion}`;
+      window.location.href = `/coleccion/${seccion}/`;
+
     });
   });
 }

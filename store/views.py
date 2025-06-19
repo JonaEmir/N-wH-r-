@@ -194,10 +194,30 @@ def lista_productos(request):
 def editar_producto(request, id):
     producto = get_object_or_404(Producto, id=id)
     categorias = Categoria.objects.all()
+
+    variantes = producto.variantes.select_related().prefetch_related('attrs__atributo_valor')
+
+    # Serializa las variantes para el template
+    variantes_data = []
+    for v in variantes:
+        talla = None
+        for av in v.attrs.all():
+            if av.atributo_valor.atributo.nombre.lower() == "talla":
+                talla = av.atributo_valor.valor
+                break
+        variantes_data.append({
+            'id': v.id,
+            'talla': talla or '—',
+            'precio': v.precio,
+            'stock': v.stock,
+        })
+
     return render(request, 'dashboard/editar.html', {
         'producto': producto,
-        'categorias': categorias
+        'categorias': categorias,
+        'variantes': variantes_data,
     })
+
 
 
 @login_required_user          # (opcional, según tu negocio)
@@ -376,10 +396,8 @@ def update_variant(request, variante_id):
     )
 
 @login_required_user
-@require_http_methods(["DELETE"])
+@require_http_methods(["POST"])
 def delete_productos(request, id):
-    if request.method != 'DELETE':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
     producto = get_object_or_404(Producto, id=id)
     producto.delete()
     return JsonResponse({'mensaje': f'Producto {producto.nombre} y sus variantes eliminados'}, status=200)
@@ -673,7 +691,8 @@ def logout_client(request):
 
 def logout_user(request):
     request.session.flush()
-    return redirect("index")
+    return redirect("login_user")  # ✅ redirige al login del dashboard
+
 
 
 def detalle_carrito(request, id):
