@@ -1,8 +1,8 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views import detalle_carrito, create_carrito, update_carrito, delete_carrito, index, genero_view, login_user, logout_user, logout_client, detalle_producto,  login_client, alta, editar_producto, registrarse, get_all_products, create_product, get_categorias, detalle_client, update_variant ,update_productos, delete_productos, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user
-
+from .views.views import detalle_carrito, create_carrito, update_carrito, delete_carrito, index, genero_view, login_user, logout_user, logout_client,  login_client, alta, editar_producto, registrarse, get_categorias, detalle_client, lista_productos, get_all_clients, create_client, update_client, delete_client, create_contact, update_contact, create_user, get_user, delete_user, update_user
+from .views.products import get_all_products, delete_productos, update_productos, create_product, update_variant, detalle_producto
 
 urlpatterns = [
     #Paths de frontEnd
@@ -16,7 +16,7 @@ urlpatterns = [
     path('create-client', create_client),
     path('login-client', login_client, name='login_client'),
 
-    path('producto/<int:id>/', detalle_producto, name='detalle_producto'),
+    
 
     #Parte visual del admin
     path('dashboard/login/', login_user, name='login_user'),
@@ -31,6 +31,7 @@ urlpatterns = [
 
 
     #Paths de BackEnd
+    path('producto/<int:id>/', detalle_producto, name='detalle_producto'),
     path('api/productos/', get_all_products, name='get_all_products'),
     path('api/productos/crear/', create_product, name='create_product'),
     path('api/productos/update/<int:id>/', update_productos, name='update_product'),
@@ -46,8 +47,8 @@ urlpatterns = [
     path('contact/update/<int:id>', update_contact, name ="update_contact"),
     path('user/get', get_user, name ="get_user"),
     path('user/create', create_user, name ="create_user"),
-    #path('user/update/<int:id>', update_user, name ="update_user"),
-    #path('user/delete/<int:id>', delete_user, name ="delete_user"),
+    path('user/update/<int:id>', update_user, name ="update_user"),
+    path('user/delete/<int:id>', delete_user, name ="delete_user"),
     #Paths carrito
     path('carrito/<int:id>/', detalle_carrito,  name='detalle_carrito'),
     path('carrito/crear', create_carrito, name ="create_carrito"),
