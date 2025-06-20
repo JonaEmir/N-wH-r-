@@ -1,4 +1,7 @@
-/* ========== CATEGORÍAS ========== */
+/* =============================================================
+   CATEGORÍAS (GENÉRICAS)
+   Sección principal y títulos
+   ============================================================ */
 .categorias {
   padding: 30px 20px;
   background: #fff;
@@ -9,74 +12,100 @@
   font-size: 1em;
   margin-bottom: 30px;
   color: #1D1D1D;
-  text-align: center;
 }
 
-.categoria-grid {
+/* =============================================================
+   CUADRÍCULA DE TARJETAS – ESTADO INICIAL (3 × 2)
+   ============================================================ */
+.categorias-generales .categoria-grid-generales {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, 1fr);  /* 3 columnas */
+  grid-template-rows:  repeat(2, 1fr);    /* 2 filas    */
   gap: 20px;
+  height: 600px;
+
+  /* transiciones suaves al pasar a “split” */
+  transition: grid-template-columns .6s ease,
+              grid-template-rows    .6s ease;
 }
 
-.categoria-card {
-  flex: 1 1 250px;
-  max-width: 250px;
-  height: 400px;
-  overflow: hidden;
-  text-align: center;
-  background: #fff;
-  transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+/* Posición tipo collage (antes de la animación) */
+.categorias-generales .categoria-card:nth-child(1){grid-column:1; grid-row:1 / span 2;}
+.categorias-generales .categoria-card:nth-child(2){grid-column:2; grid-row:1;}
+.categorias-generales .categoria-card:nth-child(3){grid-column:2; grid-row:2;}
+.categorias-generales .categoria-card:nth-child(4){grid-column:3; grid-row:1 / span 2;}
+
+/* Tarjeta individual */
+.categorias-generales .categoria-card{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:#fff;
+  text-align:center;
+  transition:transform .3s ease, opacity .3s ease;
+  opacity:0;
+  transform:translateY(20px);
 }
 
-.categoria-card img,
-.categoria-card video {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-  border-bottom: 1px solid #ddd;
+.categorias-generales .categoria-card img,
+.categorias-generales .categoria-card video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  border-bottom:1px solid #ddd;
+  transition:transform .4s ease;
+}
+.categorias-generales .categoria-card:hover img{transform:scale(1.05);}
+.categorias-generales .categoria-card.visible{
+  opacity:1; transform:translateY(0); animation:fadeInUp .6s ease forwards;
 }
 
-.categoria-card h3 {
-  font-size: 0.5em;
-  color: #1D1D1D;
-  margin: 10px 0;
-  position: static;
-  transform: none;
+/* =============================================================
+   ESTADO “SPLIT” (4 columnas – las tarjetas 2 y 3 se alinean)
+   Se activa añadiendo la clase .split al grid
+   ============================================================ */
+.categorias-generales .categoria-grid-generales.split{
+  grid-template-columns: 1fr 1fr 1fr 1fr;  /* 4 columnas iguales */
+  grid-template-rows: 1fr 1fr;
 }
 
-/* Animación de entrada */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+/* Recolocación de tarjetas cuando .split está activo */
+.categoria-grid-generales.split .categoria-card:nth-child(1){grid-column:1; grid-row:1 / span 2;}
+.categoria-grid-generales.split .categoria-card:nth-child(2){grid-column:2; grid-row:1;}
+.categoria-grid-generales.split .categoria-card:nth-child(3){grid-column:3; grid-row:1;}
+.categoria-grid-generales.split .categoria-card:nth-child(4){grid-column:4; grid-row:1 / span 2;}
+
+/* =============================================================
+   RESPONSIVE (≤ 600 px)
+   ============================================================ */
+@media (max-width:600px){
+  .categorias-generales .categoria-grid-generales,
+  .categorias-generales .categoria-grid-generales.split{   /* ← split también */
+    grid-template-columns:repeat(2,1fr);
+    grid-template-rows:auto;
+    gap:16px;
+    height:500px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .categorias-generales .categoria-card{
+    width:100%; height:100%; padding-bottom:10px;
+  }
+
+  /* quitamos el span de las grandes */
+  .categorias-generales .categoria-card:nth-child(1),
+  .categorias-generales .categoria-card:nth-child(4){
+    grid-column:auto; grid-row:auto;
   }
 }
 
-.categoria-card {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.categoria-card.visible {
-  opacity: 1;
-  transform: translateY(0);
-  animation: fadeInUp 0.6s ease forwards;
-}
-
-/* Zoom al pasar el mouse */
-.categoria-card img {
-  transition: transform 0.4s ease;
-}
-
-.categoria-card:hover img {
-  transform: scale(1.05);
+/* -------------------------------------------------------------
+   ANIMACIONES COMPARTIDAS
+   ------------------------------------------------------------- */
+@keyframes fadeInUp{
+  from{opacity:0; transform:translateY(20px);}
+  to  {opacity:1; transform:translateY(0);}
 }

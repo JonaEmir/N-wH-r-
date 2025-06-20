@@ -17,6 +17,8 @@
 /* 5. Categoria de dama*/
 @import url('./categorias-seccion.css');
 
+@import url('./wishlist.css');
+
 /* 6. Media queries: responsive adaptado */
 @import url('./pre-footer.css');
 

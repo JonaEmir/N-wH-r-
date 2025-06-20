@@ -1,0 +1,36 @@
+categoria-card {       /* asegúrate de que la tarjeta sea posicionable */
+  position: relative;
+}
+
+/* Botón */
+.wishlist-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #aaa;
+  cursor: pointer;
+  transition: transform .2s ease, color .2s ease;
+}
+.wishlist-btn:hover { transform: scale(1.15); }
+
+/* Keyframes para el “pop” */
+@keyframes clickPop {
+  0%   { transform: scale(1);   }
+  25%  { transform: scale(0.85); }
+  60%  { transform: scale(1.25); }
+  100% { transform: scale(1);   }
+}
+
+/* Aplicar la animación al ícono cuando el botón tiene .pop */
+.wishlist-btn.pop i {
+  animation: clickPop .25s ease both;
+}
+
+/* Icono activo */
+.wishlist-btn.active i {
+  color: #ff4d6d;
+  font-weight: 900;
+}

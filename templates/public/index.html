@@ -28,10 +28,10 @@
 </section>
 
 <!-- CATEGORÍAS GENERALES -->
-<section class="categorias">
+<section class="categorias categorias-generales">   <!-- ← clase extra -->
   <h2>Tu estilo empieza aquí — Explora nuestra colección premium.</h2>
 
-  <div class="categoria-grid">
+  <div class="categoria-grid categoria-grid-generales">  <!-- ← clase extra -->
     <div class="categoria-card">
       <a href="{% url 'coleccion_genero' 'dama' %}">
         <img src="{% static 'images/20250604_1519_Tenis Louis Vuitton Elegante_simple_compose_01jwycyeyherft32svj1stky60.png' %}" alt="">
@@ -58,6 +58,7 @@
   </div>
 </section>
 
+
 <!-- BANNER DAMA -->
 <section class="banner2-section banner-zoom">
   <video autoplay muted loop playsinline preload="auto" class="banner2 zoomable">
@@ -68,18 +69,28 @@
 
 <!-- CATEGORÍAS DAMA -->
 <section class="categorias-dama">
-  <h3>Mujer</h3>
+  <p>Mujer</p>
   <h2>Calzado</h2>
 
   <div class="categoria-grid">
     {% for p in dama_home %}
       <div class="categoria-card">
-        <a href="{% url 'detalle_producto' p.id %}">
-          <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
-        </a>
-        <h4>{{ p.nombre }}</h4>
-        <h5>${{ p.precio|floatformat:2 }}</h5>
-      </div>
+  <a href="{% url 'detalle_producto' p.id %}">
+    <div class="thumb"><img src="{{ p.imagen.url }}" alt="{{ p.nombre }}"></div>
+  </a>
+
+  <!-- ❤️ Botón wishlist -->
+  <button class="wishlist-btn{% if p.id in wishlist_ids %} active{% endif %}"
+          aria-label="Añadir a favoritos"
+          data-product-id="{{ p.id }}">
+    <i class="{% if p.id in wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+  </button>
+
+  <h4>{{ p.nombre }}</h4>
+  <h5>${{ p.precio|floatformat:2 }}</h5>
+</div>
+
+
     {% empty %}
       <p>No hay productos de dama disponibles.</p>
     {% endfor %}
@@ -97,19 +108,28 @@
 
 <!-- CATEGORÍAS HOMBRE -->
 <section class="categorias-hombre">
-  <h3>Hombre</h3>
+  <p>Hombre</p>
   <h2>Calzado</h2>
 
   <div class="categoria-grid">
     {% for p in cab_home %}
       <div class="categoria-card">
-        <a href="{% url 'detalle_producto' p.id %}">
-          <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">
-        </a>
-        <h4>{{ p.nombre }}</h4>
-        <h5>${{ p.precio|default_if_none:"0.00"|floatformat:2 }}</h5>
-        <p><strong>Stock disponible:</strong> {{ p.stock_total }}</p>
-      </div>
+  <a href="{% url 'detalle_producto' p.id %}">
+    <div class="thumb"><img src="{{ p.imagen.url }}" alt="{{ p.nombre }}"></div>
+  </a>
+
+  <!-- ❤️ Botón wishlist -->
+  <button class="wishlist-btn{% if p.id in wishlist_ids %} active{% endif %}"
+          aria-label="Añadir a favoritos"
+          data-product-id="{{ p.id }}">
+    <i class="{% if p.id in wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+  </button>
+
+  <h4>{{ p.nombre }}</h4>
+  <h5>${{ p.precio|floatformat:2 }}</h5>
+</div>
+
+
     {% empty %}
       <p>No hay productos de caballero disponibles.</p>
     {% endfor %}

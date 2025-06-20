@@ -16,7 +16,7 @@
 }
 
 .info-col h4 {
-  font-size: 8px;
+  font-size: 12px;
   font-weight: bold;
   text-transform: uppercase;
   margin-bottom: 15px;
@@ -25,7 +25,7 @@
 }
 
 .info-col p {
-  font-size: 9px;
+  font-size: 14px;
   color: #1d1d1d;
   line-height: 1.6;
   margin-bottom: 10px;
@@ -55,7 +55,7 @@
   .accordion-toggle.active::after { content: '−'; }
   .accordion-content {
     display: none;
-    font-size: 11px;
+    font-size: 14px;
     margin-top: 8px;
   }
   .accordion-content.open { display: block; }

@@ -7,6 +7,8 @@
 /*---Seccion para importar reset que tiene los atributos generales---*/
 @import url('/static/detalles de producto/css/detalles.css');
 
+@import url('./static/inicio/css/wishlist.css');
+
 /* 7. Media queries: responsive adaptado */
 @import url('/static/inicio/css/pre-footer.css');
 

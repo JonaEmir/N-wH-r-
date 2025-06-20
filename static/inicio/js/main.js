@@ -8,10 +8,17 @@ import { setupContactPanel } from './contact-panel.js';
 import { setupLoginPanel } from './usuario.js';
 import { getCSRFToken} from './login.js'
 import { setupClientePanel } from './logged.js';
+import { initWishlist } from './wishlist.js';
 
 
 
-
+document.addEventListener('DOMContentLoaded', () => {
+  initWishlist({
+    // ← Configura cuando tu API exista
+    // backendURL: '/api/wishlist/',
+    // csrfToken : getCookie('csrftoken')
+  });
+});
 
 setupScrollRestoration();
 setupHeaderScroll();
