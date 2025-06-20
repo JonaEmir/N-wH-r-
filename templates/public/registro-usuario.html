@@ -26,7 +26,10 @@
     </p>
 
     <!-- FORMULARIO -->
-<form id="registroForm" novalidate>
+<form id="registroForm" method="POST" action="/create-client" novalidate>
+
+  {% csrf_token %}
+<input type="hidden" name="csrfmiddlewaretoken" id="csrf_token">
   <!-- correo -->
   <div>
     <label for="email">Correo electrónico*</label>

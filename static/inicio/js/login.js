@@ -18,7 +18,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   }
 
   try {
-    const res = await fetch("/login-client", {
+    const res = await fetch("/login-client/", {
       method: "POST",
       credentials: "same-origin",          // envía las cookies (csrftoken y sessionid)
       headers: {

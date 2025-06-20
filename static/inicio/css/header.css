@@ -430,6 +430,11 @@ header.scrolled {
   cursor: pointer;
 }
 
+.user-icon {
+  cursor: pointer;
+}
+
+
 .login-panel {
   position: fixed;
   top: 0;

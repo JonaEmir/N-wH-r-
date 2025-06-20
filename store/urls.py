@@ -3,6 +3,12 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
+
+#prueba para acceder a recuperar contrasena
+from .views.reset_password import solicitar_reset
+
+
+
 # ────────── Vistas que SIGUEN en views/views.py ──────────
 from .views.views import (
     # Home y secciones públicas
@@ -41,8 +47,12 @@ from .views.products import (
     update_productos, update_variant, delete_productos,
 )
 
+
+
 # ───────────────────────── URLPATTERNS ─────────────────────────
 urlpatterns = [
+
+    path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
     # ---------- Front-end ----------
     path('', index, name='index'),
     path('coleccion/<str:genero>/', genero_view, name='coleccion_genero'),

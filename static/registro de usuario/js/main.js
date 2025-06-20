@@ -1,47 +1,47 @@
-// -------- Obtener token CSRF desde cookies --------
+/* -------- Obtener token CSRF desde el input oculto -------- */
 function getCSRFToken() {
-  const match = document.cookie.match(/csrftoken=([^;]+)/);
-  return match ? match[1] : '';
+  // Busca el campo que Django inserta con {% csrf_token %}
+  const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+  return el ? el.value : '';
 }
 
-// -------- Evento del formulario de registro --------
-document.getElementById("registroForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
+/* -------- Esperar al DOM y enganchar el submit -------- */
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("registroForm");
+  if (!form) return;
 
-  const email = document.getElementById("email").value;
-  const email2 = document.getElementById("email2").value;
-  const password = document.getElementById("pwd").value;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  if (email !== email2) {
-    alert("❌ Los correos no coinciden.");
-    return;
-  }
+    const email  = form.email.value.trim();
+    const email2 = form.email2.value.trim();
+    const pwd    = form.pwd.value;
 
-  const data = {
-    username: email,
-    password: password
-  };
-
-  try {
-    const response = await fetch("/create-client", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken(),  // ✅ Protección CSRF
-      },
-      body: JSON.stringify(data),
-      credentials: "same-origin"        // ✅ Enviar cookie de sesión
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      alert("✅ Cliente creado con éxito.");
-      window.location.href = "/"; // redirige a home o login
-    } else {
-      alert("❌ Error: " + result.error);
+    if (email !== email2) {
+      alert("❌ Los correos no coinciden."); return;
     }
-  } catch (err) {
-    alert("❌ Error inesperado: " + err);
-  }
+
+    try {
+      const res = await fetch("/create-client/", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),      // ✅ ahora siempre tiene valor
+        },
+        body: JSON.stringify({ username: email, password: pwd }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        alert("✅ Cliente creado con éxito.");
+        window.location.href = "/";
+      } else {
+        alert("❌ Error: " + (data.error || res.status));
+      }
+    } catch (err) {
+      alert("❌ Error inesperado: " + err);
+    }
+  });
 });

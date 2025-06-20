@@ -1,3 +1,5 @@
+@import url('static\registro de usuario\css\content.css');
+
 :root {
   --c-text: #333333;     /* o cualquier color visible */
   --c-grey: #888888;
@@ -75,5 +77,45 @@ header {
   }
 }
 
+.recovery-section {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.05);
+}
 
+.recovery-section h1 {
+  margin-bottom: 15px;
+}
 
+.recovery-section .form-group {
+  margin-bottom: 15px;
+}
+
+.recovery-section .form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.recovery-section .form-group input {
+  width: 100%;
+  padding: 0.8em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.recovery-section .btn-primary {
+  padding: 0.8em 2em;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.recovery-section .error {
+  color: red;
+  margin-top: 10px;
+}

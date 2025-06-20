@@ -40,19 +40,6 @@ from functools import wraps
 
 from django.http import JsonResponse
 
-   # o quita el decorador si quieres probar rápido
-def detalle_client(request, id):
-    """
-    Devuelve los datos básicos del cliente por ID (JSON sencillo)
-    """
-    cliente = get_object_or_404(Cliente, id=id)
-    data = {
-        "id":       cliente.id,
-        "username": cliente.username,
-        "email":    cliente.email,
-    }
-    return JsonResponse(data)
-
 
 #Evitar que un usuario no autenticado acceda a rutas privadas (como el dashboard).
 #Mostrar contenido distinto si el cliente ya inició sesión.
@@ -84,6 +71,19 @@ def login_required_user(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
+
+@login_required_user   # o quita el decorador si quieres probar rápido
+def detalle_client(request, id):
+    """
+    Devuelve los datos básicos del cliente por ID (JSON sencillo)
+    """
+    cliente = get_object_or_404(Cliente, id=id)
+    data = {
+        "id":       cliente.id,
+        "username": cliente.username,
+        "email":    cliente.email,
+    }
+    return JsonResponse(data)
 
 
 #Estamos creando y declarando las rutas para el inicio de sesion del Administrador
