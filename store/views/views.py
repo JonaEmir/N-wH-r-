@@ -38,6 +38,20 @@ from django.shortcuts import redirect
 #Importaciones para manejar con seguridad que cualquier usuario no identificado o mal identificado acceda a rutas que no debe
 from functools import wraps
 
+from django.http import JsonResponse
+
+   # o quita el decorador si quieres probar rápido
+def detalle_client(request, id):
+    """
+    Devuelve los datos básicos del cliente por ID (JSON sencillo)
+    """
+    cliente = get_object_or_404(Cliente, id=id)
+    data = {
+        "id":       cliente.id,
+        "username": cliente.username,
+        "email":    cliente.email,
+    }
+    return JsonResponse(data)
 
 
 #Evitar que un usuario no autenticado acceda a rutas privadas (como el dashboard).
