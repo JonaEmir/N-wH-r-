@@ -162,11 +162,13 @@ class CarritoProducto(models.Model):
         return f"{self.variante} en {self.carrito}"
 
 class Wishlist(models.Model):
-    cliente  = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cliente   = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    productos = models.ManyToManyField(Producto, blank=True, related_name='wishlists')
 
     def __str__(self):
-        return f"{self.cliente.username} quiere {self.producto.nombre}"
+        # Listamos los nombres de todos los productos en la wishlist
+        nombres = ", ".join(p.nombre for p in self.productos.all())
+        return f"{self.cliente.username} quiere {nombres}"
 
 class Orden(models.Model):
     carrito        = models.OneToOneField(Carrito, on_delete=models.CASCADE)

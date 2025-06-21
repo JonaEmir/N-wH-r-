@@ -54,6 +54,8 @@ from .views.products import (
     update_productos, update_variant, delete_productos,
 )
 
+from .views.wishlist import wishlist_detail, wishlist_all
+
 
 
 # ───────────────────────── URLPATTERNS ─────────────────────────
@@ -122,6 +124,11 @@ path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
     path('carrito/update/<int:id>/',          update_carrito,   name='update_carrito'),
     path('carrito/delete/<int:id>/',          delete_carrito,   name='delete_carrito'),
 
+
+    # ------------ wishlist --------
+    
+    path('wishlist/<int:id_cliente>/', wishlist_detail, name='wishlist_detail'), 
+    path('wishlist/all/<int:id_cliente>/', wishlist_all, name='wishlist_detail'),    
     # Alias para compatibilidad
     path('registro/', alta, name='alta'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

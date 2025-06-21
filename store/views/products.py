@@ -56,8 +56,8 @@ def detalle_producto(request, id):
 
 
 
-@login_required_user          # (opcional, según tu negocio)
-@require_GET
+#@login_required_user          # (opcional, según tu negocio)
+#@require_GET
 def get_all_products(request):
 
     productos = Producto.objects.prefetch_related('variantes__attrs__atributo_valor__atributo')
