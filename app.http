@@ -7,7 +7,7 @@ POST http://127.0.0.1:8000/api/productos/crear/
 Content-Type: application/json
 
 {
-  "nombre": "New Balance",
+  "nombre": "Forumm",
   "descripcion": "Tenis para correr",
   "precio": 119.99,
   "categoria_id": 1,
@@ -21,7 +21,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/api/productos/update/3/
 Content-Type: application/x-www-form-urlencoded
 
-nombre=AirMax97&stock=35
+nombre=AirForce&stock=30
 
 ### DELETE
 DELETE http://127.0.0.1:8000/api/productos/delete/2/
@@ -114,3 +114,22 @@ Content-Type: application/json
   "cliente_id": 3,
   "status":     "pagado"
 }
+
+
+###
+GET http://127.0.0.1:8000/wishlist/1/
+###
+
+###
+PATCH http://127.0.0.1:8000/wishlist/1/
+Content-Type: application/json
+
+{
+  "producto_id": 3
+}
+
+###
+
+DELETE http://127.0.0.1:8000/wishlist/all/1/
+
+
