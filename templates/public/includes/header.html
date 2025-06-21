@@ -99,10 +99,10 @@
         <button type="button" class="toggle-password" aria-label="Mostrar contraseña">👁️</button>
       </div>
 
-      <a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+      <a href="{% url 'cliente_solicitar_reset' %}"" class="forgot-link">¿Olvidó su contraseña?</a>
 
       <p class="login-alt-text">O use un enlace de acceso único para iniciar sesión:<br>
-        <a href="#" class="email-login-link">Enviarme el enlace por correo electrónico</a>
+        <a href="{% url 'cliente_solicitar_reset' %}" class="email-login-link">Enviarme el enlace por correo electrónico</a>
       </p>
 
       <button type="submit" class="login-btn">Iniciar sesión</button>

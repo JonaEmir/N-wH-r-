@@ -1,0 +1,9 @@
+{% extends "public/base.html" %}
+{% block title %}Token inválido{% endblock %}
+{% block content %}
+<section class="recovery-section">
+  <h1>Token inválido o expirado</h1>
+  <p>❌ El enlace de recuperación no es válido o ha expirado.</p>
+  <a href="{% url 'cliente_solicitar_reset' %}" class="btn-primary">Intentar de nuevo</a>
+</section>
+{% endblock %}

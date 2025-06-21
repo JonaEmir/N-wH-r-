@@ -7,6 +7,13 @@ from django.conf.urls.static import static
 #prueba para acceder a recuperar contrasena
 from .views.reset_password import solicitar_reset
 
+#acomodar todo esto 
+from .views.reset_password import (
+    solicitar_reset,
+    reset_password_confirm,
+    reset_password_submit,
+)
+
 
 
 # ────────── Vistas que SIGUEN en views/views.py ──────────
@@ -52,7 +59,21 @@ from .views.products import (
 # ───────────────────────── URLPATTERNS ─────────────────────────
 urlpatterns = [
 
-    path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
+    # ---------- Recuperación de contraseña ----------
+# Mostrar formulario de recuperación y enviar correo
+path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
+
+# Ruta del enlace del correo, muestra formulario de nueva contraseña si el token es válido
+path('recuperar/<uidb64>/<token>/', reset_password_confirm, name='cliente_reset_password_confirm'),
+
+# Ruta que recibe el POST con la nueva contraseña
+path('recuperar/<uidb64>/<token>/submit/', reset_password_submit, name='cliente_reset_password_submit'),
+
+
+
+
+path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
+
     # ---------- Front-end ----------
     path('', index, name='index'),
     path('coleccion/<str:genero>/', genero_view, name='coleccion_genero'),

@@ -1,0 +1,31 @@
+{% extends "public/base.html" %}
+{% block title %}Correo enviado{% endblock %}
+{% block content %}
+
+{% block extra_styles %}
+<style>
+.recovery-section {
+  max-width: 600px;           /* mismo ancho que una columna de tu grid */
+  margin: 100px auto 100px;       /* coherente con main */
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.05);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.recovery-section h1 {
+  font-size: 18px;
+  margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+<section class="recovery-section">
+  <h1>Revisa tu correo</h1>
+  <p>📬 Te hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada o carpeta de spam.</p>
+</section>
+{% endblock %}
+
+

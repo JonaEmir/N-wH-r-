@@ -1,0 +1,10 @@
+{% extends "public/base.html" %}
+{% block title %}Contraseña restablecida{% endblock %}
+
+{% block content %}
+<section class="recovery-section">
+  <h1>✅ Contraseña actualizada con éxito</h1>
+  <p>Tu contraseña ha sido cambiada correctamente. Ahora puedes iniciar sesión con tu nueva contraseña.</p>
+  <a href="{% url 'login_client' %}" class="btn-primary">Ir a iniciar sesión</a>
+</section>
+{% endblock %}

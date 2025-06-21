@@ -1,15 +1,50 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # ——————————————————————————————————————
 # Modelos de usuario y cliente
 # ——————————————————————————————————————
 
-class Cliente(models.Model):
-    username = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+class ClienteManager(BaseUserManager):
+    def create_user(self, username, password=None):
+        if not username:
+            raise ValueError("El usuario debe tener un username")
+        cliente = self.model(username=username)
+        cliente.set_password(password)
+        cliente.save(using=self._db)
+        return cliente
+
+    def create_superuser(self, username, password):
+        cliente = self.create_user(username=username, password=password)
+        cliente.is_admin = True
+        cliente.save(using=self._db)
+        return cliente
+
+class Cliente(AbstractBaseUser):
+    username = models.CharField(max_length=255, unique=True)
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+
+    objects = ClienteManager()
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.username
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    def has_module_perms(self, app_label):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
 
 class Usuario(models.Model):
     username = models.CharField(max_length=255)
