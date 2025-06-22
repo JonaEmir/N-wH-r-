@@ -1,27 +1,57 @@
-/* static/js/wishlist.js
-   Módulo ES para manejar la wishlist (solo frontend por ahora) */
-
 export function initWishlist({
-  selector   = '.wishlist-btn',   // botón que dispara la acción
-  storageKey = 'wishlist_ids',    // localStorage key
-  backendURL = null,              // pon la URL cuando exista la API
-  csrfToken  = null               // opcional si usarás fetch
+  selector        = '.wishlist-btn',
+  storageKey      = 'wishlist_ids',
+  backendURL      = null,
+  csrfToken       = null,
+  isAuthenticated = false,
+  onRequireLogin  = null
 } = {}) {
 
-  /* ─── Helpers de almacenamiento ─────────────────────────────── */
+  const wishlistIcon  = document.querySelector('#btn-wishlist-panel i');
+  const wishlistCount = document.querySelector('#btn-wishlist-panel .wishlist-count');
+
   const getList = () => {
     try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
     catch { return []; }
   };
 
-  const setList = arr => localStorage.setItem(storageKey, JSON.stringify(arr));
+  const setList = arr => {
+    localStorage.setItem(storageKey, JSON.stringify(arr));
+    updateHeaderUI(arr); // ← Actualiza ícono y contador
+  };
 
-  /* ─── UI helpers ────────────────────────────────────────────── */
   const toggleBtn = (btn, active) => {
     btn.classList.toggle('active', active);
     const icon = btn.querySelector('i');
     icon.classList.toggle('fa-regular', !active);
     icon.classList.toggle('fa-solid',   active);
+  };
+
+  const updateHeaderUI = (list) => {
+    if (wishlistIcon) {
+      wishlistIcon.classList.toggle('fa-solid', list.length > 0);
+      wishlistIcon.classList.toggle('fa-regular', list.length === 0);
+      wishlistIcon.style.color = list.length > 0 ? '#ff4d6d' : '';
+    }
+
+    if (wishlistCount) {
+      const hasItems = list.length > 0;
+      wishlistCount.textContent = list.length;
+
+      // Reiniciar animaciones previas
+      wishlistCount.classList.remove('animate-in', 'animate-out');
+
+      if (hasItems) {
+        wishlistCount.hidden = false;
+        void wishlistCount.offsetWidth; // Reinicia animación
+        wishlistCount.classList.add('animate-in');
+      } else {
+        wishlistCount.classList.add('animate-out');
+        setTimeout(() => {
+          wishlistCount.hidden = true;
+        }, 300);
+      }
+    }
   };
 
   const hydrate = () => {
@@ -30,26 +60,26 @@ export function initWishlist({
       const btn = document.querySelector(`${selector}[data-product-id="${id}"]`);
       if (btn) toggleBtn(btn, true);
     });
+    updateHeaderUI(list);
   };
 
-  /* ─── Evento click ──────────────────────────────────────────── */
   const clickHandler = async e => {
     const btn = e.target.closest(selector);
     if (!btn) return;
 
+    if (!isAuthenticated) {
+      if (typeof onRequireLogin === 'function') onRequireLogin();
+      return;
+    }
+
     const id     = btn.dataset.productId;
     let   list   = getList();
-    const active = !btn.classList.contains('active'); // estado deseado
+    const active = !btn.classList.contains('active');
 
-    // 1) UI inmediata
     toggleBtn(btn, active);
+    btn.classList.add('pop');
+    btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
 
-    // --- POP animation -----------------------------------------
-    btn.classList.add('pop');                               // dispara la animación
-    btn.addEventListener('animationend', () =>              // elimina la clase al terminar
-      btn.classList.remove('pop'), { once: true });
-
-    // 2) Actualiza localStorage
     if (active) {
       if (!list.includes(id)) list.push(id);
     } else {
@@ -57,7 +87,6 @@ export function initWishlist({
     }
     setList(list);
 
-    // 3) (Opcional) Sincroniza con tu backend cuando esté listo
     if (backendURL) {
       try {
         const res = await fetch(backendURL, {
@@ -68,28 +97,23 @@ export function initWishlist({
           },
           body: JSON.stringify({ product_id: id })
         });
-        if (!res.ok) throw new Error('Bad response');
+        if (!res.ok) throw new Error('bad response');
       } catch (err) {
-        // Revertir UI/local en caso de error
         toggleBtn(btn, !active);
         active
           ? setList(list.filter(x => x !== id))
           : setList([...list, id]);
-        console.error('Wishlist sync error:', err);
+        console.error('Wishlist sync error', err);
         alert('No se pudo actualizar tu wishlist. Intenta de nuevo.');
       }
     }
   };
 
-  /* ─── Activación ───────────────────────────────────────────── */
   hydrate();
   document.body.addEventListener('click', clickHandler);
 
-  /* ─── API opcional que devuelve la instancia ───────────────── */
   return {
-    destroy() {
-      document.body.removeEventListener('click', clickHandler);
-    },
+    destroy() { document.body.removeEventListener('click', clickHandler); },
     getWishlist: getList,
     setWishlist: setList
   };

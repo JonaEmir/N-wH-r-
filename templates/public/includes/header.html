@@ -2,7 +2,7 @@
 <!-- HEADER -->
 <header>
   <div class="header-left fade-in">
-    <button id="btn-burger" class="burger" aria-label="Menú">
+    <button id="btn-burger" class="burger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
     <span class="menu-label"></span>
@@ -18,6 +18,31 @@
     <button id="btn-contacto" class="btn-contacto">Contáctanos</button>
 
     {% if request.session.cliente_username %}
+
+    <!-- ❤️ Wishlist -->
+    <button id="btn-wishlist-panel" class="user-icon" aria-label="Ver wishlist">
+      <i class="fa-regular fa-heart user-icon-icon"></i>
+      <span id="wishlist-count" class="wishlist-count" hidden>0</span>
+    </button>
+
+    <!-- 🛒 Carrito -->
+    <!-- 🛒 Carrito - SVG de contorno -->
+    <button id="btn-cart-panel" class="user-icon" aria-label="Ver carrito">
+      <svg xmlns="http://www.w3.org/2000/svg"
+          width="24" height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+        <path d="M6 6h14l-1.4 7.2a1 1 0 0 1-1 .8H8.5a1 1 0 0 1-1-.8L6 6z" />
+        <circle cx="9" cy="20" r="1.3" />
+        <circle cx="17" cy="20" r="1.3" />
+        <path d="M6 6L4.5 3H2" />
+      </svg>
+    </button>
+
     <div class="usuario-dropdown">
       <svg id="btn-user-menu" class="user-icon" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none"
            stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
@@ -119,7 +144,8 @@
   </div>
 </div>
 
-<!-- CLIENTE PANEL (nuevo estilo idéntico al login-panel) -->
+<!-- CLIENTE PANEL MEJORADO -->
+<!-- CLIENTE PANEL (con iconos) -->
 <div id="cliente-panel" class="login-panel">
   <div class="login-header">
     <h2>Mi Perfil</h2>
@@ -128,8 +154,18 @@
 
   <div class="login-section">
     <h3>Información de la cuenta</h3>
-    <p><strong>Usuario:</strong> {{ request.session.cliente_username }}</p>
-    <p><strong>Email:</strong> (pendiente de integrar)</p>
+    <p><i class="fa-regular fa-user"></i> <strong>Usuario:</strong> {{ request.session.cliente_username }}</p>
+    <p><i class="fa-regular fa-envelope"></i> <strong>Email:</strong> (pendiente)</p>
+  </div>
+
+  <hr>
+
+  <div class="login-section quick-links">
+    <a href="/perfil/"><i class="fa-regular fa-id-card"></i> Editar perfil</a>
+    <a href="/pedidos/"><i class="fa-solid fa-box"></i> Mis pedidos</a>
+    <a href="/wishlist/"><i class="fa-regular fa-heart"></i> Wishlist</a>
+    <a href="/direccion/"><i class="fa-solid fa-location-dot"></i> Dirección</a>
+    <a href="/contacto/"><i class="fa-regular fa-paper-plane"></i> Contáctanos</a>
   </div>
 
   <hr>
@@ -137,10 +173,12 @@
   <div class="login-section">
     <form method="POST" action="{% url 'logout_client' %}">
       {% csrf_token %}
-      <button type="submit" class="logout-btn">Cerrar sesión</button>
+      <button type="submit" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</button>
     </form>
   </div>
 </div>
+
+
 
 <!-- Overlay común -->
 <div class="page-overlay"></div>

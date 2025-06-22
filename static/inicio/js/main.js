@@ -12,11 +12,28 @@ import { initWishlist } from './wishlist.js';
 
 
 
-document.addEventListener('DOMContentLoaded', () => {
-  initWishlist({
-    // ← Configura cuando tu API exista
-    // backendURL: '/api/wishlist/',
-    // csrfToken : getCookie('csrftoken')
+/* —— Lee el flag de sesión que Django dejó en <script id="is-authenticated"> —— */
+const isAuthenticated = window.IS_AUTHENTICATED ?? false;
+
+
+window.addEventListener('load', () => {
+  // Espera un frame más para asegurar que se haya renderizado todo
+  requestAnimationFrame(() => {
+    initWishlist({
+      isAuthenticated,
+      onRequireLogin: () => {
+        const loginPanel = document.querySelector('#login-panel');
+        const overlay = document.querySelector('.page-overlay');
+
+        if (!loginPanel || !overlay) {
+          console.warn('🔴 No se encontró el panel de login o el overlay');
+          return;
+        }
+
+        loginPanel.classList.add('open');
+        overlay.classList.add('active');
+      }
+    });
   });
 });
 

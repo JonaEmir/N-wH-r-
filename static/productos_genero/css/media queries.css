@@ -1,9 +1,5 @@
 @media (max-width: 768px) {
   
-  .header-left {
-    width: auto;
-  }
-
   #Logo {
     width: 120px;
     margin-top: 10px;
