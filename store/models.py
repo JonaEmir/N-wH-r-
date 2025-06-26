@@ -5,33 +5,57 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # Modelos de usuario y cliente
 # ——————————————————————————————————————
 
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
 
 class ClienteManager(BaseUserManager):
-    def create_user(self, username, password=None):
+    def create_user(self, username, correo, nombre, password=None, telefono=None, direccion=None):
+        """
+        Crea y guarda un Cliente con username, correo y nombre obligatorios,
+        y teléfono y dirección opcionales.
+        """
         if not username:
             raise ValueError("El usuario debe tener un username")
-        cliente = self.model(username=username)
+        if not correo:
+            raise ValueError("El usuario debe tener un correo electrónico")
+        if not nombre:
+            raise ValueError("El usuario debe tener un nombre")
+
+        cliente = self.model(
+            username=username,
+            correo=correo,
+            nombre=nombre,
+            telefono=telefono,
+            direccion=direccion
+        )
         cliente.set_password(password)
         cliente.save(using=self._db)
         return cliente
 
-    def create_superuser(self, username, password):
-        cliente = self.create_user(username=username, password=password)
+    def create_superuser(self, username, correo, nombre, password):
+        cliente = self.create_user(
+            username=username,
+            correo=correo,
+            nombre=nombre,
+            password=password
+        )
         cliente.is_admin = True
         cliente.save(using=self._db)
         return cliente
 
 class Cliente(AbstractBaseUser):
-    username = models.CharField(max_length=255, unique=True)
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+    username   = models.CharField(max_length=255, unique=True)
+    correo     = models.EmailField(max_length=255, blank=True)
+    nombre     = models.CharField(max_length=255, null=True)
+    telefono   = models.CharField(max_length=20, blank=True, null=True)
+    direccion  = models.CharField(max_length=500, blank=True, null=True)
 
-    objects = ClienteManager()
+    is_active  = models.BooleanField(default=True)
+    is_admin   = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
+    objects    = ClienteManager()
+
+    USERNAME_FIELD  = 'username'
+    REQUIRED_FIELDS = ['correo', 'nombre']
 
     def __str__(self):
         return self.username
@@ -45,6 +69,7 @@ class Cliente(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+
 
 class Usuario(models.Model):
     username = models.CharField(max_length=255)
