@@ -6,6 +6,7 @@ from .decorators import login_required_user
 from django.db.models import Prefetch
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password 
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 
@@ -23,7 +24,8 @@ def get_user(request):
 
     return JsonResponse(data, safe=False)
 
-@login_required_user
+#@login_required_user
+@csrf_exempt
 @require_http_methods(["POST"])
 def create_user(request):
     if request.method == 'POST':

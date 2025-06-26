@@ -39,6 +39,17 @@ Content-Type: application/json
   "password": "Tenis para correr"
 }
 
+###
+
+POST http://127.0.0.1:8000/user/create/
+Content-Type: application/json
+
+{
+  "username": "angel",
+  "password": "123456",
+  "role": "admin"
+}
+
 
 ###
 POST http://127.0.0.1:8000/clientes/update/1
@@ -133,3 +144,18 @@ Content-Type: application/json
 DELETE http://127.0.0.1:8000/wishlist/all/1/
 
 
+###
+
+POST http://127.0.0.1:8000/api/categorias/crear/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "nombre": "caballero"
+}
+
+
+###
+
+GET http://127.0.0.1:8000/api/categorias
+
+###
