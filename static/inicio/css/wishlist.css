@@ -1,8 +1,9 @@
-categoria-card {       /* asegúrate de que la tarjeta sea posicionable */
+/* 1. Tarjeta de producto (asegúrate de que sea posicionable) */
+.categoria-card {
   position: relative;
 }
 
-/* Botón */
+/* 2. Botón de wishlist en la tarjeta */
 .wishlist-btn {
   position: absolute;
   top: 0.6rem;
@@ -14,23 +15,224 @@ categoria-card {       /* asegúrate de que la tarjeta sea posicionable */
   cursor: pointer;
   transition: transform .2s ease, color .2s ease;
 }
-.wishlist-btn:hover { transform: scale(1.15); }
+.wishlist-btn:hover        { transform: scale(1.15); }
+.wishlist-btn.active i     { color: #ff4d6d; font-weight: 900; }
 
-/* Keyframes para el “pop” */
+/* Efecto “pop” al hacer clic */
 @keyframes clickPop {
   0%   { transform: scale(1);   }
   25%  { transform: scale(0.85); }
   60%  { transform: scale(1.25); }
   100% { transform: scale(1);   }
 }
+.wishlist-btn.pop i { animation: clickPop .25s ease both; }
 
-/* Aplicar la animación al ícono cuando el botón tiene .pop */
-.wishlist-btn.pop i {
-  animation: clickPop .25s ease both;
+/* 3. PANEL – se desliza desde la derecha */
+#wishlist-panel {
+  position: fixed;
+  top: 0; right: -100%;
+  width: 450px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -2px 0 8px rgba(0,0,0,.1);
+  overflow-y: auto;
+  z-index: 9999;
+  transition: right .3s ease;
+}
+#wishlist-panel.open { right: 0; }
+
+/* 4. Overlay común para todos los paneles */
+.page-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .25s ease;
+  z-index: 99;
+}
+.page-overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
 
-/* Icono activo */
-.wishlist-btn.active i {
-  color: #ff4d6d;
-  font-weight: 900;
+/* 5. Contenido de la wishlist (vista de catálogo) */
+.wishlist-item {
+  display: flex;
+  flex-direction: row;
+  gap: .75rem;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
 }
+.wishlist-item img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.wishlist-item h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Celulares (≤ 480 px) – wishlist a pantalla completa */
+@media (max-width: 480px) {
+  #wishlist-panel {
+    width: 100vw;
+    max-width: none;
+    right: -100vw;
+    padding: 20px 24px;
+  }
+  #wishlist-panel.open { right: 0; }
+}
+
+/* Celulares (≤ 768 px) – wishlist a pantalla completa */
+@media (max-width: 768px) {
+  #wishlist-panel {
+    width: 100vw;
+    max-width: none;
+    right: -100vw;
+    padding: 20px 24px;
+  }
+  #wishlist-panel.open { right: 0; }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   6. NUEVA MAQUETACIÓN PARA LAS FILAS DENTRO DEL PANEL LATERAL
+      (imagen 1×1, texto abajo, cantidad y botón “Agregar”)
+────────────────────────────────────────────────────────────────── */
+#wishlist-panel .wishlist-item {
+  display: grid;                              /* Grid en lugar de flex    */
+  grid-template-columns: 90px 1fr 110px;      /* img | texto | acciones   */
+  gap: 12px;
+  align-items: end;                           /* alinea todo abajo        */
+}
+
+/* Miniatura cuadrada */
+#wishlist-panel .wishlist-item img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Texto (nombre + precio) */
+#wishlist-panel .wishlist-details {
+  display: flex;
+  flex-direction: column;
+}
+#wishlist-panel .wishlist-details h4 {
+  font-size: 13px;
+  margin: 0 0 4px;
+  line-height: 1.25;
+}
+#wishlist-panel .wishlist-details .precio {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Columna derecha: cantidad y botón */
+#wishlist-panel .wishlist-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+#wishlist-panel .qty {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+#wishlist-panel .qty button {
+  background: none;
+  border: none;
+  width: 26px;
+  height: 26px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+#wishlist-panel .qty input {
+  width: 34px;
+  text-align: center;
+  border: none;
+  background: #f8f8f8;
+  font-size: 12px;
+}
+
+#wishlist-panel .btn-carrito-mini {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 6px 8px;
+  font-size: 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+#wishlist-panel .btn-carrito-mini:hover { background: #333; }
+
+/* Responsive para panel lateral (≤ 480 px) */
+@media (max-width: 480px) {
+  #wishlist-panel .wishlist-item {
+    grid-template-columns: 80px 1fr;
+    grid-template-areas:
+      "img texto"
+      "img acciones";
+  }
+  #wishlist-panel .wishlist-item img       { grid-area: img; }
+  #wishlist-panel .wishlist-details        { grid-area: texto; }
+  #wishlist-panel .wishlist-actions        {
+    grid-area: acciones;
+    flex-direction: row;
+  }
+  #wishlist-panel .wishlist-actions .qty   { margin-right: 6px; }
+}
+
+
+/* ──────────────────────────────────────────────────────────────
+   7. Selector de talla que se despliega sobre el botón AGREGAR
+──────────────────────────────────────────────────────────────── */
+.size-picker{
+  width:100%;
+  background:#fff;
+  border:1px solid #e5e5e5;
+  border-radius:6px;
+  padding:10px 12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+  animation:fadeUp .25s ease-out forwards;   /* aparece de abajo a arriba */
+}
+.size-title{
+  font-size:12px;
+  margin:0 0 6px;
+  color:#555;
+}
+.size-options{
+  display:flex; flex-wrap:wrap; gap:6px;
+}
+.size-option{
+  min-width:38px; padding:6px 8px;
+  font-size:12px; line-height:1;
+  border:1px solid #ccc; border-radius:4px;
+  background:#fafafa; cursor:pointer;
+  transition:background .2s,border .2s;
+}
+.size-option:hover{
+  background:#f0f0f0;
+}
+.size-option.chosen{                 /* feedback tras confirmar */
+  background:#007a00; color:#fff;
+  border-color:#007a00;
+}
+
+/* Animación utilitaria (si ya la tenías, no la dupliques) */
+@keyframes fadeUp{
+  from{opacity:0; transform:translateY(8px);}
+  to  {opacity:1; transform:translateY(0);}
+}
+.fade-up{ animation:fadeUp .25s ease-out forwards; }
+
+

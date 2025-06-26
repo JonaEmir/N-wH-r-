@@ -18,11 +18,21 @@
   {% block content %}{% endblock %}
   {% include "public/includes/footer.html" %}
 
-  <!-- ✅ Inyecta la sesión de forma segura (sin json_script) -->
+  <!-- Inyección de sesión / CSRF para el frontend -->
   <script>
-  window.IS_AUTHENTICATED = {% if request.session.cliente_username %}true{% else %}false{% endif %};
+    /* ¿El usuario está logeado? */
+    window.IS_AUTHENTICATED = {{ request.session.cliente_username|yesno:"true,false" }};
 
-</script>
+    /* ID del cliente (null si no hay sesión) */
+    {% if request.session.cliente_id %}
+      window.CLIENTE_ID = {{ request.session.cliente_id }};
+    {% else %}
+      window.CLIENTE_ID = null;
+    {% endif %}
+
+    /* Token CSRF para peticiones fetch() POST/PATCH/DELETE */
+    window.CSRF_TOKEN = "{{ csrf_token }}";
+  </script>
 
   <script type="module" src="{% static 'inicio/js/main.js' %}"></script>
   {% block extra_js %}{% endblock %}

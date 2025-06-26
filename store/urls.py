@@ -3,78 +3,61 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 
-
-#prueba para acceder a recuperar contrasena
-from .views.reset_password import solicitar_reset
-
-#acomodar todo esto 
+# ---------- Reset password ----------
 from .views.reset_password import (
-    solicitar_reset,
-    reset_password_confirm,
-    reset_password_submit,
+    solicitar_reset, reset_password_confirm, reset_password_submit,
 )
 
-
-
-# ────────── Vistas que SIGUEN en views/views.py ──────────
+# ---------- Vistas públicas / dashboard ----------
 from .views.views import (
-    # Home y secciones públicas
     index, genero_view, registrarse,
-    # Dashboard básicos
     alta, lista_productos, editar_producto,
-    # Auxiliares
     get_categorias,
-    # Autenticación (admin y cliente)
     login_user, logout_user,
     login_client, logout_client,
 )
 
-# ────────── Carrito (views/carrito.py) ──────────
+# ---------- Carrito ----------
 from .views.carrito import (
     detalle_carrito, create_carrito,
     update_carrito, delete_carrito,
 )
 
-# ────────── Clientes (views/client.py) ──────────
+# ---------- Clientes ----------
 from .views.client import (
     detalle_client, get_all_clients,
     create_client, update_client, delete_client,
     create_contact, update_contact,
 )
 
-# ────────── Usuarios (views/users.py) ──────────
+# ---------- Usuarios ----------
 from .views.users import (
     create_user, get_user, update_user, delete_user,
 )
 
-# ────────── Productos (views/products.py) ───────
+# ---------- Productos ----------
 from .views.products import (
     detalle_producto,
     get_all_products, create_product,
     update_productos, update_variant, delete_productos,
 )
 
-from .views.wishlist import wishlist_detail, wishlist_all
-
+# ---------- Wishlist ----------
+from .views.wishlist import (
+    wishlist_detail, wishlist_all,   # ← importado producto_detail
+)
 
 
 # ───────────────────────── URLPATTERNS ─────────────────────────
 urlpatterns = [
 
     # ---------- Recuperación de contraseña ----------
-# Mostrar formulario de recuperación y enviar correo
-path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
+    path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
+    path('recuperar/<uidb64>/<token>/',          reset_password_confirm, name='cliente_reset_password_confirm'),
+    path('recuperar/<uidb64>/<token>/submit/',   reset_password_submit,  name='cliente_reset_password_submit'),
 
-# Ruta del enlace del correo, muestra formulario de nueva contraseña si el token es válido
-path('recuperar/<uidb64>/<token>/', reset_password_confirm, name='cliente_reset_password_confirm'),
-
-# Ruta que recibe el POST con la nueva contraseña
-path('recuperar/<uidb64>/<token>/submit/', reset_password_submit, name='cliente_reset_password_submit'),
-
-
-
-
-path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
+    # Duplicada a petición tuya
+    path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
 
     # ---------- Front-end ----------
     path('', index, name='index'),
@@ -90,17 +73,15 @@ path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
     path('dashboard/logout/', logout_user, name='logout_user'),
     path('dashboard/registro/', alta,            name='dashboard_alta'),
     path('dashboard/lista/',    lista_productos, name='dashboard_productos'),
-    path('dashboard/productos/editar/<int:id>/',
-         editar_producto, name='editar_producto'),
+    path('dashboard/productos/editar/<int:id>/', editar_producto, name='editar_producto'),
 
     # ---------- Productos ----------
     path('producto/<int:id>/',                      detalle_producto,  name='detalle_producto'),
-    path('api/productos/',                          get_all_products,  name='get_all_products'),
+    path('api/productos/',                          get_all_products,  name='get_all_products'),  # ← NUEVA RUTA
     path('api/productos/crear/',                    create_product,    name='create_product'),
     path('api/productos/update/<int:id>/',          update_productos,  name='update_product'),
     path('api/productos/delete/<int:id>/',          delete_productos,  name='delete_product'),
-    path('api/variantes/update/<int:variante_id>/',
-         update_variant, name='update_variant'),
+    path('api/variantes/update/<int:variante_id>/', update_variant,    name='update_variant'),
     path('api/categorias/',                         get_categorias,    name='get_categorias'),
 
     # ---------- Clientes ----------
@@ -124,12 +105,11 @@ path('recuperar/', solicitar_reset, name='cliente_solicitar_reset'),
     path('carrito/update/<int:id>/',          update_carrito,   name='update_carrito'),
     path('carrito/delete/<int:id>/',          delete_carrito,   name='delete_carrito'),
 
+    # ---------- Wishlist ----------
+    path('wishlist/<int:id_cliente>/',           wishlist_detail, name='wishlist_detail'),
+    path('wishlist/all/<int:id_cliente>/',       wishlist_all,    name='wishlist_detail'),  # nombre duplicado
 
-    # ------------ wishlist --------
-    
-    path('wishlist/<int:id_cliente>/', wishlist_detail, name='wishlist_detail'), 
-    path('wishlist/all/<int:id_cliente>/', wishlist_all, name='wishlist_detail'),    
-    # Alias para compatibilidad
+    # Alias antiguo
     path('registro/', alta, name='alta'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

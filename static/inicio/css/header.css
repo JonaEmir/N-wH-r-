@@ -356,9 +356,9 @@ header.scrolled {
 
 /* Celulares pequeños (≤ 480px) */
 @media (max-width: 480px) {
-@media (max-width: 480px) {
+
   header {
-    position: relative; /* Para que el logo centrado funcione */
+    position: fixed; /* Para que el logo centrado funcione */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -399,7 +399,6 @@ header.scrolled {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-}
 
 
   #Logo {

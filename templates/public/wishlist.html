@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="wishlist-container">
+  <h2 class="wishlist-title">Mis Favoritos <span>❤️</span></h2>
+
+  {% if productos %}
+    <div class="wishlist-grid">
+      {% for producto in productos %}
+        <div class="producto-card" data-id="{{ producto.id }}">
+          <figure class="producto-thumb">
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+          </figure>
+
+          <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+          <p class="producto-precio">${{ producto.precio }}</p>
+
+          <div class="producto-actions">
+            <!-- ❤️ quitar -->
+            <button class="wishlist-btn active" data-product-id="{{ producto.id }}">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+
+            <!-- 🛒 agregar -->
+            <form method="POST" action="{% url 'agregar_al_carrito' producto.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-carrito">Agregar al carrito</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="wishlist-empty">No tienes productos en tu wishlist aún.</p>
+  {% endif %}
+</div>
+
+<!-- tu JS sigue igual -->
+<script src="{% static 'js/wishlist.js' %}"></script>
+{% endblock %}

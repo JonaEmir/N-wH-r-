@@ -6,21 +6,23 @@ import { setupAccordion } from './accordion.js';
 import { setupNavigationButtons } from './navigation.js';
 import { setupContactPanel } from './contact-panel.js';
 import { setupLoginPanel } from './usuario.js';
-import { getCSRFToken} from './login.js'
+import { getCSRFToken } from './login.js';
 import { setupClientePanel } from './logged.js';
 import { initWishlist } from './wishlist.js';
 
-
-
-/* —— Lee el flag de sesión que Django dejó en <script id="is-authenticated"> —— */
+/* —— Lee datos inyectados desde Django —— */
 const isAuthenticated = window.IS_AUTHENTICATED ?? false;
-
+const clienteId = window.CLIENTE_ID ?? null;
+const csrfToken = window.CSRF_TOKEN ?? null;
 
 window.addEventListener('load', () => {
-  // Espera un frame más para asegurar que se haya renderizado todo
   requestAnimationFrame(() => {
     initWishlist({
       isAuthenticated,
+      clienteId,
+      csrfToken,
+      backendURL: '/wishlist/',         // PATCH/DELETE: /api/wishlist/<clienteId>/
+      fetchProductoURL: '/wishlist/',  // GET: /api/productos/<id>/
       onRequireLogin: () => {
         const loginPanel = document.querySelector('#login-panel');
         const overlay = document.querySelector('.page-overlay');
@@ -47,4 +49,3 @@ setupContactPanel();
 setupLoginPanel();
 setupClientePanel();
 getCSRFToken();
-

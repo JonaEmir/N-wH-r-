@@ -1,120 +1,202 @@
+/**
+ * initWishlist
+ * ------------
+ * 1) Corazón en tarjetas del catálogo.
+ * 2) Panel lateral con los favoritos.
+ *    – Cada fila muestra sólo el botón **Agregar**.
+ *    – Al hacer clic aparece un “selector de talla” que se despliega
+ *      desde abajo (slide-up) justo ENCIMA del botón.
+ *    – Al elegir la talla se llama a addToCart(id, talla) y se cierra
+ *      el selector.
+ *
+ *  Nota:
+ *    • El endpoint /api/productos/<id>/ debe devolver un array
+ *      `tallas` con las tallas disponibles, p.ej. ["24", "25", "26"].
+ *    • Sustituye addToCart() por tu llamada fetch real.
+ */
 export function initWishlist({
-  selector        = '.wishlist-btn',
+  selector        = '.wishlist-btn',        // corazón en catálogo
   storageKey      = 'wishlist_ids',
-  backendURL      = null,
+  backendURL      = null,                   // /wishlist/
   csrfToken       = null,
   isAuthenticated = false,
-  onRequireLogin  = null
+  onRequireLogin  = null,
+  fetchProductoURL = null,                  // /productos/
+  clienteId       = null
 } = {}) {
 
-  const wishlistIcon  = document.querySelector('#btn-wishlist-panel i');
-  const wishlistCount = document.querySelector('#btn-wishlist-panel .wishlist-count');
+/* ─────────────────────────── 1. Referencias DOM ────────────────────────── */
+const wishlistIcon    = document.querySelector('#btn-wishlist-panel i');
+const wishlistCount   = document.querySelector('#btn-wishlist-panel .wishlist-count');
+const wishlistBtn     = document.getElementById('btn-wishlist-panel');
+const wishlistPanel   = document.getElementById('wishlist-panel');
+const closeBtn        = document.getElementById('close-wishlist-panel');
+const wishlistContent = wishlistPanel?.querySelector('.wishlist-content');
+const overlay         = document.querySelector('.page-overlay');
 
-  const getList = () => {
-    try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
-    catch { return []; }
-  };
+/* ─────────────────────────── 2. LocalStorage helpers ───────────────────── */
+const getList = () => {
+  try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
+  catch { return []; }
+};
+const setList = list => {
+  localStorage.setItem(storageKey, JSON.stringify(list));
+  updateHeaderUI(list);
+};
 
-  const setList = arr => {
-    localStorage.setItem(storageKey, JSON.stringify(arr));
-    updateHeaderUI(arr); // ← Actualiza ícono y contador
-  };
+/* ─────────────────────────── 3. Header UI (icono + badge) ─────────────── */
+const toggleBtn = (btn, on) => {
+  btn.classList.toggle('active', on);
+  const ic = btn.querySelector('i');
+  if (ic) { ic.classList.toggle('fa-solid', on); ic.classList.toggle('fa-regular', !on); }
+};
 
-  const toggleBtn = (btn, active) => {
-    btn.classList.toggle('active', active);
-    const icon = btn.querySelector('i');
-    icon.classList.toggle('fa-regular', !active);
-    icon.classList.toggle('fa-solid',   active);
-  };
+const updateHeaderUI = list => {
+  wishlistIcon?.classList.toggle('fa-solid', list.length);
+  wishlistIcon?.classList.toggle('fa-regular', !list.length);
+  if (wishlistIcon) wishlistIcon.style.color = list.length ? '#ff4d6d' : '';
+  if (wishlistCount) {
+    wishlistCount.textContent = list.length;
+    wishlistCount.hidden = list.length === 0;
+  }
+};
 
-  const updateHeaderUI = (list) => {
-    if (wishlistIcon) {
-      wishlistIcon.classList.toggle('fa-solid', list.length > 0);
-      wishlistIcon.classList.toggle('fa-regular', list.length === 0);
-      wishlistIcon.style.color = list.length > 0 ? '#ff4d6d' : '';
-    }
+/* Marca corazones guardados al cargar */
+const hydrate = () => {
+  const list = getList();
+  list.forEach(id => {
+    const btn = document.querySelector(`${selector}[data-product-id="${id}"]`);
+    btn && toggleBtn(btn, true);
+  });
+  updateHeaderUI(list);
+};
 
-    if (wishlistCount) {
-      const hasItems = list.length > 0;
-      wishlistCount.textContent = list.length;
+/* ─────────────────────────── 4. Panel show/hide ───────────────────────── */
+const showWishlist = () => {
+  wishlistPanel?.classList.add('open');
+  overlay?.classList.add('active');
+};
+const hideWishlist = () => {
+  wishlistPanel?.classList.remove('open');
+  overlay?.classList.remove('active');
+};
+overlay?.addEventListener('click', hideWishlist);
 
-      // Reiniciar animaciones previas
-      wishlistCount.classList.remove('animate-in', 'animate-out');
+/* ─────────────────────────── 5. Corazones catálogo ────────────────────── */
+document.body.addEventListener('click', e => {
+  const heart = e.target.closest(selector);
+  if (!heart) return;
 
-      if (hasItems) {
-        wishlistCount.hidden = false;
-        void wishlistCount.offsetWidth; // Reinicia animación
-        wishlistCount.classList.add('animate-in');
-      } else {
-        wishlistCount.classList.add('animate-out');
-        setTimeout(() => {
-          wishlistCount.hidden = true;
-        }, 300);
-      }
-    }
-  };
+  if (!isAuthenticated) { onRequireLogin?.(); return; }
 
-  const hydrate = () => {
-    const list = getList();
-    list.forEach(id => {
-      const btn = document.querySelector(`${selector}[data-product-id="${id}"]`);
-      if (btn) toggleBtn(btn, true);
-    });
-    updateHeaderUI(list);
-  };
+  const id   = heart.dataset.productId;
+  let   list = getList();
+  const add  = !heart.classList.contains('active');
 
-  const clickHandler = async e => {
-    const btn = e.target.closest(selector);
-    if (!btn) return;
+  toggleBtn(heart, add);
+  add ? list.push(id) : list = list.filter(x => x !== id);
+  setList(list);
 
-    if (!isAuthenticated) {
-      if (typeof onRequireLogin === 'function') onRequireLogin();
-      return;
-    }
+  if (backendURL && clienteId !== null) {
+    fetch(`${backendURL}${clienteId}/`, {
+      method : add ? 'PATCH' : 'DELETE',
+      headers: { 'Content-Type':'application/json',
+                 ...(csrfToken && { 'X-CSRFToken': csrfToken })},
+      body   : JSON.stringify({ producto_id: id })
+    }).catch(err => console.error('Wishlist sync', err));
+  }
+});
 
-    const id     = btn.dataset.productId;
-    let   list   = getList();
-    const active = !btn.classList.contains('active');
+/* ─────────────────────────── 6. Placeholder carrito ───────────────────── */
+const addToCart = (productoId, talla) => {
+  console.log(`addToCart → id=${productoId} talla=${talla}`);
+  /* TODO: fetch('/carrito/', { body:{productoId, talla} }) */
+};
 
-    toggleBtn(btn, active);
-    btn.classList.add('pop');
-    btn.addEventListener('animationend', () => btn.classList.remove('pop'), { once: true });
+/* ─────────────────────────── 7. Render panel ──────────────────────────── */
+const renderWishlistPanel = async () => {
+  wishlistContent.textContent = 'Cargando…';
 
-    if (active) {
-      if (!list.includes(id)) list.push(id);
-    } else {
-      list = list.filter(x => x !== id);
-    }
-    setList(list);
+  const list = getList();
+  if (!fetchProductoURL || !list.length) {
+    wishlistContent.textContent = 'No tienes productos en tu wishlist.';
+    return;
+  }
 
-    if (backendURL) {
-      try {
-        const res = await fetch(backendURL, {
-          method : active ? 'POST' : 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(csrfToken && { 'X-CSRFToken': csrfToken })
-          },
-          body: JSON.stringify({ product_id: id })
-        });
-        if (!res.ok) throw new Error('bad response');
-      } catch (err) {
-        toggleBtn(btn, !active);
-        active
-          ? setList(list.filter(x => x !== id))
-          : setList([...list, id]);
-        console.error('Wishlist sync error', err);
-        alert('No se pudo actualizar tu wishlist. Intenta de nuevo.');
-      }
-    }
-  };
+  const frag = document.createDocumentFragment();
 
-  hydrate();
-  document.body.addEventListener('click', clickHandler);
+  for (const id of list) {
+    try {
+      console.log(fetchProductoURL)
+      const res = await fetch(`${fetchProductoURL}${id}/`);
+      if (!res.ok) continue;
+      const p = await res.json();    // debe traer p.tallas = ["24","25",…]
 
-  return {
-    destroy() { document.body.removeEventListener('click', clickHandler); },
-    getWishlist: getList,
-    setWishlist: setList
-  };
+      const sizes = Array.isArray(p.tallas) && p.tallas.length
+                  ? p.tallas.join(',') : '';
+
+      const item = document.createElement('div');
+      item.className = 'wishlist-item';
+      item.innerHTML = `
+        <img src="${p.imagen}" alt="${p.nombre}">
+        <div class="wishlist-details">
+          <h4>${p.nombre}</h4>
+          <span class="precio">$${p.precio}</span>
+        </div>
+        <div class="wishlist-actions">
+          <button class="btn-carrito-mini"
+                  data-id="${p.id}"
+                  data-sizes="${sizes}">
+            Agregar
+          </button>
+        </div>`;
+      frag.appendChild(item);
+    } catch(e){ console.warn('Producto no cargado', id, e); }
+  }
+  wishlistContent.innerHTML = '';
+  wishlistContent.appendChild(frag);
+};
+
+/* ─────────────────────────── 8. Selector de talla ─────────────────────── */
+wishlistContent?.addEventListener('click', e => {
+
+  /* click en botón Agregar */
+  if (e.target.matches('.btn-carrito-mini')) {
+    const btn   = e.target;
+    const sizes = btn.dataset.sizes ? btn.dataset.sizes.split(',') : ['Única'];
+    const already = btn.parentElement.querySelector('.size-picker');
+
+    /* si ya está abierto → lo cerramos */
+    if (already) { already.remove(); return; }
+
+    /* construir selector de tallas */
+    const picker = document.createElement('div');
+    picker.className = 'size-picker fade-up';
+    picker.innerHTML = `
+      <p class="size-title">Selecciona tu talla</p>
+      <div class="size-options">
+        ${sizes.map(s => `<button class="size-option" data-size="${s.trim()}">${s.trim()}</button>`).join('')}
+      </div>`;
+    btn.parentElement.insertBefore(picker, btn);
+    return;
+  }
+
+  /* click en una talla */
+  if (e.target.matches('.size-option')) {
+    const size   = e.target.dataset.size;
+    const pid    = e.target.closest('.wishlist-actions')
+                           .querySelector('.btn-carrito-mini').dataset.id;
+    addToCart(pid, size);
+    /* feedback visual */
+    e.target.classList.add('chosen');
+    setTimeout(() => {
+      e.target.closest('.size-picker')?.remove();
+    }, 200);
+  }
+});
+
+/* ─────────────────────────── 9. Bootstrap ─────────────────────────────── */
+hydrate();
+wishlistBtn?.addEventListener('click', () => { renderWishlistPanel(); showWishlist(); });
+closeBtn  ?.addEventListener('click', hideWishlist);
 }
