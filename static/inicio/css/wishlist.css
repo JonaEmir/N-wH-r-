@@ -41,6 +41,14 @@
 }
 #wishlist-panel.open { right: 0; }
 
+/* ——— Blur cuando el selector está abierto ——— */
+#wishlist-panel .wishlist-content.blurred{
+  filter: blur(2px);          /* elige la intensidad */
+  pointer-events: none;       /* evita clics sobre elementos borrosos */
+  transition: filter 1s;    /* suave */
+}
+
+
 /* 4. Overlay común para todos los paneles */
 .page-overlay {
   position: fixed;
@@ -196,43 +204,111 @@
 /* ──────────────────────────────────────────────────────────────
    7. Selector de talla que se despliega sobre el botón AGREGAR
 ──────────────────────────────────────────────────────────────── */
-.size-picker{
-  width:100%;
-  background:#fff;
-  border:1px solid #e5e5e5;
-  border-radius:6px;
-  padding:10px 12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.06);
-  animation:fadeUp .25s ease-out forwards;   /* aparece de abajo a arriba */
-}
-.size-title{
-  font-size:12px;
-  margin:0 0 6px;
-  color:#555;
-}
-.size-options{
-  display:flex; flex-wrap:wrap; gap:6px;
-}
-.size-option{
-  min-width:38px; padding:6px 8px;
-  font-size:12px; line-height:1;
-  border:1px solid #ccc; border-radius:4px;
-  background:#fafafa; cursor:pointer;
-  transition:background .2s,border .2s;
-}
-.size-option:hover{
-  background:#f0f0f0;
-}
-.size-option.chosen{                 /* feedback tras confirmar */
-  background:#007a00; color:#fff;
-  border-color:#007a00;
+/* Panel entero que cubre el interior del wishlist */
+/* Selector de talla pegado al panel */
+/* ───── Selector de talla con fade-in y slide-up ───── */
+:root { --wishlist-width: 450px; }
+
+.size-picker.slide-up-full{
+  position: fixed;
+  bottom: 0;
+  left: 0;            /* el JS luego ajusta left + width */
+  width: var(--wishlist-width);
+  max-width: 100vw;
+
+  height: 40%;
+  background: #fff;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.15);
+  z-index: 10000;
+
+  /* punto de partida: abajo + transparente */
+  transform: translateY(100%);
+  opacity: 0;
+
+  /* nueva animación: sube y se desvanece */
+  animation: pickerFadeSlideUp .35s ease-out forwards;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Animación utilitaria (si ya la tenías, no la dupliques) */
-@keyframes fadeUp{
-  from{opacity:0; transform:translateY(8px);}
-  to  {opacity:1; transform:translateY(0);}
+@keyframes pickerFadeSlideUp{
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
-.fade-up{ animation:fadeUp .25s ease-out forwards; }
+
+/* en móviles el ancho ya lo haces 100 vw */
+@media (max-width: 768px){
+  .size-picker.slide-up-full{ width: 100vw; }
+}
+
+/* ─── salida vertical (default) ─── */
+.size-picker.fade-out-down{
+  animation: pickerFadeSlideDown .30s ease-in forwards;
+}
+@keyframes pickerFadeSlideDown{
+  from{ transform: translateY(0);    opacity:1; }
+  to  { transform: translateY(100%); opacity:0; }
+}
+
+/* ─── salida horizontal (con el panel) ─── */
+/* ——— salida horizontal (igual que el panel) ——— */
+.size-picker.fade-out-side{
+  animation: pickerFadeSlideSide .1s ease forwards;   /* ← mismos .3s ease */
+}
+
+@keyframes pickerFadeSlideSide{
+  from { transform: translateX(0);    opacity:1; }
+  to   { transform: translateX(100%); opacity:0; }   /* → hacia la derecha */
+}
 
 
+/* (Si tu panel se oculta a la izquierda, usa -100% en el to{}) */
+
+
+
+
+/* interior para maquetar título y tallas */
+.size-picker-inner {
+  text-align: center;
+  width: 100%;
+  padding: 1rem 2rem;
+}
+
+.size-picker-inner h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .75rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.size-option {
+  padding: .5rem 1.1rem;
+  border: 1px solid #000;
+  background: #fff;
+  cursor: pointer;
+  transition: background .2s;
+}
+.size-option:hover,
+.size-option.chosen { background: #000; color: #fff; }
+
+.close-size-picker {
+  border: none;
+  background: transparent;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+/* Animación: sube desde abajo hasta ocupar solo su 40 % */
+@keyframes slideUp40 {
+  from { transform: translate(-50%, 100%); }
+  to   { transform: translate(-50%, 0);   }
+}

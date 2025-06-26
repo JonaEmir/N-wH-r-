@@ -1,31 +1,88 @@
-{% extends "public/base.html" %}
-{% block title %}Correo enviado{% endblock %}
-{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar contraseña</title>
 
-{% block extra_styles %}
-<style>
-.recovery-section {
-  max-width: 600px;           /* mismo ancho que una columna de tu grid */
-  margin: 100px auto 100px;       /* coherente con main */
-  padding: 2rem;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.05);
-  font-size: 14px;
-  line-height: 1.5;
-}
+    <!-- CSS global -->
+    <link rel="stylesheet" href="{% static 'registro de usuario/css/main.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+    <!-- CSS específico de recuperación -->
+    <link rel="stylesheet" href="{% static 'recuperar-password/css/main.css' %}">  {# ← usa “/”, no “\” #}
+</head>
+<body>
 
-.recovery-section h1 {
-  font-size: 18px;
-  margin-bottom: 1rem;
-}
-</style>
-{% endblock %}
+<header>
+    <div class="header-left">
+        <a href="{% url 'index' %}">
+            <img src="{% static 'images/NowHere.svg' %}" id="Logo" class="fade-in" alt="NöwHėrē">
+        </a>
+        <h2>| Creación de cuenta N:</h2>
+    </div>
+</header>
 
-<section class="recovery-section">
-  <h1>Revisa tu correo</h1>
-  <p>📬 Te hemos enviado un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada o carpeta de spam.</p>
-</section>
-{% endblock %}
+<main>
+    <section class="recovery-section">
+        <h1>Revisa tu correo</h1>
+        <p>📬 Te hemos enviado un enlace para restablecer tu contraseña.
+           Revisa tu bandeja de entrada o carpeta de spam.</p>
+    </section>
+</main>
 
+<section class="info-footer">
+    <div class="info-col">
+      <h4 class="accordion-toggle">AYUDA</h4>
+      <div class="accordion-content">
+        <p>¿Tienes dudas sobre tu pedido?</p>
+        <p>Contáctanos vía <a href="https://api.whatsapp.com/send/?phone=523322118360&text&type=phone_number&app_absent=0">WhatsApp</a> o envíanos un correo a <a href="jona.emir@hotmail.com">jona.emir@hotmail.com</a></p>
+        <p><a href="#">Preguntas Frecuentes</a></p>
+        <p><a href="#">Guía de Tallas</a></p>
+      </div>
+    </div>
+    <div class="info-col">
+      <h4 class="accordion-toggle">SERVICIOS</h4>
+      <div class="accordion-content">
+        <p><a href="#">Compra por Mayoreo</a></p>
+        <p><a href="#">Seguimiento de Envíos</a></p>
+        <p><a href="#">Política de Cambios</a></p>
+        <p><a href="#">Atención Personalizada</a></p>
+      </div>
+    </div>
+    <div class="info-col">
+      <h4 class="accordion-toggle">INFORMACION</h4>
+      <div class="accordion-content">
+        <p><a href="#">Sobre Nosotros</a></p>
+        <p><a href="#">Métodos de Pago</a></p>
+        <p><a href="#">Privacidad y Seguridad</a></p>
+        <p><a href="#">Términos y Condiciones</a></p>
+      </div>
+    </div>
+    <div class="info-col">
+      <h4 class="accordion-toggle">Mayoreo</h4>
+      <div class="accordion-content">
+        <p>¿Eres revendedor o tienda?</p>
+        <p>Mayoreo a partir de 6 pzs.</p>
+        <p><a href="#">Solicita Cotización</a></p>
+      </div>
+    </div>
+  </section>
 
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="#">Avisos Legales</a>
+      </div>
+      <img src="/static/images/NowHere.svg" id="Logo-footer" class="fade-in" alt="NöwHėrē">
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://api.whatsapp.com/send/?phone=523322118360&text&type=phone_number&app_absent=0" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

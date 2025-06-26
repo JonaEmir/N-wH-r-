@@ -44,7 +44,7 @@ from .views.products import (
 
 # ---------- Wishlist ----------
 from .views.wishlist import (
-    wishlist_detail, wishlist_all, get_cliente_id   # ← importado producto_detail
+    wishlist_detail, wishlist_all, get_cliente_id, producto_tallas,   # ← importado producto_detail
 )
 
 
@@ -110,6 +110,9 @@ urlpatterns = [
     # ---------- Wishlist ----------
     path('wishlist/<int:id_cliente>/',           wishlist_detail, name='wishlist_detail'),
     path('wishlist/all/<int:id_cliente>/',       wishlist_all,    name='wishlist_detail'),  # nombre duplicado
+            # --- API “tallas” (debe ir antes o no importa, pero queda claro) ---
+    path('api/productos/<int:id_producto>/', producto_tallas, name='producto_tallas'),
+
 
     # Alias antiguo
     path('registro/', alta, name='alta'),

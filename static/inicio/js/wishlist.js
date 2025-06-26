@@ -1,31 +1,22 @@
 /**
- * initWishlist
- * ------------
- * 1) Corazón en tarjetas del catálogo.
- * 2) Panel lateral con los favoritos.
- *    – Cada fila muestra sólo el botón **Agregar**.
- *    – Al hacer clic aparece un “selector de talla” que se despliega
- *      desde abajo (slide-up) justo ENCIMA del botón.
- *    – Al elegir la talla se llama a addToCart(id, talla) y se cierra
- *      el selector.
- *
- *  Nota:
- *    • El endpoint /api/productos/<id>/ debe devolver un array
- *      `tallas` con las tallas disponibles, p.ej. ["24", "25", "26"].
- *    • Sustituye addToCart() por tu llamada fetch real.
+ * initWishlist  –  versión final con:
+ *   • Animaciones sincronizadas
+ *   • Cierre automático del selector
+ *   • Blur del contenido cuando el selector está abierto
+ * ----------------------------------------------------------------
  */
 export function initWishlist({
-  selector        = '.wishlist-btn',        // corazón en catálogo
-  storageKey      = 'wishlist_ids',
-  backendURL      = null,                   // /wishlist/
-  csrfToken       = null,
-  isAuthenticated = false,
-  onRequireLogin  = null,
-  fetchProductoURL = null,                  // /productos/
-  clienteId       = null
+  selector          = '.wishlist-btn',
+  storageKey        = 'wishlist_ids',
+  backendURL        = null,
+  csrfToken         = null,
+  isAuthenticated   = false,
+  onRequireLogin    = null,
+  fetchProductoURL  = null,
+  clienteId         = null
 } = {}) {
 
-/* ─────────────────────────── 1. Referencias DOM ────────────────────────── */
+/* ───────────────────────── 1. Referencias DOM ────────────────────────── */
 const wishlistIcon    = document.querySelector('#btn-wishlist-panel i');
 const wishlistCount   = document.querySelector('#btn-wishlist-panel .wishlist-count');
 const wishlistBtn     = document.getElementById('btn-wishlist-panel');
@@ -33,11 +24,8 @@ const wishlistPanel   = document.getElementById('wishlist-panel');
 const closeBtn        = document.getElementById('close-wishlist-panel');
 const wishlistContent = wishlistPanel?.querySelector('.wishlist-content');
 const overlay         = document.querySelector('.page-overlay');
-const cId = localStorage.getItem('clienteId');
-if (!cId) {
-  console.error("No hay clienteId guardado");
-}
-/* ─────────────────────────── 2. LocalStorage helpers ───────────────────── */
+
+/* ───────────────────────── 2. LocalStorage helpers ───────────────────── */
 const getList = () => {
   try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
   catch { return []; }
@@ -47,15 +35,14 @@ const setList = list => {
   updateHeaderUI(list);
 };
 
-/* ─────────────────────────── 3. Header UI (icono + badge) ─────────────── */
+/* ───────────────────────── 3. Header UI ──────────────────────────────── */
 const toggleBtn = (btn, on) => {
   btn.classList.toggle('active', on);
   const ic = btn.querySelector('i');
   if (ic) { ic.classList.toggle('fa-solid', on); ic.classList.toggle('fa-regular', !on); }
 };
-
 const updateHeaderUI = list => {
-  wishlistIcon?.classList.toggle('fa-solid', list.length);
+  wishlistIcon?.classList.toggle('fa-solid', !!list.length);
   wishlistIcon?.classList.toggle('fa-regular', !list.length);
   if (wishlistIcon) wishlistIcon.style.color = list.length ? '#ff4d6d' : '';
   if (wishlistCount) {
@@ -63,8 +50,6 @@ const updateHeaderUI = list => {
     wishlistCount.hidden = list.length === 0;
   }
 };
-
-/* Marca corazones guardados al cargar */
 const hydrate = () => {
   const list = getList();
   list.forEach(id => {
@@ -74,18 +59,21 @@ const hydrate = () => {
   updateHeaderUI(list);
 };
 
-/* ─────────────────────────── 4. Panel show/hide ───────────────────────── */
+/* ───────────────────────── 4. Panel show/hide ───────────────────────── */
 const showWishlist = () => {
   wishlistPanel?.classList.add('open');
   overlay?.classList.add('active');
 };
 const hideWishlist = () => {
-  wishlistPanel?.classList.remove('open');
-  overlay?.classList.remove('active');
+  const picker = wishlistPanel.querySelector('.size-picker');
+  if (picker) closeSizePicker(picker, 'side');   // cierre horizontal + quita blur
+
+  wishlistPanel.classList.remove('open');
+  overlay.classList.remove('active');
 };
 overlay?.addEventListener('click', hideWishlist);
 
-/* ─────────────────────────── 5. Corazones catálogo ────────────────────── */
+/* ───────────────────────── 5. Corazones catálogo ────────────────────── */
 document.body.addEventListener('click', e => {
   const heart = e.target.closest(selector);
   if (!heart) return;
@@ -100,7 +88,7 @@ document.body.addEventListener('click', e => {
   add ? list.push(id) : list = list.filter(x => x !== id);
   setList(list);
 
-  if (backendURL && clienteId !== null) {
+  if (backendURL && clienteId != null) {
     fetch(`${backendURL}${clienteId}/`, {
       method : add ? 'PATCH' : 'DELETE',
       headers: { 'Content-Type':'application/json',
@@ -110,39 +98,38 @@ document.body.addEventListener('click', e => {
   }
 });
 
-/* ─────────────────────────── 6. Placeholder carrito ───────────────────── */
+/* ───────────────────────── 6. Placeholder carrito ───────────────────── */
 const addToCart = (productoId, talla) => {
   console.log(`addToCart → id=${productoId} talla=${talla}`);
   /* TODO: fetch('/carrito/', { body:{productoId, talla} }) */
 };
 
-/* ─────────────────────────── 7. Render panel ──────────────────────────── */
+/* ───────────────────────── 7. Render panel ──────────────────────────── */
 const renderWishlistPanel = async () => {
   wishlistContent.textContent = 'Cargando…';
-
-  const list = getList();
-  if (!fetchProductoURL || !list.length) {
+  if (!fetchProductoURL || !clienteId) {
     wishlistContent.textContent = 'No tienes productos en tu wishlist.';
     return;
   }
 
-  const frag = document.createDocumentFragment();
+  try {
+    const res = await fetch(`${fetchProductoURL}${clienteId}/`);
+    if (!res.ok) throw new Error('Error al obtener productos');
+    const { productos = [] } = await res.json();
+    if (!productos.length) {
+      wishlistContent.textContent = 'No tienes productos en tu wishlist.';
+      return;
+    }
 
-  for (const id of list) {
-    try {
-      //sustituir el 2 por id del cliente
-      const res = await fetch(`${fetchProductoURL}${cId}`);
-      console.log(res)
-      if (!res.ok) continue;
-      const p = await res.json();    // debe traer p.tallas = ["24","25",…]
-      console.log(p)
+    const frag = document.createDocumentFragment();
+    for (const p of productos) {
       const sizes = Array.isArray(p.tallas) && p.tallas.length
-                  ? p.tallas.join(',') : '';
+        ? p.tallas.join(',') : '';
 
       const item = document.createElement('div');
       item.className = 'wishlist-item';
       item.innerHTML = `
-        <img src="${p.imagen}" alt="${p.nombre}">
+        <img src="${p.imagen || '/static/img/no-image.jpg'}" alt="${p.nombre}">
         <div class="wishlist-details">
           <h4>${p.nombre}</h4>
           <span class="precio">$${p.precio}</span>
@@ -155,52 +142,135 @@ const renderWishlistPanel = async () => {
           </button>
         </div>`;
       frag.appendChild(item);
-    } catch(e){ console.warn('Producto no cargado', id, e); }
+    }
+    wishlistContent.innerHTML = '';
+    wishlistContent.appendChild(frag);
+
+  } catch (err) {
+    console.error(err);
+    wishlistContent.textContent = 'Hubo un error al cargar tu wishlist.';
   }
-  wishlistContent.innerHTML = '';
-  wishlistContent.appendChild(frag);
 };
 
-/* ─────────────────────────── 8. Selector de talla ─────────────────────── */
-wishlistContent?.addEventListener('click', e => {
+/* ============ 8. Selector de talla dinámico (fetch a la BD) ============ */
+wishlistContent?.addEventListener('click', async e => {
 
-  /* click en botón Agregar */
+  /* —— click en “Agregar” —— */
   if (e.target.matches('.btn-carrito-mini')) {
-    const btn   = e.target;
-    const sizes = btn.dataset.sizes ? btn.dataset.sizes.split(',') : ['Única'];
-    const already = btn.parentElement.querySelector('.size-picker');
+    const btn  = e.target;
+    const pid  = btn.dataset.id;
 
-    /* si ya está abierto → lo cerramos */
-    if (already) { already.remove(); return; }
+    /* cierra picker abierto si existe (toggle para mismo producto) */
+    const open = wishlistPanel.querySelector('.size-picker');
+    if (open) {
+      if (open.dataset.productId === pid) { closeSizePicker(open); return; }
+      closeSizePicker(open);
+    }
 
-    /* construir selector de tallas */
+    /* 1. solicitar tallas al back-end */
+    let sizes = [];
+    try {
+      const res  = await fetch(`/api/productos/${pid}/`);
+      if (!res.ok) throw new Error('Error fetch tallas');
+      const data = await res.json();
+      sizes = Array.isArray(data.tallas) && data.tallas.length
+              ? data.tallas : ['Única'];
+    } catch (err) {
+      console.error(err);
+      sizes = ['Única'];
+    }
+
+      /* 2. construir el selector */
     const picker = document.createElement('div');
-    picker.className = 'size-picker fade-up';
+    picker.className = 'size-picker slide-up-full';
+    picker.dataset.productId = pid;
     picker.innerHTML = `
-      <p class="size-title">Selecciona tu talla</p>
-      <div class="size-options">
-        ${sizes.map(s => `<button class="size-option" data-size="${s.trim()}">${s.trim()}</button>`).join('')}
+      <div class="size-picker-inner">
+        <h3>Selecciona tu talla</h3>
+        <div class="size-options">
+          ${sizes.map(s => `
+            <button class="size-option" data-size="${s.trim()}">${s.trim()}</button>
+          `).join('')}
+        </div>
+        <button class="close-size-picker">✕</button>
       </div>`;
-    btn.parentElement.insertBefore(picker, btn);
+
+    /* ★ CERRAR con la “X” directamente */
+    picker.addEventListener('click', ev => {
+      if (ev.target.matches('.close-size-picker')) {
+        closeSizePicker(picker);           // usa animación vertical
+      }
+    });                                    // ← FIN bloque nuevo ★
+
+    wishlistPanel.appendChild(picker);
+
+    /* 3. alinear al panel visible */
+    const rect = wishlistPanel.getBoundingClientRect();
+    picker.style.position = 'fixed';
+    picker.style.left     = `${rect.left}px`;
+    picker.style.width    = `${rect.width}px`;
+    picker.style.bottom   = '0';
+
+    /* 4. bloquear scroll interno y aplicar blur */
+    wishlistPanel.dataset.prevOverflow = wishlistPanel.style.overflowY || '';
+    wishlistPanel.style.overflowY = 'hidden';
+    wishlistContent.classList.add('blurred');
     return;
   }
 
-  /* click en una talla */
+  /* —— click en talla —— */
   if (e.target.matches('.size-option')) {
-    const size   = e.target.dataset.size;
-    const pid    = e.target.closest('.wishlist-actions')
-                           .querySelector('.btn-carrito-mini').dataset.id;
-    addToCart(pid, size);
-    /* feedback visual */
+    const talla = e.target.dataset.size;
+    const pid   = e.target.closest('.size-picker').dataset.productId;
+    addToCart(pid, talla);
     e.target.classList.add('chosen');
-    setTimeout(() => {
-      e.target.closest('.size-picker')?.remove();
-    }, 200);
+    setTimeout(() => closeSizePicker(
+                 e.target.closest('.size-picker')), 150);
+    return;
+  }
+
+  /* —— cerrar con la X —— */
+  if (e.target.matches('.close-size-picker')) {
+    closeSizePicker(e.target.closest('.size-picker'));
   }
 });
 
-/* ─────────────────────────── 9. Bootstrap ─────────────────────────────── */
+/* cierre global dentro del panel (clic fuera del picker) */
+wishlistPanel.addEventListener('click', e => {
+  const picker = wishlistPanel.querySelector('.size-picker');
+  if (!picker) return;
+  const inside = picker.contains(e.target);
+  const addBtn = e.target.matches('.btn-carrito-mini');
+  if (!inside && !addBtn) closeSizePicker(picker);
+});
+
+/* ─── helper con modo variable ─── */
+function closeSizePicker(node, mode = "down"){
+  if(!node) return;
+
+  node.classList.add(
+    mode === "side" ? "fade-out-side" : "fade-out-down"
+  );
+
+  wishlistPanel.style.overflowY =
+    wishlistPanel.dataset.prevOverflow || 'auto';
+  delete wishlistPanel.dataset.prevOverflow;
+  wishlistContent.classList.remove('blurred');          // quitar blur
+
+  node.addEventListener('animationend', () => node.remove(), { once:true });
+}
+
+/* ───────────────────────── 9. Bootstrap ─────────────────────────────── */
 hydrate();
 wishlistBtn?.addEventListener('click', () => { renderWishlistPanel(); showWishlist(); });
 closeBtn  ?.addEventListener('click', hideWishlist);
+
+document.getElementById('link-wishlist')
+  .addEventListener('click', e => {
+      e.preventDefault();
+      renderWishlistPanel();
+      showWishlist();
+  });
+
 }
+

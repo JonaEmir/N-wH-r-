@@ -3,11 +3,11 @@ import logging
 import decimal
 
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http      import JsonResponse
+from django.http      import JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http  import require_http_methods
 
-from ..models import Cliente, Wishlist, Producto
+from ..models import Cliente, Wishlist, Producto, VarianteAtributo
 
 logger = logging.getLogger(__name__)
 
@@ -97,3 +97,27 @@ def wishlist_all(request, id_cliente):
     return JsonResponse({'mensaje': 'productos eliminados correctamente'})
 
 
+@csrf_exempt
+@require_http_methods(['GET'])
+def producto_tallas(request, id_producto):
+    """
+    GET /api/productos/<id_producto>/
+    Devuelve {"tallas": ["24","25",...]} ó ["Única"] si no hay atributo “Talla”.
+    """
+    producto = Producto.objects.filter(pk=id_producto).first()
+    if not producto:
+        raise Http404("Producto no encontrado")
+
+    # 1) Obtenemos todas las tallas distintas de variantes con stock>0
+    tallas_qs = (VarianteAtributo.objects
+        .filter(
+            variante__producto   = producto,
+            variante__stock__gt  = 0,
+            atributo_valor__atributo__nombre__iexact = "talla"   # clave
+        )
+        .values_list("atributo_valor__valor", flat=True)
+        .distinct()
+    )
+
+    tallas = sorted(tallas_qs) or ["Única"]
+    return JsonResponse({"tallas": tallas})
