@@ -45,7 +45,7 @@ def detalle_producto(request, id):
 
     return render(
         request,
-        "public/detalles.html",
+        "public/producto/detalles.html",
         {
             "producto"       : producto,
             "origen"         : origen,

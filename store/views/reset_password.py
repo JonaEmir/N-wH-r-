@@ -19,7 +19,7 @@ def solicitar_reset(request):
         if not cliente:
             return render(
                 request,
-                "public/recuperar-password.html",
+                "public/password/recuperar-password.html",
                 {"error": "❌ Correo no registrado."}
             )
 
@@ -54,10 +54,10 @@ def solicitar_reset(request):
         email_msg.attach_alternative(html_body, "text/html")
         enviar_correo_async(email_msg)
 
-        return render(request, "public/confirmacion-envio-correo.html")
+        return render(request, "public/password/confirmacion-envio-correo.html")
 
     # GET: mostrar formulario
-    return render(request, "public/recuperar-password.html")
+    return render(request, "public/password/recuperar-password.html")
 
 
 # 2. Confirmar enlace (muestra formulario si token válido)
@@ -69,12 +69,12 @@ def reset_password_confirm(request, uidb64, token):
         cliente = None
 
     if cliente and default_token_generator.check_token(cliente, token):
-        return render(request, "public/recuperar-nuevo-password.html", {
+        return render(request, "public/password/recuperar-nuevo-password.html", {
             "uidb64": uidb64,
             "token": token,
         })
     else:
-        return render(request, "public/recuperar-invalid-token.html")
+        return render(request, "public/password/recuperar-invalid-token.html")
 
 
 def reset_password_submit(request, uidb64, token):
@@ -104,9 +104,9 @@ def reset_password_submit(request, uidb64, token):
             # ¡Ahora sí!
             cliente.set_password(pass1)   # <-- cifra de forma correcta
             cliente.save()
-            return render(request, "public/recuperar-exito.html")
+            return render(request, "public/password/recuperar-exito.html")
 
-    return render(request, "public/recuperar-invalid-token.html")
+    return render(request, "public/password/recuperar-invalid-token.html")
 
 # Al final del archivo reset_password.py (o en otro utils.py si prefieres)
 import threading

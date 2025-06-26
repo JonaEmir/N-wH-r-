@@ -90,7 +90,7 @@ def detalle_client(request, id):
 @require_http_methods(["GET", "POST"])
 def login_user(request):
     if request.method == "GET":
-        return render(request, "dashboard/login.html")
+        return render(request, "dashboard/auth/login.html")
 
     # POST
     username = request.POST.get("username")
@@ -133,7 +133,7 @@ def index(request):
     cab_home  = sample(list(qs_h), min(4, qs_h.count()))
     dama_home = sample(list(qs_m), min(4, qs_m.count()))
 
-    return render(request, 'public/index.html', {
+    return render(request, 'public/home/index.html', {
         'cab_home': cab_home,
         'dama_home': dama_home,
     })
@@ -143,11 +143,11 @@ def index(request):
 def registrarse(request):
     if request.session.get("cliente_id"):
         return redirect("index")
-    return render(request, "public/registro-usuario.html")
+    return render(request, "public/registro/registro-usuario.html")
 
 @login_required_user
 def alta(request):
-    return render(request, 'dashboard/registro.html')
+    return render(request, 'dashboard/productos/registro.html')
 
 def get_categorias(request):
     categorias = Categoria.objects.all().values('id', 'nombre')
@@ -175,7 +175,7 @@ def create_categoria(request):
 
 @login_required_user
 def lista_productos(request):
-    return render(request, 'dashboard/lista.html')
+    return render(request, 'dashboard/productos/lista.html')
 
 #vista del cliente no es funcion logica
 @login_required_user
@@ -200,7 +200,7 @@ def editar_producto(request, id):
             'stock': v.stock,
         })
 
-    return render(request, 'dashboard/editar.html', {
+    return render(request, 'dashboard/productos/editar.html', {
         'producto': producto,
         'categorias': categorias,
         'variantes': variantes_data,
@@ -260,7 +260,7 @@ def genero_view(request, genero):  # genero = 'dama' o 'caballero'
 
     return render(
         request,
-        'public/productos_genero.html',
+        'public/catalogo/productos_genero.html',
         {
             'seccion'   : genero,
             'titulo'    : 'Mujer' if genero == 'dama' else 'Hombre',

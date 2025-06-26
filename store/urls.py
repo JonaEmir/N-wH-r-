@@ -69,11 +69,18 @@ urlpatterns = [
     path('login-client/',  login_client,  name='login_client'),
 
     # ---------- Dashboard ----------
-    path('dashboard/login/',  login_user,  name='login_user'),
-    path('dashboard/logout/', logout_user, name='logout_user'),
-    path('dashboard/registro/', alta,            name='dashboard_alta'),
-    path('dashboard/lista/',    lista_productos, name='dashboard_productos'),
-    path('dashboard/productos/editar/<int:id>/', editar_producto, name='editar_producto'),
+    # ---------- Dashboard ----------
+    path('dashboard/login/',           login_user,        name='login_user'),
+    path('dashboard/logout/',          logout_user,       name='logout_user'),
+
+
+    path('dashboard/productos/',                 lista_productos,   name='dashboard_productos'),
+    path('dashboard/productos/crear/',           alta,              name='dashboard_alta'),
+    path('dashboard/productos/editar/<int:id>/', editar_producto,   name='editar_producto'),
+
+# --- Usuarios (cuando actives su view) ---
+# path('dashboard/usuarios/', dashboard_usuarios, name='dashboard_usuarios'),
+
 
     # ---------- Productos ----------
     path('producto/<int:id>/',                      detalle_producto,  name='detalle_producto'),
