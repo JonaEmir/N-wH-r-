@@ -33,7 +33,10 @@ const wishlistPanel   = document.getElementById('wishlist-panel');
 const closeBtn        = document.getElementById('close-wishlist-panel');
 const wishlistContent = wishlistPanel?.querySelector('.wishlist-content');
 const overlay         = document.querySelector('.page-overlay');
-
+const cId = localStorage.getItem('clienteId');
+if (!cId) {
+  console.error("No hay clienteId guardado");
+}
 /* ─────────────────────────── 2. LocalStorage helpers ───────────────────── */
 const getList = () => {
   try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
@@ -127,11 +130,12 @@ const renderWishlistPanel = async () => {
 
   for (const id of list) {
     try {
-      console.log(fetchProductoURL)
-      const res = await fetch(`${fetchProductoURL}${id}/`);
+      //sustituir el 2 por id del cliente
+      const res = await fetch(`${fetchProductoURL}${cId}`);
+      console.log(res)
       if (!res.ok) continue;
       const p = await res.json();    // debe traer p.tallas = ["24","25",…]
-
+      console.log(p)
       const sizes = Array.isArray(p.tallas) && p.tallas.length
                   ? p.tallas.join(',') : '';
 

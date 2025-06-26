@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-
+from django.views.decorators.csrf import csrf_exempt
 # 
 """
     get_object_or_404 
@@ -152,6 +152,26 @@ def alta(request):
 def get_categorias(request):
     categorias = Categoria.objects.all().values('id', 'nombre')
     return JsonResponse(list(categorias), safe=False)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_categoria(request):
+    """
+    Crea una nueva categoría cuyo nombre viene en JSON:
+      { "nombre": "Dama" }
+    """
+    try:
+        data = json.loads(request.body)
+        nombre = data['nombre']
+    except (json.JSONDecodeError, KeyError):
+        return JsonResponse({'error': 'Falta campo "nombre"'}, status=400)
+
+    # Creamos la categoría
+    categoria = Categoria.objects.create(nombre=nombre)
+    return JsonResponse({
+        'id': categoria.id,
+        'nombre': categoria.nombre
+    }, status=201)
 
 @login_required_user
 def lista_productos(request):

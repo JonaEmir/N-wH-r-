@@ -11,6 +11,16 @@ from ..models import Cliente, Wishlist, Producto
 
 logger = logging.getLogger(__name__)
 
+
+@csrf_exempt
+@require_http_methods(['GET'])
+def get_cliente_id(request, username):
+    """
+    GET /api/cliente_id/<username>/
+    Devuelve {"id": <cliente.id>} o 404 si no existe.
+    """
+    cliente = get_object_or_404(Cliente, username=username)
+    return JsonResponse({'id': cliente.id})
 # ---------------------------------------------------------------------------
 @csrf_exempt
 @require_http_methods(['GET', 'PATCH', 'DELETE'])
@@ -20,7 +30,7 @@ def wishlist_detail(request, id_cliente):
 
     # ───── GET: devuelve sólo la lista de IDs ───────────────────────────────
     if request.method == 'GET':
-        producto = get_object_or_404(Producto, pk=id)   # 2️⃣  usa la misma variable
+        """ producto = get_object_or_404(Producto, pk=id)   # 2️⃣  usa la misma variable
 
         precio = float(producto.precio) if isinstance(producto.precio, decimal.Decimal) else producto.precio
 
@@ -30,7 +40,24 @@ def wishlist_detail(request, id_cliente):
                 "precio": precio,
                 "imagen": request.build_absolute_uri(producto.imagen.url) if producto.imagen else "",
             }
-        return JsonResponse(data)
+        return JsonResponse(data)"""
+        productos=[]
+        ids = list(wishlist.productos.values_list('id', flat=True))
+        for i in ids:
+            producto = get_object_or_404(Producto, id=i)
+            if producto.imagen:
+                imagen_url = request.build_absolute_uri(producto.imagen.url)
+            else:
+                imagen_url = None
+            
+            productos.append({
+                "id": i,
+                "nombre": producto.nombre,
+                "precio": producto.precio,
+                "imagen": imagen_url
+            })
+
+        return JsonResponse({'productos': productos})
 
     # ───── PATCH / DELETE: cuerpo JSON con "producto_id" ────────────────────
     try:

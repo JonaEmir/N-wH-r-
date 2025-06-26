@@ -14,7 +14,7 @@ from .views.views import (
     alta, lista_productos, editar_producto,
     get_categorias,
     login_user, logout_user,
-    login_client, logout_client,
+    login_client, logout_client,create_categoria
 )
 
 # ---------- Carrito ----------
@@ -44,7 +44,7 @@ from .views.products import (
 
 # ---------- Wishlist ----------
 from .views.wishlist import (
-    wishlist_detail, wishlist_all,   # ← importado producto_detail
+    wishlist_detail, wishlist_all, get_cliente_id   # ← importado producto_detail
 )
 
 
@@ -83,6 +83,7 @@ urlpatterns = [
     path('api/productos/delete/<int:id>/',          delete_productos,  name='delete_product'),
     path('api/variantes/update/<int:variante_id>/', update_variant,    name='update_variant'),
     path('api/categorias/',                         get_categorias,    name='get_categorias'),
+    path('api/categorias/crear/',  create_categoria, name='create_categoria'),
 
     # ---------- Clientes ----------
     path('clientes/',                get_all_clients, name='get_all_clients'),
@@ -90,6 +91,7 @@ urlpatterns = [
     path('clientes/crear/',          create_client,   name='create_client'),
     path('clientes/update/<int:id>/',update_client,   name='update_client'),
     path('clientes/delete/<int:id>/',delete_client,   name='delete_client'),
+    path('api/cliente_id/<str:username>/',get_cliente_id,name='get_cliente_id'),
     path('contact/create/<int:id>/', create_contact,  name='create_contact'),
     path('contact/update/<int:id>/', update_contact,  name='update_contact'),
 
