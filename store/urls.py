@@ -27,7 +27,7 @@ from .views.carrito import (
 from .views.client import (
     detalle_client, get_all_clients,
     create_client, update_client, delete_client,
-    create_contact, update_contact,
+    send_contact, 
 )
 
 # ---------- Usuarios ----------
@@ -99,8 +99,7 @@ urlpatterns = [
     path('clientes/update/<int:id>/',update_client,   name='update_client'),
     path('clientes/delete/<int:id>/',delete_client,   name='delete_client'),
     path('api/cliente_id/<str:username>/',get_cliente_id,name='get_cliente_id'),
-    path('contact/create/<int:id>/', create_contact,  name='create_contact'),
-    path('contact/update/<int:id>/', update_contact,  name='update_contact'),
+    path('contact/send/<int:id>/', send_contact,  name='send_contact'),
 
     # ---------- Usuarios ----------
     path('user/get/',          get_user,    name='get_user'),
