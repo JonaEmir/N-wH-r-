@@ -1,0 +1,17 @@
+<table>
+  {% for u in usuarios %}
+  <tr>
+    <td>{{ u.username }}</td>
+    <td>{{ u.role }}</td>
+    <td>
+      <a href="{% url 'dashboard_usuario_editar' u.id %}">Editar</a>
+
+      <!-- Eliminar -->
+      <form action="/user/delete/{{ u.id }}/" method="post" style="display:inline">
+        {% csrf_token %}
+        <button onclick="return confirm('¿Eliminar?')">Borrar</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>

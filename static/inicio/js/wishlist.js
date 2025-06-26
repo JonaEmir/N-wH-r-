@@ -1,13 +1,13 @@
 /**
- * initWishlist  –  versión final con:
- *   • Animaciones sincronizadas
- *   • Cierre automático del selector
- *   • Blur del contenido cuando el selector está abierto
- * ----------------------------------------------------------------
+ * initWishlist – versión multi-usuario robusta
+ *   • Una clave de localStorage por usuario (o "guest").
+ *   • Migración automática de wishlist_ids_guest → wishlist_ids_<clienteId>.
+ *   • Retorna { clearWishlist } para que puedas vaciar la lista al hacer logout.
+ * --------------------------------------------------------------------------
  */
 export function initWishlist({
   selector          = '.wishlist-btn',
-  storageKey        = 'wishlist_ids',
+  storageKey        = 'wishlist_ids',   // clave base (se versiona internamente)
   backendURL        = null,
   csrfToken         = null,
   isAuthenticated   = false,
@@ -16,7 +16,29 @@ export function initWishlist({
   clienteId         = null
 } = {}) {
 
-/* ───────────────────────── 1. Referencias DOM ────────────────────────── */
+/* ─────────────── 0. Clave de almacenamiento y migración ─────────────── */
+const storageKeyBase = storageKey;
+const storageKeyUser = (isAuthenticated && clienteId != null)
+      ? `${storageKeyBase}_${clienteId}`   // p.ej. wishlist_ids_42
+      : `${storageKeyBase}_guest`;         // navegación sin login
+
+if (isAuthenticated && clienteId != null) {
+  // Pasa los likes del invitado al usuario que acaba de iniciar sesión
+  try {
+    const guestKey   = `${storageKeyBase}_guest`;
+    const guestRaw   = localStorage.getItem(guestKey);
+    if (guestRaw) {
+      const guestList = JSON.parse(guestRaw) || [];
+      const userRaw   = localStorage.getItem(storageKeyUser);
+      const userList  = userRaw ? JSON.parse(userRaw) : [];
+      const merged    = [...new Set([...userList, ...guestList])];
+      localStorage.setItem(storageKeyUser, JSON.stringify(merged));
+      localStorage.removeItem(guestKey);
+    }
+  } catch { /* Si hay error de parseo, simplemente lo ignoramos */ }
+}
+
+/* ───────────────────── 1. Referencias DOM ───────────────────────────── */
 const wishlistIcon    = document.querySelector('#btn-wishlist-panel i');
 const wishlistCount   = document.querySelector('#btn-wishlist-panel .wishlist-count');
 const wishlistBtn     = document.getElementById('btn-wishlist-panel');
@@ -25,21 +47,22 @@ const closeBtn        = document.getElementById('close-wishlist-panel');
 const wishlistContent = wishlistPanel?.querySelector('.wishlist-content');
 const overlay         = document.querySelector('.page-overlay');
 
-/* ───────────────────────── 2. LocalStorage helpers ───────────────────── */
+/* ───────────────────── 2. LocalStorage helpers ──────────────────────── */
 const getList = () => {
-  try { return JSON.parse(localStorage.getItem(storageKey)) || []; }
+  try { return JSON.parse(localStorage.getItem(storageKeyUser)) || []; }
   catch { return []; }
 };
 const setList = list => {
-  localStorage.setItem(storageKey, JSON.stringify(list));
+  localStorage.setItem(storageKeyUser, JSON.stringify(list));
   updateHeaderUI(list);
 };
 
-/* ───────────────────────── 3. Header UI ──────────────────────────────── */
+/* ───────────────────── 3. Header UI helpers ─────────────────────────── */
 const toggleBtn = (btn, on) => {
   btn.classList.toggle('active', on);
   const ic = btn.querySelector('i');
-  if (ic) { ic.classList.toggle('fa-solid', on); ic.classList.toggle('fa-regular', !on); }
+  if (ic) { ic.classList.toggle('fa-solid', on);
+            ic.classList.toggle('fa-regular', !on); }
 };
 const updateHeaderUI = list => {
   wishlistIcon?.classList.toggle('fa-solid', !!list.length);
@@ -53,27 +76,35 @@ const updateHeaderUI = list => {
 const hydrate = () => {
   const list = getList();
   list.forEach(id => {
-    const btn = document.querySelector(`${selector}[data-product-id="${id}"]`);
+    const btn = document.querySelector(
+      `${selector}[data-product-id="${id}"]`);
     btn && toggleBtn(btn, true);
   });
   updateHeaderUI(list);
 };
 
-/* ───────────────────────── 4. Panel show/hide ───────────────────────── */
+/* ───────────────────── 4. clearWishlist (API pública) ───────────────── */
+function clearWishlist() {
+  localStorage.removeItem(storageKeyUser);
+  updateHeaderUI([]);
+  document.querySelectorAll(`${selector}.active`)
+          .forEach(btn => toggleBtn(btn, false));
+}
+
+/* ───────────────────── 5. Panel show/hide ───────────────────────────── */
 const showWishlist = () => {
   wishlistPanel?.classList.add('open');
   overlay?.classList.add('active');
 };
 const hideWishlist = () => {
   const picker = wishlistPanel.querySelector('.size-picker');
-  if (picker) closeSizePicker(picker, 'side');   // cierre horizontal + quita blur
-
+  if (picker) closeSizePicker(picker, 'side');
   wishlistPanel.classList.remove('open');
   overlay.classList.remove('active');
 };
 overlay?.addEventListener('click', hideWishlist);
 
-/* ───────────────────────── 5. Corazones catálogo ────────────────────── */
+/* ───────────────────── 6. Corazones del catálogo ───────────────────── */
 document.body.addEventListener('click', e => {
   const heart = e.target.closest(selector);
   if (!heart) return;
@@ -98,20 +129,19 @@ document.body.addEventListener('click', e => {
   }
 });
 
-/* ───────────────────────── 6. Placeholder carrito ───────────────────── */
+/* ───────────────────── 7. Placeholder “add to cart” ─────────────────── */
 const addToCart = (productoId, talla) => {
   console.log(`addToCart → id=${productoId} talla=${talla}`);
   /* TODO: fetch('/carrito/', { body:{productoId, talla} }) */
 };
 
-/* ───────────────────────── 7. Render panel ──────────────────────────── */
+/* ───────────────────── 8. Render del panel ─────────────────────────── */
 const renderWishlistPanel = async () => {
   wishlistContent.textContent = 'Cargando…';
   if (!fetchProductoURL || !clienteId) {
     wishlistContent.textContent = 'No tienes productos en tu wishlist.';
     return;
   }
-
   try {
     const res = await fetch(`${fetchProductoURL}${clienteId}/`);
     if (!res.ok) throw new Error('Error al obtener productos');
@@ -120,12 +150,10 @@ const renderWishlistPanel = async () => {
       wishlistContent.textContent = 'No tienes productos en tu wishlist.';
       return;
     }
-
     const frag = document.createDocumentFragment();
     for (const p of productos) {
       const sizes = Array.isArray(p.tallas) && p.tallas.length
         ? p.tallas.join(',') : '';
-
       const item = document.createElement('div');
       item.className = 'wishlist-item';
       item.innerHTML = `
@@ -145,28 +173,22 @@ const renderWishlistPanel = async () => {
     }
     wishlistContent.innerHTML = '';
     wishlistContent.appendChild(frag);
-
   } catch (err) {
     console.error(err);
     wishlistContent.textContent = 'Hubo un error al cargar tu wishlist.';
   }
 };
 
-/* ============ 8. Selector de talla dinámico (fetch a la BD) ============ */
+/* ============== 9. Selector de talla dinámico ======================== */
 wishlistContent?.addEventListener('click', async e => {
-
   /* —— click en “Agregar” —— */
   if (e.target.matches('.btn-carrito-mini')) {
-    const btn  = e.target;
-    const pid  = btn.dataset.id;
-
-    /* cierra picker abierto si existe (toggle para mismo producto) */
+    const pid  = e.target.dataset.id;
     const open = wishlistPanel.querySelector('.size-picker');
     if (open) {
       if (open.dataset.productId === pid) { closeSizePicker(open); return; }
       closeSizePicker(open);
     }
-
     /* 1. solicitar tallas al back-end */
     let sizes = [];
     try {
@@ -175,12 +197,10 @@ wishlistContent?.addEventListener('click', async e => {
       const data = await res.json();
       sizes = Array.isArray(data.tallas) && data.tallas.length
               ? data.tallas : ['Única'];
-    } catch (err) {
-      console.error(err);
+    } catch {
       sizes = ['Única'];
     }
-
-      /* 2. construir el selector */
+    /* 2. construir el selector */
     const picker = document.createElement('div');
     picker.className = 'size-picker slide-up-full';
     picker.dataset.productId = pid;
@@ -188,36 +208,27 @@ wishlistContent?.addEventListener('click', async e => {
       <div class="size-picker-inner">
         <h3>Selecciona tu talla</h3>
         <div class="size-options">
-          ${sizes.map(s => `
-            <button class="size-option" data-size="${s.trim()}">${s.trim()}</button>
-          `).join('')}
+          ${sizes.map(s => `<button class="size-option" data-size="${s.trim()}">${s.trim()}</button>`).join('')}
         </div>
         <button class="close-size-picker">✕</button>
       </div>`;
-
-    /* ★ CERRAR con la “X” directamente */
     picker.addEventListener('click', ev => {
       if (ev.target.matches('.close-size-picker')) {
-        closeSizePicker(picker);           // usa animación vertical
+        closeSizePicker(picker);
       }
-    });                                    // ← FIN bloque nuevo ★
-
+    });
     wishlistPanel.appendChild(picker);
-
-    /* 3. alinear al panel visible */
+    /* 3. posicionar y bloquear scroll interno */
     const rect = wishlistPanel.getBoundingClientRect();
     picker.style.position = 'fixed';
     picker.style.left     = `${rect.left}px`;
     picker.style.width    = `${rect.width}px`;
     picker.style.bottom   = '0';
-
-    /* 4. bloquear scroll interno y aplicar blur */
     wishlistPanel.dataset.prevOverflow = wishlistPanel.style.overflowY || '';
     wishlistPanel.style.overflowY = 'hidden';
     wishlistContent.classList.add('blurred');
     return;
   }
-
   /* —— click en talla —— */
   if (e.target.matches('.size-option')) {
     const talla = e.target.dataset.size;
@@ -228,14 +239,9 @@ wishlistContent?.addEventListener('click', async e => {
                  e.target.closest('.size-picker')), 150);
     return;
   }
-
-  /* —— cerrar con la X —— */
-  if (e.target.matches('.close-size-picker')) {
-    closeSizePicker(e.target.closest('.size-picker'));
-  }
 });
 
-/* cierre global dentro del panel (clic fuera del picker) */
+/* —— cerrar picker haciendo click fuera —— */
 wishlistPanel.addEventListener('click', e => {
   const picker = wishlistPanel.querySelector('.size-picker');
   if (!picker) return;
@@ -244,27 +250,21 @@ wishlistPanel.addEventListener('click', e => {
   if (!inside && !addBtn) closeSizePicker(picker);
 });
 
-/* ─── helper con modo variable ─── */
-function closeSizePicker(node, mode = "down"){
-  if(!node) return;
-
-  node.classList.add(
-    mode === "side" ? "fade-out-side" : "fade-out-down"
-  );
-
+/* ─── animación de cierre ─── */
+function closeSizePicker(node, mode = 'down') {
+  if (!node) return;
+  node.classList.add(mode === 'side' ? 'fade-out-side' : 'fade-out-down');
   wishlistPanel.style.overflowY =
     wishlistPanel.dataset.prevOverflow || 'auto';
   delete wishlistPanel.dataset.prevOverflow;
-  wishlistContent.classList.remove('blurred');          // quitar blur
-
-  node.addEventListener('animationend', () => node.remove(), { once:true });
+  wishlistContent.classList.remove('blurred');
+  node.addEventListener('animationend', () => node.remove(), { once: true });
 }
 
-/* ───────────────────────── 9. Bootstrap ─────────────────────────────── */
+/* ───────────────────── 10. Bootstrap ─────────────────────────────── */
 hydrate();
 wishlistBtn?.addEventListener('click', () => { renderWishlistPanel(); showWishlist(); });
 closeBtn  ?.addEventListener('click', hideWishlist);
-
 document.getElementById('link-wishlist')
   .addEventListener('click', e => {
       e.preventDefault();
@@ -272,5 +272,6 @@ document.getElementById('link-wishlist')
       showWishlist();
   });
 
+/* ─── Devuelve API pública ─── */
+return { clearWishlist };
 }
-

@@ -39,6 +39,21 @@ window.addEventListener('load', () => {
   });
 });
 
+// main.js (o el módulo que corresponda)
+const wishlist = initWishlist({
+  selector: '.wishlist-btn',
+  clienteId: window.USER_ID ?? null,
+  isAuthenticated: !!window.USER_ID,
+  /* otros parámetros … */
+});
+
+async function handleLogout() {
+  await fetch('/logout/', { method: 'POST' });
+  wishlist.clearWishlist();      // ← vacía los corazones de la sesión actual
+  window.location.reload();      // si refrescas la página tras logout
+}
+
+
 setupScrollRestoration();
 setupHeaderScroll();
 setupBurgerMenu();
