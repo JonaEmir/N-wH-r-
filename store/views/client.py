@@ -9,7 +9,6 @@ from django.contrib.auth.hashers import check_password
 import json
 from django.views.decorators.csrf import csrf_exempt
 
-
 """
 get_all_clients devuelve la lista completa de clientes registrados
 """
@@ -152,9 +151,6 @@ def delete_client(request, id):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     
- 
-
-
 """
 Funciones de contacto para que el cliente se comunique por correo con nosotros 
 Todos los campos obligatorios
