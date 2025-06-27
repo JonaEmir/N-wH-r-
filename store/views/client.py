@@ -9,7 +9,6 @@ from django.contrib.auth.hashers import check_password
 import json
 from django.views.decorators.csrf import csrf_exempt
 
-
 """
 get_all_clients devuelve la lista completa de clientes registrados
 """

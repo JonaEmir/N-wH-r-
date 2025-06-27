@@ -20,8 +20,7 @@ from .views.views import (
 
 # ---------- Carrito ----------
 from .views.carrito import (
-    detalle_carrito, create_carrito,
-    update_carrito, delete_carrito,
+     create_carrito, detalle_carrito_cliente, delete_producto_carrito, vaciar_carrito
 )
 
 # ---------- Clientes ----------
@@ -116,10 +115,12 @@ urlpatterns = [
     path('user/delete/<int:id>/', delete_user, name='delete_user'),
 
     # ---------- Carrito ----------
-    path('carrito/<int:id>/',                 detalle_carrito,  name='detalle_carrito'),
-    path('carrito/crear/<int:cliente_id>/',   create_carrito,   name='create_carrito'),
-    path('carrito/update/<int:id>/',          update_carrito,   name='update_carrito'),
-    path('carrito/delete/<int:id>/',          delete_carrito,   name='delete_carrito'),
+
+    path('api/carrito/create/<int:cliente_id>/', create_carrito, name='create_carrito'),
+    path('api/carrito/<int:cliente_id>/', detalle_carrito_cliente, name='detalle_carrito'),
+    path('api/carrito/<int:cliente_id>/item/<int:variante_id>/',delete_producto_carrito,name='delete_producto_carrito'),
+    path('api/carrito/<int:cliente_id>/empty/', vaciar_carrito, name='vaciar_carrito'),
+
 
     # ---------- Wishlist ----------
     path('wishlist/<int:id_cliente>/',           wishlist_detail, name='wishlist_detail'),

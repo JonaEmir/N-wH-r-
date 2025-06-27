@@ -149,9 +149,13 @@ class Variante(models.Model):
     stock      = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    
     def __str__(self):
-        attrs = ", ".join(str(av) for av in self.attrs.all())
+        # Obtenemos directamente el valor de cada atributo
+        valores = [str(av.atributo_valor) for av in self.attrs.all()]
+        attrs   = ", ".join(valores)
         return f"{self.producto.nombre} ({attrs})" if attrs else self.producto.nombre
+
 
 class VarianteAtributo(models.Model):
     """
@@ -164,8 +168,8 @@ class VarianteAtributo(models.Model):
         unique_together = ("variante", "atributo_valor")
 
     def __str__(self):
-        return f"{self.variante} → {self.atributo_valor}"
-
+        # Devolvemos solo el texto del AtributoValor
+        return str(self.atributo_valor)
 
 # ——————————————————————————————————————
 # Carrito, Wishlist y Órdenes
@@ -180,9 +184,9 @@ class Carrito(models.Model):
         return f"Carrito de {self.cliente.username} ({self.status})"
 
 class CarritoProducto(models.Model):
-    carrito  = models.ForeignKey(Carrito, on_delete=models.CASCADE)
+    carrito  = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='items')
     variante = models.ForeignKey(Variante, on_delete=models.CASCADE)
-
+    cantidad  = models.PositiveIntegerField(default=1)
     def __str__(self):
         return f"{self.variante} en {self.carrito}"
 

@@ -1,109 +1,161 @@
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods, require_GET
-from ..models import Carrito, CarritoProducto 
-from .decorators import login_required_user, login_required_client
-from django.db.models import Prefetch
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.hashers import check_password 
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from ..models import Cliente, Carrito, Producto, AtributoValor, Variante, CarritoProducto
 import json
+from django.views.decorators.csrf import csrf_exempt
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_carrito(request, cliente_id):
+    # 1) Parsear y validar JSON
+    try:
+        payload     = json.loads(request.body)
+        prod_id     = payload["producto_id"]
+        talla_valor = payload["talla"]
+        cantidad    = int(payload["cantidad"])
+    except (json.JSONDecodeError, KeyError, ValueError):
+        return JsonResponse({'error': 'JSON inválido o faltan campos'}, status=400)
 
-def detalle_carrito(request, id):
-    if request.method != 'GET':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-    carrito = get_object_or_404(Carrito, id=id)
-    cliente = carrito.cliente
+    # 2) Obtener cliente
+    cliente = get_object_or_404(Cliente, id=cliente_id)
 
-    # 1) Todas las relaciones CarritoProducto para este carrito
-    items = CarritoProducto.objects.filter(carrito=carrito)
-    # — o bien —
-    items = carrito.carritoproducto_set.all()
+    # 3) Obtener o crear/activar carrito “activo”
+    carrito, created = Carrito.objects.get_or_create(
+        cliente=cliente,
+        defaults={'status': 'activo'}
+    )
+    if not created and carrito.status != 'activo':
+        carrito.status = 'activo'
+        carrito.save(update_fields=['status'])
 
-    # Ahora construimos la respuesta (JSON de ejemplo)
-    data = []
-    for cp in items.select_related('variante__producto'):
-        var = cp.variante
+    # 4) Resolver Variante
+    producto = get_object_or_404(Producto, id=prod_id)
+    atributo_valor = get_object_or_404(
+        AtributoValor,
+        atributo__nombre="Talla",
+        valor=talla_valor
+    )
+
+
+    variante = get_object_or_404(
+        Variante.objects.prefetch_related('attrs'),
+        producto=producto,
+        attrs__atributo_valor=atributo_valor
+    )
+
+    # 5) Añadir o actualizar cantidad
+    carrito_prod, creado = CarritoProducto.objects.get_or_create(
+        carrito=carrito,
+        variante=variante,
+        defaults={'cantidad': cantidad}
+    )
+    if not creado:
+        carrito_prod.cantidad += cantidad
+        carrito_prod.save(update_fields=['cantidad'])
+
+    # 6) Responder
+    return JsonResponse({
+        'mensaje':    'Producto agregado al carrito',
+        'carrito_id': carrito.id,
+        'status':     carrito.status,
+        'producto':   producto.nombre,
+        'variante': {
+            'sku':       variante.sku,
+            'atributos': [ str(av) for av in variante.attrs.all() ]
+        },
+        'cantidad':   carrito_prod.cantidad,
+        # opcional: subtotal aquí en back
+        'subtotal':   float((variante.precio or producto.precio) * carrito_prod.cantidad)
+    }, status=201)
+
+
+@require_http_methods(["GET"])
+def detalle_carrito_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    try:
+        carrito = cliente.carrito
+    except Carrito.DoesNotExist:
+        return JsonResponse({'error': 'El cliente no tiene un carrito.'}, status=404)
+
+    items = []
+    qs = (
+        CarritoProducto.objects
+        .filter(carrito=carrito)
+        .select_related('variante__producto')
+        .prefetch_related('variante__attrs__atributo_valor')
+    )
+
+    for cp in qs:
+        var  = cp.variante
         prod = var.producto
-        # Lista de atributos (talla, color…) si los tienes
-        attrs = [str(av) for av in var.attrs.all()]
-        data.append({
-            'producto': prod.nombre,
-            'precio_unitario': float(var.precio or prod.precio),
-            'atributos': attrs,
+        precio_unit = float(var.precio or prod.precio)
+        items.append({
+            'producto':        prod.nombre,
+            'precio_unitario': precio_unit,
+            'cantidad':        cp.cantidad,
+            'atributos':       [ str(av) for av in var.attrs.all() ],
+            'subtotal':        round(precio_unit * cp.cantidad, 2),
         })
 
     return JsonResponse({
-        'cliente': cliente.username,
-        'items': data,
-    })
-
-@csrf_exempt  # si lo llamas desde JS asegúrate de enviar X-CSRFToken o eximirlo
-@require_http_methods(["POST"])
-def create_carrito(request, cliente_id):
-    try:
-        payload = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'JSON inválido'}, status=400)
-
-    cliente = get_object_or_404(Cliente, id=cliente_id)
-    if hasattr(cliente, 'carrito'):
-        return JsonResponse({'error': 'El cliente ya tiene un carrito.'}, status=400)
-    status = payload.get('status', 'vacio')
-    carrito = Carrito.objects.create(cliente=cliente, status=status)
-    return JsonResponse({
-        'id':          carrito.id,
-        'cliente':     cliente.username,
-        'status':      carrito.status,
-        'created_at':  carrito.created_at.isoformat(),
-    }, status=201)
-
-@csrf_exempt
-@require_http_methods(["PUT", "PATCH"])
-def update_carrito(request, id):
-    # 1) Parsear JSON
-    try:
-        payload = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'JSON inválido'}, status=400)
-
-    # 2) Obtener carrito o 404
-    carrito = get_object_or_404(Carrito, id=id)
-
-    # 3) Campos que permitimos cambiar
-    campos_posibles = {
-        'status':        lambda val: setattr(carrito, 'status', val),
-        'cliente_id':    lambda val: setattr(carrito, 'cliente', get_object_or_404(Cliente, id=val)),
-    }
-
-    # 4) Aplicar sólo los que vienen en payload
-    campos_actualizados = []
-    for campo, setter in campos_posibles.items():
-        if campo in payload:
-            setter(payload[campo])
-            # en el modelo el field se llama “cliente” pero lo pasamos como “cliente_id”
-            campos_actualizados.append('cliente' if campo=='cliente_id' else campo)
-
-    if not campos_actualizados:
-        return JsonResponse({'error': 'No se enviaron campos a actualizar.'}, status=400)
-
-    # 5) Guardar sólo los update_fields necesarios
-    carrito.save(update_fields=campos_actualizados)
-    return JsonResponse({
-        'mensaje':    'Carrito actualizado',
-        'id':         carrito.id,
+        'cliente':    cliente.username,
+        'carrito_id': carrito.id,
         'status':     carrito.status,
-        'cliente':    carrito.cliente.username,
+        'items':      items,
     }, status=200)
 
 
-def delete_carrito(request,id):
 
-    if request.method != 'DELETE':
-        return JsonResponse({'error': 'Método no permitido'}, status=405)
-    carrito = get_object_or_404(Carrito, id=id)
-    carrito.delete()
-    return JsonResponse({'mensaje': f'carrito {carrito.id}  eliminados'}, status=200)
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_producto_carrito(request, cliente_id, variante_id):
+    """
+    Elimina una variante concreta del carrito activo del cliente.
+    """
+    # 1) Cliente → carrito
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    try:
+        carrito = cliente.carrito
+    except Carrito.DoesNotExist:
+        return JsonResponse({'error': 'El cliente no tiene carrito.'}, status=404)
 
+    # 2) Buscar y borrar la línea de CarritoProducto
+    carrito_prod = get_object_or_404(
+        CarritoProducto,
+        carrito=carrito,
+        variante_id=variante_id
+    )
+    carrito_prod.delete()
+
+    return JsonResponse(
+        {'mensaje': 'Producto eliminado del carrito.'},
+        status=200
+    )
+
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def vaciar_carrito(request, cliente_id):
+    """
+    Elimina todos los items del carrito activo del cliente y lo marca como 'vacio'.
+    """
+    # 1) Cliente → carrito
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    try:
+        carrito = cliente.carrito
+    except Carrito.DoesNotExist:
+        return JsonResponse({'error': 'El cliente no tiene carrito.'}, status=404)
+
+    # 2) Borrar todos los CarritoProducto
+    CarritoProducto.objects.filter(carrito=carrito).delete()
+
+    # 3) Marcar el carrito como vacío
+    carrito.status = 'vacio'
+    carrito.save(update_fields=['status'])
+
+    return JsonResponse(
+        {'mensaje': 'Carrito vaciado.'},
+        status=200
+    )

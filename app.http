@@ -148,12 +148,9 @@ Content-Type: application/json
 }
 
 ###
-
 DELETE http://127.0.0.1:8000/wishlist/all/1/
 
-
 ###
-
 POST http://127.0.0.1:8000/api/categorias/crear/ HTTP/1.1
 Content-Type: application/json
 
@@ -161,9 +158,30 @@ Content-Type: application/json
   "nombre": "Dama"
 }
 
-
 ###
-
 GET http://127.0.0.1:8000/api/categorias
 
-###
+### Obtener carrito activo del cliente 1
+GET http://127.0.0.1:8000/api/carrito/1/ HTTP/1.1
+Accept: application/json
+
+### Agregar producto al carrito del cliente 1
+POST http://127.0.0.1:8000/api/carrito/create/1/ HTTP/1.1
+Content-Type: application/json
+
+{
+  "producto_id": 1,
+  "talla": "28",
+  "cantidad": 1
+}
+
+
+
+### Vaciar carritp
+### Vaciar todo el carrito del cliente 1
+DELETE http://127.0.0.1:8000/api/carrito/1/empty/ HTTP/1.1
+Accept: application/json
+
+### Eliminar la variante (producto) con ID 5 del carrito del cliente 1 hacer get products para verificar el id de la variante
+DELETE http://127.0.0.1:8000/api/carrito/1/item/5/ HTTP/1.1
+Accept: application/json
