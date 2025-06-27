@@ -1,0 +1,26 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<h1>Editar Cliente</h1>
+
+<form method="post">
+  {% csrf_token %}
+  <label>Usuario:</label><br>
+  <input type="text" name="username" value="{{ cliente.username }}"><br><br>
+
+  <label>Correo:</label><br>
+  <input type="email" name="correo" value="{{ cliente.correo }}"><br><br>
+
+  <label>Nombre:</label><br>
+  <input type="text" name="nombre" value="{{ cliente.nombre }}"><br><br>
+
+  <label>Teléfono:</label><br>
+  <input type="text" name="telefono" value="{{ cliente.telefono }}"><br><br>
+
+  <label>Dirección:</label><br>
+  <input type="text" name="direccion" value="{{ cliente.direccion }}"><br><br>
+
+  <button type="submit">Guardar cambios</button>
+  <a href="{% url 'dashboard_clientes' %}">Cancelar</a>
+</form>
+{% endblock %}

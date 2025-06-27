@@ -14,7 +14,8 @@ from .views.views import (
     alta, lista_productos, editar_producto,
     get_categorias,
     login_user, logout_user,
-    login_client, logout_client,create_categoria
+    login_client, logout_client,create_categoria,
+    dashboard_clientes,editar_cliente, perfil_cliente
 )
 
 # ---------- Carrito ----------
@@ -68,6 +69,9 @@ urlpatterns = [
     path('create-client/', create_client, name='create_client'),
     path('login-client/',  login_client,  name='login_client'),
 
+    path('perfil/', perfil_cliente, name='perfil_cliente'),
+
+
     # ---------- Dashboard ----------
     # ---------- Dashboard ----------
     path('dashboard/login/',           login_user,        name='login_user'),
@@ -77,6 +81,10 @@ urlpatterns = [
     path('dashboard/productos/',                 lista_productos,   name='dashboard_productos'),
     path('dashboard/productos/crear/',           alta,              name='dashboard_alta'),
     path('dashboard/productos/editar/<int:id>/', editar_producto,   name='editar_producto'),
+
+    path('dashboard/clientes/', dashboard_clientes, name='dashboard_clientes'),
+    path('dashboard/clientes/editar/<int:id>/', editar_cliente, name='editar_cliente'),
+
 
 # --- Usuarios (cuando actives su view) ---
 # path('dashboard/usuarios/', dashboard_usuarios, name='dashboard_usuarios'),

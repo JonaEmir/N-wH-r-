@@ -1,5 +1,5 @@
 /*---Importacion de reset---*/
-@import url(/static/inicio/css/reset.css);
+@import url('/static/public/inicio/css/reset.css');
 
 @import url(header.css);
 
@@ -9,7 +9,7 @@
 
 
 /* 6. Media queries: responsive adaptado */
-@import url('/static/inicio/css/pre-footer.css');
+@import url('/static/public/inicio/css/pre-footer.css');
 
 /* 7. Media queries: responsive adaptado */
-@import url('/static/inicio/css/footer.css');
+@import url('/static/public/inicio/css/footer.css');

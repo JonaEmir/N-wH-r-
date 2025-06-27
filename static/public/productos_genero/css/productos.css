@@ -20,19 +20,19 @@
 
 /* ----- Encabezados generales ----- */
 .producto-card h2{
-  font-size:1em;
+  font-size: 12px;
   margin-bottom:20px;
   color:#1D1D1D;
   margin:8px 0 2px; 
 }
 .producto-card h3{
-  font-size:.5em;
+  font-size: 12px;
   margin-bottom:5px;
   color:#1D1D1D;
   margin:8px 0 2px; 
 }
 .producto-card h4{
-  font-size:.5em;
+  font-size: 12px;
   margin-bottom:5px;
    padding-left: 5px;
   color:#1D1D1D;
@@ -42,7 +42,7 @@
 }
 
 .producto-card h5{
-  font-size:.6em;
+  font-size: 12px;
   margin-bottom:5px;
   padding-left: 5px;
   color:#1d1d1d4c;

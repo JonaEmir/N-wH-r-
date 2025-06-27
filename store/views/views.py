@@ -206,6 +206,28 @@ def editar_producto(request, id):
         'variantes': variantes_data,
     })
 
+@login_required_user
+def dashboard_clientes(request):
+    clientes = Cliente.objects.all()
+    return render(request, 'dashboard/clientes/lista.html', {'clientes': clientes})
+
+@login_required_user
+def editar_cliente(request, id):
+    cliente = get_object_or_404(Cliente, id=id)
+
+    if request.method == 'GET':
+        return render(request, 'dashboard/clientes/editar.html', {'cliente': cliente})
+
+    if request.method == 'POST':
+        cliente.username  = request.POST.get('username')
+        cliente.correo    = request.POST.get('correo')
+        cliente.nombre    = request.POST.get('nombre')
+        cliente.telefono  = request.POST.get('telefono')
+        cliente.direccion = request.POST.get('direccion')
+        cliente.save()
+        return redirect('dashboard_clientes')
+
+
 @require_POST          # fuerza solo POSTAdd commentMore actions
 def login_client(request):
     """
@@ -374,3 +396,21 @@ def delete_carrito(request,id):
     carrito = get_object_or_404(Carrito, id=id)
     carrito.delete()
     return JsonResponse({'mensaje': f'carrito {carrito.id}  eliminados'}, status=200)
+
+
+@require_http_methods(["GET", "POST"])
+def perfil_cliente(request):
+    cliente_id = request.session.get("cliente_id")
+    if not cliente_id:
+        return redirect("index")  # si no ha iniciado sesión
+
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+
+    if request.method == "POST":
+        cliente.nombre = request.POST.get("nombre")
+        cliente.telefono = request.POST.get("telefono")
+        cliente.direccion = request.POST.get("direccion")
+        cliente.save()
+        return redirect("perfil_cliente")
+
+    return render(request, "public/cliente/perfil.html", {"cliente": cliente})
