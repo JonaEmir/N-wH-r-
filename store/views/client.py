@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods, require_GET
 from ..models import Cliente, ContactoCliente
@@ -73,31 +73,37 @@ def detalle_client(request, id):
 @csrf_exempt
 @require_http_methods(["POST"])
 def create_client(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body) #Aqui si se puede parsear el json por que l cabezal es apication json no multipl    
-            print(data)
-            username = data.get('username')
-            password = data.get('password')
-            correo = data.get('correo')
-            nombre = data.get('nombre')
-            telefono = data.get('telefono')
-            direccion = data.get('direccion')
+    try:
+        data = json.loads(request.body)
+        print("📥 Datos recibidos:", data)
 
-            if not username or not password:
-                return JsonResponse({'error': 'Faltan campos obligatorios'}, status=400)
-            cliente = Cliente.objects.create(
-                username=username,
-                password=make_password(password),
-                correo=correo,
-                nombre=nombre,
-                telefono=telefono,
-                direccion=direccion
+        username  = data.get('username')
+        password  = data.get('password')
+        correo    = data.get('correo')
+        nombre    = data.get('nombre')
+        telefono  = data.get('telefono')
+        direccion = data.get('direccion')
 
-            )
-            return JsonResponse({'username': cliente.username, 'message': 'Cliente creado con éxito'}, status=201)
-        except Exception as e:
-            return JsonResponse({'error': str(e)})
+        # Validación de campos obligatorios
+        if not username or not password or not correo:
+            return JsonResponse({'error': 'Faltan campos obligatorios'}, status=400)
+
+        cliente = Cliente.objects.create(
+            username=username,
+            password=make_password(password),
+            correo=correo,
+            nombre=nombre,
+            telefono=telefono,
+            direccion=direccion
+        )
+
+        print("✅ Cliente creado con ID:", cliente.id)
+        return JsonResponse({'username': cliente.username, 'message': 'Cliente creado con éxito'}, status=201)
+
+    except Exception as e:
+        print("❌ Error al crear cliente:", str(e))
+        return JsonResponse({'error': str(e)}, status=400)
+
 
 
 
@@ -138,19 +144,32 @@ def update_client(request, id):
 """
 -delete_client elimina un cliente en especifico por id
 """
-@require_http_methods(["DELETE"])
+@require_http_methods(["POST", "DELETE"])
 def delete_client(request, id):
-    if request.method == 'DELETE':
-        try:
-            cliente = Cliente.objects.get(id=id)  
-            username=cliente.nombre
-            cliente.delete()
-            return JsonResponse({'mensaje': f'cliente {username} eliminado correctamente'}, status=200) 
-        except Cliente.DoesNotExist:
-            return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    
+    try:
+        cliente = Cliente.objects.get(id=id)
+        username = cliente.nombre
+        cliente.delete()
+
+        # Si es un formulario HTML (POST), redirige al dashboard
+        if request.method == "POST":
+            return redirect('dashboard_clientes')
+
+        # Si es una llamada AJAX DELETE
+        return JsonResponse({'mensaje': f'Cliente {username} eliminado correctamente'}, status=200)
+
+    except Cliente.DoesNotExist:
+        if request.method == "POST":
+            return redirect('dashboard_clientes')
+        return JsonResponse({'error': 'Cliente no encontrado'}, status=404)
+
+    except Exception as e:
+        if request.method == "POST":
+            return redirect('dashboard_clientes')
+        return JsonResponse({'error': str(e)}, status=400)   
+ 
+
+
 """
 Funciones de contacto para que el cliente se comunique por correo con nosotros 
 Todos los campos obligatorios

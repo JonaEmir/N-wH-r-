@@ -1,6 +1,5 @@
 /* -------- Obtener token CSRF desde el input oculto -------- */
 function getCSRFToken() {
-  // Busca el campo que Django inserta con {% csrf_token %}
   const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
   return el ? el.value : '';
 }
@@ -13,13 +12,36 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email  = form.email.value.trim();
-    const email2 = form.email2.value.trim();
-    const pwd    = form.pwd.value;
+    // Obtener valores del formulario
+    const email     = form.email.value.trim();
+    const email2    = form.email2.value.trim();
+    const pwd       = form.pwd.value;
+    const nombre    = form.nombre.value.trim();
+    const telefono  = form.telefono.value.trim();
+    const direccion = form.direccion.value.trim();
+
+    // Validaciones obligatorias
+    if (!email || !email2 || !pwd) {
+      alert("❌ Los campos de correo, confirmación y contraseña son obligatorios.");
+      return;
+    }
 
     if (email !== email2) {
-      alert("❌ Los correos no coinciden."); return;
+      alert("❌ Los correos no coinciden.");
+      return;
     }
+
+    // Armar el objeto de datos
+    const datos = {
+      username: email,
+      password: pwd,
+      correo: email,
+    };
+
+    // Agregar opcionales si están llenos
+    if (nombre) datos.nombre = nombre;
+    if (telefono) datos.telefono = telefono;
+    if (direccion) datos.direccion = direccion;
 
     try {
       const res = await fetch("/create-client/", {
@@ -27,9 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
         credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken(),      // ✅ ahora siempre tiene valor
+          "X-CSRFToken": getCSRFToken(),
         },
-        body: JSON.stringify({ username: email, password: pwd }),
+        body: JSON.stringify(datos),
       });
 
       const data = await res.json().catch(() => ({}));

@@ -1,0 +1,18 @@
+{% extends 'public/base.html' %}
+
+{% block content %}
+<h2>Editar Perfil</h2>
+<form method="POST">
+  {% csrf_token %}
+  <label>Nombre:</label>
+  <input type="text" name="nombre" value="{{ cliente.nombre }}"><br>
+
+  <label>Teléfono:</label>
+  <input type="text" name="telefono" value="{{ cliente.telefono }}"><br>
+
+  <label>Dirección:</label>
+  <input type="text" name="direccion" value="{{ cliente.direccion }}"><br>
+
+  <button type="submit">Guardar cambios</button>
+</form>
+{% endblock %}

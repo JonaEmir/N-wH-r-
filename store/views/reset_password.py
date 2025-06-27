@@ -91,13 +91,13 @@ def reset_password_submit(request, uidb64, token):
 
             if not pass1 or not pass2:
                 return render(request,
-                              "public/recuperar-nuevo-password.html",
+                              "public/password/recuperar-nuevo-password.html",
                               {"uidb64": uidb64, "token": token,
                                "error": "Debes escribir la contraseña dos veces."})
 
             if pass1 != pass2:
                 return render(request,
-                              "public/recuperar-nuevo-password.html",
+                              "public/password/recuperar-nuevo-password.html",
                               {"uidb64": uidb64, "token": token,
                                "error": "Las contraseñas no coinciden."})
 

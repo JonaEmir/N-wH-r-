@@ -1,0 +1,43 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<h1>👥 Lista de Clientes</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Usuario</th>
+      <th>Correo</th>
+      <th>Nombre</th>
+      <th>Teléfono</th>
+      <th>Dirección</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for cliente in clientes %}
+    <tr>
+      <td>{{ cliente.username }}</td>
+      <td>{{ cliente.correo }}</td>
+      <td>{{ cliente.nombre }}</td>
+      <td>{{ cliente.telefono }}</td>
+      <td>{{ cliente.direccion }}</td>
+      <td>
+        <a href="{% url 'editar_cliente' cliente.id %}">✏️ Editar</a>
+
+        <!-- Formulario para eliminar -->
+        <form action="{% url 'delete_client' cliente.id %}" method="post" style="display:inline">
+          {% csrf_token %}
+          <button onclick="return confirm('¿Eliminar este cliente?')">🗑️ Borrar</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="6">No hay clientes registrados.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
