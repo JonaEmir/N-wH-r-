@@ -21,7 +21,7 @@ def get_cliente_id(request, username):
     """
     cliente = get_object_or_404(Cliente, username=username)
     return JsonResponse({'id': cliente.id})
-# ---------------------------------------------------------------------------
+# ---------------------Restful obtiene, inserta y elimina -------------------------------------------
 @csrf_exempt
 @require_http_methods(['GET', 'PATCH', 'DELETE'])
 def wishlist_detail(request, id_cliente):
@@ -30,17 +30,6 @@ def wishlist_detail(request, id_cliente):
 
     # ───── GET: devuelve sólo la lista de IDs ───────────────────────────────
     if request.method == 'GET':
-        """ producto = get_object_or_404(Producto, pk=id)   # 2️⃣  usa la misma variable
-
-        precio = float(producto.precio) if isinstance(producto.precio, decimal.Decimal) else producto.precio
-
-        data = {
-                "id":     producto.id,
-                "nombre": producto.nombre,
-                "precio": precio,
-                "imagen": request.build_absolute_uri(producto.imagen.url) if producto.imagen else "",
-            }
-        return JsonResponse(data)"""
         productos=[]
         ids = list(wishlist.productos.values_list('id', flat=True))
         for i in ids:

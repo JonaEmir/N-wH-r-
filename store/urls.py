@@ -39,7 +39,7 @@ from .views.users import (
 from .views.products import (
     detalle_producto,
     get_all_products, create_product,
-    update_productos, update_variant, delete_productos,
+    update_productos, update_variant, delete_productos, delete_all_productos
 )
 
 # ---------- Wishlist ----------
@@ -95,6 +95,8 @@ urlpatterns = [
     path('api/productos/crear/',                    create_product,    name='create_product'),
     path('api/productos/update/<int:id>/',          update_productos,  name='update_product'),
     path('api/productos/delete/<int:id>/',          delete_productos,  name='delete_product'),
+    path('api/productos/delete/all/',          delete_all_productos,  name='delete_all_productos'),
+    
     path('api/variantes/update/<int:variante_id>/', update_variant,    name='update_variant'),
     path('api/categorias/',                         get_categorias,    name='get_categorias'),
     path('api/categorias/crear/',  create_categoria, name='create_categoria'),
@@ -127,6 +129,15 @@ urlpatterns = [
     path('wishlist/all/<int:id_cliente>/',       wishlist_all,    name='wishlist_detail'),  # nombre duplicado
             # --- API “tallas” (debe ir antes o no importa, pero queda claro) ---
     path('api/productos/<int:id_producto>/', producto_tallas, name='producto_tallas'),
+
+
+
+    # ---------- Orden ----------
+    #path('orden/<int:id_cliente>/',           "orden_detail", name='orden_detail'),
+    #path('orden/all/<int:id_cliente>/',       "orden_all",    name='orden_detail'),  # nombre duplicado
+            # --- API “tallas” (debe ir antes o no importa, pero queda claro) ---
+    #path('api/productos/<int:id_producto>/', producto_tallas, name='producto_tallas'),
+
 
 
     # Alias antiguo
