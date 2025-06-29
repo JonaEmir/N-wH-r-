@@ -75,7 +75,8 @@
   <div class="categoria-grid">
     {% for p in dama_home %}
       <div class="categoria-card">
-  <a href="{% url 'detalle_producto' p.id %}">
+  <a href="{% url 'detalle_producto' p.id %}?from=dama">
+
     <div class="thumb"><img src="{{ p.imagen.url }}" alt="{{ p.nombre }}"></div>
   </a>
 
@@ -114,7 +115,8 @@
   <div class="categoria-grid">
     {% for p in cab_home %}
       <div class="categoria-card">
-  <a href="{% url 'detalle_producto' p.id %}">
+  <a href="{% url 'detalle_producto' p.id %}?from=caballero">
+
     <div class="thumb"><img src="{{ p.imagen.url }}" alt="{{ p.nombre }}"></div>
   </a>
 

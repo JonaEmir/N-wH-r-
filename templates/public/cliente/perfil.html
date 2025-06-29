@@ -1,18 +1,37 @@
 {% extends 'public/base.html' %}
+{% load static %}  {# <-- ESTA LÍNEA ES NECESARIA PARA USAR {% static %} #}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'public/cliente/css/main.css' %}">
+{% endblock %}
 
 {% block content %}
-<h2>Editar Perfil</h2>
-<form method="POST">
-  {% csrf_token %}
-  <label>Nombre:</label>
-  <input type="text" name="nombre" value="{{ cliente.nombre }}"><br>
+<main class="fade-in">
 
-  <label>Teléfono:</label>
-  <input type="text" name="telefono" value="{{ cliente.telefono }}"><br>
+  <h1>Editar Perfil</h1>
+  <p class="lead">Actualiza tu información personal. Solo los campos necesarios deben completarse.</p>
 
-  <label>Dirección:</label>
-  <input type="text" name="direccion" value="{{ cliente.direccion }}"><br>
+  <form method="POST">
+    {% csrf_token %}
 
-  <button type="submit">Guardar cambios</button>
-</form>
+    <div>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" value="{{ cliente.nombre }}">
+    </div>
+
+    <div>
+      <label for="telefono">Teléfono:</label>
+      <input type="text" id="telefono" name="telefono" value="{{ cliente.telefono }}">
+    </div>
+
+    <div>
+      <label for="direccion">Dirección:</label>
+      <input type="text" id="direccion" name="direccion" value="{{ cliente.direccion }}">
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn-primary">Guardar cambios</button>
+    </div>
+  </form>
+</main>
 {% endblock %}
