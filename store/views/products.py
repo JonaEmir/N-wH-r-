@@ -75,6 +75,7 @@ def get_all_products(request):
                 'id': v.id,
                 'sku': v.sku,
                 'precio': float(v.precio or p.precio),
+                'precio_mayorista': float(v.precio_mayorista or p.precio_mayorista),
                 'stock': v.stock,
                 'atributos': attrs,
             })
@@ -103,6 +104,7 @@ def create_product(request):
         nombre      = request.POST['nombre']
         descripcion = request.POST['descripcion']
         precio      = request.POST['precio']
+        precio_mayorista = request.POST['precio_mayorista']
         categoria   = Categoria.objects.get(id=request.POST['categoria_id'])
         genero      = request.POST['genero']
         en_oferta   = request.POST.get('en_oferta') == 'on'
@@ -125,6 +127,7 @@ def create_product(request):
         nombre=nombre,
         descripcion=descripcion,
         precio=precio,
+        precio_mayorista= precio_mayorista,
         categoria=categoria,
         genero=genero,
         en_oferta=en_oferta,
@@ -146,6 +149,7 @@ def create_product(request):
             variante = Variante.objects.create(
                 producto=producto,
                 precio=precio,
+                precio_mayorista=precio_mayorista,
                 stock=stock,
             )
             variante.attrs.create(atributo_valor=valor_talla)
@@ -167,6 +171,7 @@ def create_product(request):
         variante = Variante.objects.create(
             producto=producto,
             precio=precio,
+            precio_mayorista=precio_mayorista,
             stock=stock_unico,
         )
         variante.attrs.create(atributo_valor=valor_talla)
@@ -182,7 +187,7 @@ def update_productos(request, id):
     producto = get_object_or_404(Producto, id=id)
 
     # Campos del Producto
-    for field in ('nombre', 'descripcion', 'precio', 'genero'):
+    for field in ('nombre', 'descripcion', 'precio', 'precio_mayorista', 'genero'):
         if field in request.POST:
             setattr(producto, field, request.POST[field])
 
@@ -214,6 +219,9 @@ def update_variant(request, variante_id):
         variante.stock = int(request.POST['stock'])
     if 'precio' in request.POST:
         variante.precio = request.POST['precio']
+
+    if 'precio_mayorista' in request.POST:
+        variante.precio_mayorista = request.POST['precio_mayorista']
     if 'sku' in request.POST:
         variante.sku = request.POST['sku']
 

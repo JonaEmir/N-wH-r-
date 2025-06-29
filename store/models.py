@@ -96,6 +96,7 @@ class Producto(models.Model):
     precio      = models.DecimalField(max_digits=10, decimal_places=2)
     categoria   = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     genero      = models.CharField(max_length=50)
+    precio_mayorista = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     en_oferta   = models.BooleanField(default=False)
     imagen      = models.ImageField(upload_to='productos/', blank=True, null=True)
     created_at  = models.DateTimeField(auto_now_add=True)
@@ -146,6 +147,7 @@ class Variante(models.Model):
     precio     = models.DecimalField(max_digits=10, decimal_places=2,
                                      blank=True, null=True,
                                      help_text="Si varía de precio respecto al Producto")
+    precio_mayorista = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     stock      = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 

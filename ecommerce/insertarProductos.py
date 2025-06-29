@@ -18,8 +18,8 @@ productos = [
         "en_oferta": True,
         "stock_total": 10,
         "variantes": [
-            {"id": 1,  "precio": 2900.0, "stock": 5,  "atributos": {"Talla": "26"}},
-            {"id": 2,  "precio": 2900.0, "stock": 5,  "atributos": {"Talla": "28"}}
+            {"id": 1,  "precio_mayorista":1200,"precio": 2900.0, "stock": 5,  "atributos": {"Talla": "26"}},
+            {"id": 2,  "precio_mayorista":1200,"precio": 2900.0, "stock": 5,  "atributos": {"Talla": "28"}}
         ]
     },
     {
@@ -31,8 +31,8 @@ productos = [
         "en_oferta": False,
         "stock_total": 40,
         "variantes": [
-            {"id": 3,  "precio": 3600.0, "stock": 10, "atributos": {"Talla": "26"}},
-            {"id": 4,  "precio": 3600.0, "stock": 30, "atributos": {"Talla": "27"}}
+            {"id": 3,  "precio_mayorista":1200,"precio": 3600.0, "stock": 10, "atributos": {"Talla": "26"}},
+            {"id": 4,  "precio_mayorista":1200,"precio": 3600.0, "stock": 30, "atributos": {"Talla": "27"}}
         ]
     },
     {
@@ -44,9 +44,9 @@ productos = [
         "en_oferta": True,
         "stock_total": 32,
         "variantes": [
-            {"id": 5,  "precio": 2200.0, "stock": 5,  "atributos": {"Talla": "26"}},
-            {"id": 6,  "precio": 2200.0, "stock": 7,  "atributos": {"Talla": "27"}},
-            {"id": 7,  "precio": 2200.0, "stock": 20, "atributos": {"Talla": "28"}}
+            {"id": 5,  "precio_mayorista":1200,"precio": 2200.0, "stock": 5,  "atributos": {"Talla": "26"}},
+            {"id": 6,  "precio_mayorista":1200,"precio": 2200.0, "stock": 7,  "atributos": {"Talla": "27"}},
+            {"id": 7,  "precio_mayorista":1200,"precio": 2200.0, "stock": 20, "atributos": {"Talla": "28"}}
         ]
     },
     {
@@ -58,8 +58,8 @@ productos = [
         "en_oferta": False,
         "stock_total": 2,
         "variantes": [
-            {"id": 8,  "precio": 3000.0, "stock": 1, "atributos": {"Talla": "26"}},
-            {"id": 9,  "precio": 3000.0, "stock": 1, "atributos": {"Talla": "29"}}
+            {"id": 8,  "precio_mayorista":1200,"precio": 3000.0, "stock": 1, "atributos": {"Talla": "26"}},
+            {"id": 9,  "precio_mayorista":1200,"precio": 3000.0, "stock": 1, "atributos": {"Talla": "29"}}
         ]
     },
     {
@@ -71,8 +71,8 @@ productos = [
         "en_oferta": False,
         "stock_total": 3,
         "variantes": [
-            {"id": 10, "precio": 1400.0, "stock": 2, "atributos": {"Talla": "26"}},
-            {"id": 11, "precio": 1400.0, "stock": 1, "atributos": {"Talla": "28"}}
+            {"id": 10, "precio_mayorista":1200,"precio": 1400.0, "stock": 2, "atributos": {"Talla": "26"}},
+            {"id": 11, "precio_mayorista":1200,"precio": 1400.0, "stock": 1, "atributos": {"Talla": "28"}}
         ]
     },
     {
@@ -84,8 +84,8 @@ productos = [
         "en_oferta": True,
         "stock_total": 4,
         "variantes": [
-            {"id": 12, "precio": 2000.0, "stock": 3, "atributos": {"Talla": "26"}},
-            {"id": 13, "precio": 2000.0, "stock": 1, "atributos": {"Talla": "27"}}
+            {"id": 12, "precio_mayorista":1200,"precio": 2000.0, "stock": 3, "atributos": {"Talla": "26"}},
+            {"id": 13, "precio_mayorista":1200,"precio": 2000.0, "stock": 1, "atributos": {"Talla": "27"}}
         ]
     }
 ]
@@ -100,12 +100,14 @@ categoria_map = {
 def crear_producto(p):
     # Toma precio y stock total
     precio = p['variantes'][0]['precio'] if p.get('variantes') else 0
-
+    precio_mayorista =  p['variantes'][0]['precio_mayorista'] if p.get('variantes') else 0
+    
     # Lo que lee tu vista en request.POST
     data = {
         'nombre':       p['nombre'],
         'descripcion':  p['descripcion'],
         'precio':       str(precio),
+        'precio_mayorista': str(precio_mayorista),
         'categoria_id': str(categoria_map.get(p['categoria'], '')),
         'genero':       p['genero'],
     }
