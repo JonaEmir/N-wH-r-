@@ -20,12 +20,17 @@
   </label>
 
   <label>Descripción
-    <textarea name="descripcion" rows="4" required></textarea>
+    <textarea name="descripcion" rows="4"></textarea>
   </label>
 
-  <label>Precio
+  <label>Precio Unitario
     <input type="number" name="precio" step="0.01" min="0" required />
   </label>
+
+  <label>Precio mayorista
+  <input type="number" name="precio_mayorista" step="0.01" min="0" required />
+</label>
+
 
   <label>Categoría
     <select name="categoria_id" required>
@@ -47,7 +52,7 @@
   </label>
 
   <label>Imagen
-    <input type="file" name="imagen" accept="image/*" required />
+    <input type="file" name="imagen" accept="image/*"  />
   </label>
 
   <fieldset>
