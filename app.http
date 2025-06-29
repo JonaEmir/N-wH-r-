@@ -1,7 +1,8 @@
 ### obtener productos
-GET http://127.0.0.1:8000/api/productos
+GET http://127.0.0.1:8000/api/productos 
 
-
+###
+DELETE http://127.0.0.1:8000/api/productos/delete/all/
 ### Crear productos
 POST http://127.0.0.1:8000/api/productos/crear/
 Content-Type: application/json

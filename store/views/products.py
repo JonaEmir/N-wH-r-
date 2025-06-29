@@ -6,6 +6,7 @@ from .decorators import login_required_user, login_required_client
 from django.db.models import Prefetch
 import json
 
+from django.views.decorators.csrf import csrf_exempt
 
 
 def detalle_producto(request, id):
@@ -92,8 +93,9 @@ def get_all_products(request):
         })
 
     return JsonResponse(data, safe=False)
+#@login_required_user
+@csrf_exempt
 
-@login_required_user
 @require_http_methods(["POST"])
 def create_product(request):
     try:
@@ -227,3 +229,15 @@ def delete_productos(request, id):
     producto = get_object_or_404(Producto, id=id)
     producto.delete()
     return JsonResponse({'mensaje': f'Producto {producto.nombre} y sus variantes eliminados'}, status=200)
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_all_productos(request):
+    # Contamos cuántos productos hay antes de borrarlos
+    total = Producto.objects.count()
+    # Eliminamos todos los productos
+    Producto.objects.all().delete()
+    return JsonResponse(
+        {'mensaje': f'Se eliminaron {total} productos y sus variantes'},
+        status=200
+    )
