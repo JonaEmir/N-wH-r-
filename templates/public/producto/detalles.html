@@ -22,27 +22,50 @@
 
   <div class="detalle-container">
 
+    <!-- ── Imagen ── -->
     <div class="detalle-imagen">
       {% if producto.imagen %}
         <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
       {% endif %}
     </div>
 
+    <!-- ── Información ── -->
     <div class="detalle-info">
       <p class="sku">{{ producto.id|stringformat:"03d" }}</p>
       <h2>{{ producto.nombre }}</h2>
-      <h3>${{ producto.precio|floatformat:2 }}</h3>
+      <h3 id="precio-actual">${{ producto.precio|floatformat:2 }}</h3>
 
-      <label for="selector-talla">Seleccione su talla</label>
-      <select id="selector-talla">
-        <option value="">Seleccione su talla</option>
+      <!-- Selector inicial -->
+      <label for="select-talla-inicial">Elige tu primera talla:</label>
+      <select id="select-talla-inicial">
+        <option value="">Seleccionar talla</option>
         {% for t in tallas %}
           <option value="{{ t }}">{{ t }}</option>
         {% endfor %}
       </select>
 
+      <!-- Contenedor de líneas dinámicas -->
+      <div id="lineas-tallas"></div>
+
+      <!-- Selector extra (oculto hasta crear 1ª línea) -->
+      <div id="wrapper-select-extra" style="display:none; margin-top:10px;">
+        <select id="select-talla-extra">
+          <option value="">Añadir Talla </option>
+          {% for t in tallas %}
+            <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <p id="info-stock" style="display: none;"></p>
+
+      <p>Sujeto a Disponibilidad</p>
+
       <a href="#" class="guia-tallas">Guía de tallas</a>
-      <button class="boton-contacto">Contactar a un Asesor</button>
+
+      <!-- Botón acción -->
+      <button class="btn-asesor" id="btn-agregar-carrito">🛒 Agregar al carrito</button>
+      <p id="mensaje-carrito" class="msg"></p>
 
       <p class="descripcion">{{ producto.descripcion }}</p>
     </div>
@@ -50,7 +73,12 @@
   </div>
 </section>
 
-<!-- Variantes JSON para el JS -->
+<!-- Datos para JS -->
+<div id="detalles-datos"
+     data-cliente-id="{{ request.session.cliente_id }}"
+     data-producto-id="{{ producto.id }}"></div>
+
+<!-- Variantes JSON -->
 <script id="variantes-data" type="application/json">
   {{ variantes_json|safe }}
 </script>

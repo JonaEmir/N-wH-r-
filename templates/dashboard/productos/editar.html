@@ -22,6 +22,10 @@
     <input type="number" name="precio" step="0.01" min="0" value="{{ producto.precio }}" required />
   </label>
 
+  <label>Precio Mayorista
+    <input type="number" name="precio_mayorista" step="0.01" min="0" value="{{ producto.precio_mayorista }}" />
+  </label>
+
   <label>Categoría
     <select name="categoria_id" required>
       {% for categoria in categorias %}
@@ -62,32 +66,37 @@
 
   <h2>Variantes</h2>
 
-{% if producto.variantes.all %}
-  {% for variante in producto.variantes.all %}
-    <fieldset>
-      <legend>Variante #{{ forloop.counter }}</legend>
+  {% if producto.variantes.all %}
+    {% for variante in producto.variantes.all %}
+      <fieldset>
+        <legend>Variante #{{ forloop.counter }}</legend>
 
-      <input type="hidden" name="variante_id" value="{{ variante.id }}">
+        <input type="hidden" name="variante_id" value="{{ variante.id }}">
 
-      <label>Talla:
-        {{ variante.attrs.first.atributo_valor.valor }}
-        <!-- Asumimos solo 1 atributo (Talla) por variante -->
-      </label>
+        <label>Talla:
+          {{ variante.attrs.first.atributo_valor.valor }}
+          <!-- Asumimos solo 1 atributo (Talla) por variante -->
+        </label>
 
-      <label>Precio
-        <input type="number" name="variante_precio_{{ variante.id }}" step="0.01"
-               value="{{ variante.precio|default:producto.precio }}">
-      </label>
+        <label>Precio
+          <input type="number" name="variante_precio_{{ variante.id }}" step="0.01"
+                 value="{{ variante.precio|default:producto.precio }}">
+        </label>
 
-      <label>Stock
-        <input type="number" name="variante_stock_{{ variante.id }}" min="0"
-               value="{{ variante.stock }}">
-      </label>
-    </fieldset>
-  {% endfor %}
-{% else %}
-  <p>No hay variantes registradas.</p>
-{% endif %}
+        <label>Precio Mayorista
+          <input type="number" name="variante_precio_mayorista_{{ variante.id }}" step="0.01"
+                 value="{{ variante.precio_mayorista|default:producto.precio_mayorista }}">
+        </label>
+
+        <label>Stock
+          <input type="number" name="variante_stock_{{ variante.id }}" min="0"
+                 value="{{ variante.stock }}">
+        </label>
+      </fieldset>
+    {% endfor %}
+  {% else %}
+    <p>No hay variantes registradas.</p>
+  {% endif %}
 
   <button type="submit">Actualizar</button>
   <p class="msg" id="mensaje"></p>

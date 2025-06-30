@@ -4,6 +4,7 @@ from django.views.decorators.http import require_http_methods, require_GET
 from ..models import Atributo, AtributoValor, Producto, Categoria, Variante
 from .decorators import login_required_user, login_required_client
 from django.db.models import Prefetch
+from decimal import Decimal
 import json
 
 from django.views.decorators.csrf import csrf_exempt
@@ -187,9 +188,20 @@ def update_productos(request, id):
     producto = get_object_or_404(Producto, id=id)
 
     # Campos del Producto
-    for field in ('nombre', 'descripcion', 'precio', 'precio_mayorista', 'genero'):
+    from decimal import Decimal  # asegúrate de tener esta importación al inicio del archivo
+
+    # Campos del Producto
+    campos = ('nombre', 'descripcion', 'precio', 'precio_mayorista', 'genero')
+    for field in campos:
         if field in request.POST:
-            setattr(producto, field, request.POST[field])
+            valor = request.POST[field]
+            if field in ['precio', 'precio_mayorista']:
+                try:
+                    valor = Decimal(valor)
+                except:
+                    return JsonResponse({'error': f'Formato inválido en {field}'}, status=400)
+            setattr(producto, field, valor)
+
 
     if 'en_oferta' in request.POST:
         producto.en_oferta = request.POST.get('en_oferta') == 'on'

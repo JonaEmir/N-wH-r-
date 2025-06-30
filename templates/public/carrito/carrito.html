@@ -1,0 +1,105 @@
+{% extends "public/base.html" %}
+{% load static %}
+
+{% block title %}Mi Carrito - NöwHėrē{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'public/carrito/css/carrito.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="carrito-container" id="carrito-container">
+
+  <h1 class="carrito-titulo">Carrito</h1>
+
+  <!-- 🔔 Alerta de piezas restantes para mayoreo -->
+  <div id="alerta-meta-mayoreo" class="alert-meta-mayoreo" style="display: none;">
+    <div class="scroll-wrapper">
+      <span> Solo te faltan <strong class="piezas-restantes">4</strong> piezas para alcanzar el <strong>precio de mayoreo</strong>. ¡Aprovecha la oferta! </span>
+      <span> Solo te faltan <strong class="piezas-restantes">4</strong> piezas para alcanzar el <strong>precio de mayoreo</strong>. ¡Aprovecha la oferta! </span>
+      <span> Solo te faltan <strong class="piezas-restantes">4</strong> piezas para alcanzar el <strong>precio de mayoreo</strong>. ¡Aprovecha la oferta! </span>
+    </div>
+  </div>
+
+  <!-- ✅ Alerta de mayoreo activado -->
+  <div id="alerta-mayoreo" class="alert-mayoreo" style="display: none;">
+    <div class="scroll-wrapper">
+      <span> Estás comprando al <strong>precio de mayoreo</strong>. ¡Aprovecha tus ahorros! </span>
+      <span> Estás comprando al <strong>precio de mayoreo</strong>. ¡Aprovecha tus ahorros! </span>
+    </div>
+  </div>
+
+  <!-- 🛒 Contenido activo del carrito -->
+  <div id="carrito-activo" style="{% if not productos %}display:none;{% endif %}">
+    <div class="carrito-items">
+      {% for item in productos %}
+      <div class="carrito-item"
+           data-variante-id="{{ item.variante_id }}"
+           data-cantidad="{{ item.cantidad }}"
+           data-precio-menudeo="{{ item.precio }}"
+           data-precio-mayorista="{{ item.precio_mayorista }}">
+
+        <div class="item-imagen">
+          <img src="{{ item.imagen|default:'/static/img/no-image.jpg' }}" alt="{{ item.nombre }}">
+        </div>
+
+        <div class="item-detalles">
+          <h4>{{ item.nombre }}</h4>
+          <span>Talla: {{ item.talla }}</span>
+        </div>
+
+        <div class="item-precio">
+          $<span class="precio-unitario">0.00</span>
+          <span class="badge badge-menudeo">(menudeo)</span>
+        </div>
+
+        <div class="item-cantidad qty-wrap">
+          <button class="btn-minus">−</button>
+          <input type="number" class="qty" min="1" value="{{ item.cantidad }}">
+          <button class="btn-plus">＋</button>
+        </div>
+
+        <div class="item-subtotal">
+          $<span class="subtotal">0.00</span>
+        </div>
+
+        <button class="item-remove btn-eliminar" data-variante-id="{{ item.variante_id }}">×</button>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="carrito-resumen">
+      <p>Subtotal: <strong id="carrito-subtotal">$0.00</strong></p>
+      <div class="carrito-botones">
+
+        <button class="btn-vaciar">Vaciar Carrito</button>
+        <a href="{% url 'finalizar_compra' %}" class="btn-finalizar">Finalizar compra</a>
+        <a href="{% url 'index' %}" class="btn-seguir">Seguir comprando</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🪣 Vista carrito vacío -->
+  <div id="carrito-vacio" style="{% if productos %}display:none;{% endif %}">
+    <section class="carrito-vacio-section">
+      {% if request.session.cliente_id %}
+        <h2>Tu carrito está vacío</h2>
+        <p>Añade productos para verlos aquí.</p>
+        <a href="{% url 'index' %}" class="btn">Ir a la tienda</a>
+      {% else %}
+        <h2>Tu carrito está vacío</h2>
+        <p>Inicia sesión para ver tu carrito de compra.</p>
+        <a href="#" onclick="mostrarLoginPanel()" class="btn">Iniciar sesión</a>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const CLIENTE_ID = {{ request.session.cliente_id|default:"null" }};
+</script>
+<script src="{% static 'public/carrito/js/carrito.js' %}"></script>
+<script type="module" src="{% static 'public/inicio/js/main.js' %}" defer></script>
+{% endblock %}

@@ -33,6 +33,7 @@ function crearCard(p) {
         const talla = v.atributos?.Talla ?? '—';
         return `<li><strong>Talla:</strong> ${talla} |
                      <strong>Precio:</strong> $${v.precio} |
+                     <strong>Precio Mayorista:</strong> $${v.precio_mayorista} |
                      <strong>Stock:</strong> ${v.stock}</li>`;
       }).join('') + '</ul>'
     : '<p>No hay variantes registradas.</p>';
@@ -43,6 +44,7 @@ function crearCard(p) {
     <p><strong>Descripción:</strong> ${p.descripcion}</p>
     <p><strong>Categoría:</strong> ${p.categoria}</p>
     <p><strong>Género:</strong> ${p.genero}</p>
+    <p><strong>Precio Mayorista:</strong> $${p.precio_mayorista ?? '—'}</p>
     <p><strong>Oferta:</strong> ${p.en_oferta ? 'Sí' : 'No'}</p>
     <p><strong>Stock total:</strong> ${p.stock_total}</p>
     <p><strong>Variantes:</strong></p>

@@ -54,6 +54,16 @@ async function handleLogout() {
 }
 
 
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.info-footer, .site-footer').forEach(el => {
+        el.classList.add('fade-in-footer');
+      });
+    }, 4500); // 4.5 segundos delay para que coincida con la secuencia
+  });
+
+
+
 setupScrollRestoration();
 setupHeaderScroll();
 setupBurgerMenu();

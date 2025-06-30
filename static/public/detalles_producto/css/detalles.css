@@ -1,160 +1,299 @@
-.detalle-container {
+/*  ===========================================================
+    DETALLE PRODUCTO – CSS unificado
+    (separación fija de 250 px entre <select> y bloque −1＋)
+    =========================================================== */
+
+/* ========== 1. Layout general ========== */
+.detalle-container{
   display: flex;
   width: 100%;
   height: 100vh;
   overflow: hidden;
 }
 
-.detalle-imagen {
+/* --- Imagen --- */
+.detalle-imagen{
   width: 50%;
-  height: 100vh; /* ← Que abarque todo el alto de la pantalla */
-  overflow: hidden;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
-
-.detalle-imagen img {
+.detalle-imagen img{
   width: 100%;
   height: 100%;
-  object-fit: cover; /* rellena el espacio sin deformarse */
+  object-fit: cover;
   display: block;
 }
 
-.detalle-info {
+/* --- Panel info --- */
+.detalle-info{
   width: 50%;
-  padding: 60px 120px;
+  margin-top: 100px;
+  padding: 120px 120px 60px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   font-family: 'Helvetica Neue', sans-serif;
   color: #1d1d1d;
   background: #fff;
 }
-
-.detalle-info h2 {
-  font-size: .8em;
-  font-weight: normal;
-  margin-bottom: 10px;
+.detalle-info h2{ 
+  font-size: 14px; 
+  font-weight: normal; 
+  margin-bottom: 10px; 
 }
 
-.detalle-info h3 {
-  font-size: .8em;
-  margin-bottom: 10px;
+.detalle-info h3{ 
+  font-size: 14px; 
+  margin-bottom: 10px; 
 }
 
-.detalle-info p {
-  font-size: 0.5em;
-  line-height: 1.6;
-  color: #444;
+.detalle-info p { 
+  font-size: 14px; 
+  line-height: 1.6; 
+  color: #444; 
 }
 
-.detalle-info .boton-contacto {
-  background: black;
-  color: white;
-  padding: 15px;
-  border-radius: 30px;
-  border: none;
-  font-size: .5em;
-  margin-top: 20px;
-  cursor: pointer;
-  width: 100%;
+.detalle-info label{ 
+  font-size: 12px; 
+  font-weight: bold; 
+  margin-bottom: 5px; 
 }
 
-.detalle-info label {
-  font-size: 0.6em;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.detalle-info select {
-  font-size: 0.5em;
+.detalle-info select{
+  font-size: 14px;
   padding: 6px 10px;
   margin-bottom: 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
   width: 100%;
-  background-color: #fff;
   appearance: none;
 }
 
-.guia-tallas{
-     font-size: 0.5em;
+.detalle-info .boton-contacto,
+.btn-asesor{
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 15px 0;
+  width: 100%;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+.btn-asesor:hover,
+.detalle-info .boton-contacto:hover{ opacity: 0.85; }
+
+.guia-tallas{ 
+  font-size: 10px; 
+  color: #000;
+  margin-bottom: 15px;
+  margin-top: 25px;
 }
 
-
-.volver-atras {
+/* --- Flecha volver --- */
+.volver-atras{
   position: absolute;
   top: 40px;
   left: 20px;
-  transform: rotate(90deg) translateY(5px); /* flecha hacia la izquierda */
+  transform: rotate(90deg) translateY(5px);
   text-decoration: none;
   z-index: 10;
 }
-
-.volver-atras .chevron {
+.volver-atras .chevron{
   width: 16px;
   height: 16px;
-  stroke: #1D1D1D;
-  transition: transform 0.2s ease;
+  stroke: #1d1d1d;
+  transition: transform 0.2s;
 }
+.volver-atras:hover .chevron{ transform: translateY(6px) scale(1.1); }
 
-.volver-atras:hover .chevron {
-  transform: translateY(6px) scale(1.1); /* movimiento hacia la izquierda + zoom */
-}
-
-
-.detalle-section {
+/* --- Animación sección --- */
+.detalle-section{
   opacity: 0;
   transform: translateY(50px);
-  transition:opacity 3s ease 1.5s, transform 3s ease 1.5s;
+  transition: opacity 3s ease 1.5s, transform 3s ease 1.5s;
+}
+.detalle-section.fade-in{ opacity: 1; transform: none; }
+
+/* ========== 2. UI tallas & cantidades ========== */
+/* Select inicial / extra (fuera de las filas) */
+#select-talla-inicial,
+#select-talla-extra{
+  width: 120px;
+  height: 24px;
+  line-height: 22px;
+  font-size: 12px;
+  padding: 0 6px;
+  margin-bottom: 15px;
+  display: inline-block;
+  box-sizing: border-box;
+  appearance: none;
 }
 
-.detalle-section.fade-in {
+/* --- Fila: select | qty-wrap | ✖  (ESCRITORIO) --- */
+.linea-talla {
+  display: flex;
+  align-items: center;
+  margin: 12px 0;
+  font-size: 14px;
+  transition: max-height 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
+  max-height: 0;
+  opacity: 0;
+  transform: translateX(40px);
+  position: relative;      /* ⬅️ Necesario para que ::before funcione */
+  padding-top: 24px;       /* ⬅️ Deja espacio para el texto "Cantidad" */
+  overflow: visible;       /* ⬅️ Permite que el texto sobresalga hacia arriba */
+}
+
+
+/* Estado final (visible) */
+.linea-talla.expand{
+  max-height: 120px;      /* ≈ altura suficiente de tu fila */
   opacity: 1;
-  transform: none;
+  transform: translateX(0);
 }
 
-/* -------- tabla tallas -------- */
+/* Estado colapsado hacia la derecha (fade-out) */
+.linea-talla.collapse{
+  max-height: 0;
+  opacity: 0;
+  transform: translateX(40px);   /* sale al mismo lado */
+}
+
+/* Select dentro de la fila */
+.linea-talla select.talla-select{
+  width: 70px;             /* tu ancho original */
+  height: 24px;
+  line-height: 22px;
+  font-size: 14px;
+  padding: 0 6px;
+  margin: 0;
+  position: relative;
+  top: 7px;                /* pequeño ajuste vertical */
+}
+
+/* Bloque − 1 ＋ */
+.qty-wrap{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 250px;      /* ⬅️ separación fija restaurada */
+}
+
+/* Input número sin caja */
+.qty-wrap input.qty{
+  width: 48px;
+  text-align: center;
+  font-size: 16px;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+/* sin spinners */
+.qty-wrap input.qty::-webkit-outer-spin-button,
+.qty-wrap input.qty::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+.qty-wrap input.qty[type="number"]{ -moz-appearance: textfield; }
+
+/* Botones − y + sin borde/fondo */
+.btn-minus,
+.btn-plus{
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+.btn-minus:hover,
+.btn-plus:hover{ opacity: .7; }
+
+/* Botón ✖ */
+.btn-remove{
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  color: #c00;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 12px;       /* pequeño respiro entre ＋ y ✖ */
+  user-select: none;
+}
+
+/* ========== 3. Utilidades adicionales ========== */
 .tabla-tallas{
-  width:100%;
-  border-collapse:collapse;
-  margin:15px 0;
-  font-size:.5em;
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 14px;
 }
 .tabla-tallas th,
 .tabla-tallas td{
-  border:1px solid #ccc;
-  text-align:center;
-  padding:10px;
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 10px;
 }
+
 .input-cantidad{
-  width:60px;
-  padding:5px;
-  font-size:.5em;
-  text-align:center;
+  width: 60px;
+  padding: 5px;
+  font-size: 14px;
+  text-align: center;
 }
 
-/* ------- resumen pedido ------- */
 .resumen-pedido{
-  margin:15px 0;
-  font-size:.6em;
-  line-height:1.4;
+  margin: 15px 0;
+  font-size: 14px;
+  line-height: 1.4;
 }
-.resumen-pedido strong{
-  font-weight:bold;
+.resumen-pedido strong{ font-weight: bold; }
+
+/* ①  Quita la etiqueta a todos por defecto */
+.qty-wrap::before{
+  content: none;
 }
 
-/* ------ botón asesor --------- */
-.btn-asesor{
-  background:#000;
-  color:#fff;
-  border:none;
-  padding:15px;
-  width:100%;
-  border-radius:30px;
-  cursor:pointer;
-  font-size:.6em;
-  transition:opacity .2s;
+/* ②  Activa la etiqueta SOLO en la primera fila */
+#lineas-tallas > .linea-talla:first-child .qty-wrap{
+  position: relative;          /* referencia para el ::before */
 }
-.btn-asesor:hover{opacity:.85;}
+#lineas-tallas > .linea-talla:first-child .qty-wrap::before{
+  content: "Cantidad";
+  position: absolute;
+  top: -32px;                  /* súbelo/ bájalo si hace falta */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: #1d1d1d;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+   Animaciones de entrada / salida de cada fila
+   ───────────────────────────────────────────── */
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0);   }
+}
+@keyframes fadeOutLeft {
+  from { opacity: 1; transform: translateX(0);   }
+  to   { opacity: 0; transform: translateX(40px);}
+}
+
+/* Clase que se añade al crear la fila */
+.linea-talla.animate-in{
+  animation: fadeInRight 0.35s ease forwards;
+}
+
+/* Clase que se aplica antes de eliminar la fila */
+.linea-talla.fade-out{
+  animation: fadeOutLeft 0.35s ease forwards;
+}
+

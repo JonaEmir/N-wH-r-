@@ -13,7 +13,7 @@ document.getElementById('editarForm').addEventListener('submit', async (e) => {
     /* 1. Actualiza el producto principal ----------------------- */
     const resProd = await fetch(`/api/productos/update/${productoId}/`, {
       method: 'POST',
-      credentials: 'same-origin',   // ← envía cookies (csrftoken, sessionid)
+      credentials: 'same-origin',
       body: formData
     });
 
@@ -27,15 +27,16 @@ document.getElementById('editarForm').addEventListener('submit', async (e) => {
       const vId    = input.value;
       const stock  = form.querySelector(`[name="variante_stock_${vId}"]`)?.value;
       const precio = form.querySelector(`[name="variante_precio_${vId}"]`)?.value;
+      const precio_mayorista = form.querySelector(`[name="variante_precio_mayorista_${vId}"]`)?.value;
 
       await fetch(`/api/variantes/update/${vId}/`, {
         method: 'POST',
-        credentials: 'same-origin',               // ← necesario para CSRF
+        credentials: 'same-origin',
         headers: {
-          'X-CSRFToken': getCSRFToken(),          // ← token real
+          'X-CSRFToken': getCSRFToken(),
           'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: new URLSearchParams({ stock, precio })
+        body: new URLSearchParams({ stock, precio, precio_mayorista })
       });
     }
 
