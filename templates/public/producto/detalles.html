@@ -63,11 +63,12 @@
 
       <a href="#" class="guia-tallas">Guía de tallas</a>
 
+      <p class="descripcion">{{ producto.descripcion }}</p>
+      <br>
       <!-- Botón acción -->
-      <button class="btn-asesor" id="btn-agregar-carrito">🛒 Agregar al carrito</button>
+      <button class="btn-asesor" id="btn-agregar-carrito"> Agregar al carrito</button>
       <p id="mensaje-carrito" class="msg"></p>
 
-      <p class="descripcion">{{ producto.descripcion }}</p>
     </div>
 
   </div>
@@ -85,5 +86,8 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script>
+    window.SESSION_KEY = "{{ request.session.session_key|default:'' }}";
+  </script>
   <script type="module" src="{% static 'public/detalles_producto/js/main.js' %}" defer></script>
 {% endblock %}

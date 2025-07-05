@@ -1,31 +1,46 @@
-/* === Layout general === */
+/* ============================================================================
+   🛒 CARRITO DE COMPRAS – ESTILOS GLOBALES
+   ============================================================================ */
+
+/* ========== 1. Contenedor principal y animación inicial ========== */
 .carrito-container {
   max-width: 900px;
   margin: 100px auto 50px;
   padding: 0 20px;
   font-family: 'Arial', sans-serif;
+
+  /* Fade-in animación al cargar */
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 2s ease 1s, transform 2s ease 1s;
+}
+
+.carrito-container.fade-in-carrito {
+  opacity: 1;
+  transform: none;
 }
 
 .carrito-titulo {
   font-size: 32px;
+  font-weight: bold;
   margin-bottom: 30px;
   text-align: left;
-  font-weight: bold;
 }
 
+/* ========== 2. Lista de ítems ========== */
 .carrito-items {
   border-top: 1px solid #ccc;
   margin-top: 10px;
 }
 
-/* === Ítems === */
+/* ========== 3. Ítem individual ========== */
 .carrito-item {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-  padding: 20px 0;
+  padding: 5px 0;
   border-bottom: 1px solid #eee;
 }
 
@@ -35,26 +50,52 @@
   border-radius: 6px;
 }
 
+/* Detalles del producto */
 .item-detalles {
   flex: 2;
   min-width: 150px;
 }
-
 .item-detalles h4 {
   margin: 0;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: bold;
 }
-
 .item-detalles span {
   display: block;
-  margin-top: 6px;
-  font-size: 14px;
+  margin-top: 4px;
+  font-size: 13px;
   color: #666;
 }
 
-/* === Precio y cantidad === */
-.item-precio,
+/* ========== 4. Contenedor agrupado: Precio + Cantidad + Subtotal ========== */
+.item-precio-cantidad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+
+/* Precio */
+.item-precio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 14px;
+  font-weight: bold;
+  color: #444;
+  min-width: 110px;
+}
+
+.precio-unitario-wrapper {
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Subtotal */
 .item-subtotal {
   font-weight: bold;
   font-size: 16px;
@@ -63,45 +104,83 @@
   color: #444;
 }
 
+/* ========== 5. Control de cantidad ========== */
 .item-cantidad {
   display: flex;
   align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  overflow: hidden;
-  height: 36px;
-}
-
-.item-cantidad input {
-  width: 50px;
-  border: none;
-  text-align: center;
-  font-size: 16px;
-}
-
-.item-cantidad button {
-  background: #f5f5f5;
-  border: none;
-  width: 36px;
-  height: 100%;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-/* === Botón eliminar === */
-.item-remove {
+  gap: 6px;
+  margin-left: 0;
   background: none;
   border: none;
-  font-size: 24px;
-  color: #ff4d4f;
+  padding: 0;
+}
+
+/* Input sin borde ni spinner */
+.item-cantidad input.qty {
+  width: 48px;
+  text-align: center;
+  font-size: 16px;
+  border: none;
+  background: transparent;
+  outline: none;
+  appearance: none;
+}
+
+/* Quitar flechas de número */
+.item-cantidad input.qty::-webkit-outer-spin-button,
+.item-cantidad input.qty::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.item-cantidad input.qty[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Botones ± */
+.item-cantidad .btn-minus,
+.item-cantidad .btn-plus {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  padding: 0;
   cursor: pointer;
 }
-
-.item-remove:hover {
-  color: #d9363e;
+.item-cantidad .btn-minus:hover,
+.item-cantidad .btn-plus:hover {
+  opacity: .7;
 }
 
-/* === Resumen === */
+/* ========== 6. Ícono de basura animado (cuando cantidad = 1) ========== */
+.item-cantidad .btn-minus.trash {
+  color: #000;                  
+  font-size: 12px;
+}
+.item-cantidad .btn-minus.trash i {
+  pointer-events: none;
+  animation: fadeInIcon 0.2s ease-in;
+}
+.item-cantidad .btn-minus.trash.fade-out i {
+  animation: fadeOutIcon 0.2s ease-out;
+}
+
+@keyframes fadeInIcon {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeOutIcon {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.8); }
+}
+
+/* ========== 7. Eliminación clásica (no usada, oculto) ========== */
+.item-remove {
+  display: none;
+}
+
+/* ========== 8. Resumen final del carrito ========== */
 .carrito-resumen {
   text-align: right;
   margin-top: 40px;
@@ -109,13 +188,12 @@
   border-top: 2px solid #ccc;
   font-size: 20px;
 }
-
 .carrito-resumen strong {
   font-size: 22px;
   font-weight: bold;
 }
 
-/* === Botones === */
+/* ========== 9. Botones de acción ========== */
 .carrito-botones {
   display: flex;
   justify-content: flex-end;
@@ -141,7 +219,6 @@
   border: 2px solid black;
   color: black;
 }
-
 .btn-actualizar:hover {
   background: #f0f0f0;
 }
@@ -151,7 +228,6 @@
   border: 2px solid #d9534f;
   color: #d9534f;
 }
-
 .btn-vaciar:hover {
   background: #fbeaea;
   color: #b52b27;
@@ -163,7 +239,6 @@
   color: white;
   border: none;
 }
-
 .btn-finalizar:hover {
   background: #333;
 }
@@ -173,47 +248,38 @@
   color: #333;
   border: 1px solid #ccc;
 }
-
 .btn-seguir:hover {
   background: #ececec;
 }
 
-
+/* ========== 10. Alertas de mayoreo ========== */
 .alert-mayoreo,
 .alert-meta-mayoreo {
   background: black;
-  border: none;
-  margin-bottom: 15px;
-  font-weight: bold;
-  font-size: 16px;
-  color: #ffffff;
-  position: relative;
+  color: white;
   height: 30px;
-  overflow: hidden;
   display: flex;
   align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  overflow: hidden;
 }
 
-/* Contenedor animado */
 .scroll-wrapper {
   display: inline-block;
   white-space: nowrap;
   animation: scrollLoop 20s linear infinite;
 }
-
-/* Mensaje repetido sin margen extra */
 .scroll-wrapper span {
   display: inline-block;
   padding: 0 30px;
 }
-  
 @keyframes scrollLoop {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); } /* Mueve la mitad para repetir perfectamente */
+  100% { transform: translateX(-50%); }
 }
 
-
-/* === Carrito vacío === */
+/* ========== 11. Carrito vacío ========== */
 .carrito-vacio-section {
   text-align: center;
   background-color: #fafafa;
@@ -223,19 +289,16 @@
   border-radius: 10px;
   animation: fadeIn 0.3s ease-in-out;
 }
-
 .carrito-vacio-section h2 {
   font-size: 24px;
   color: #333;
   margin-bottom: 15px;
 }
-
 .carrito-vacio-section p {
   font-size: 16px;
   color: #666;
   margin-bottom: 25px;
 }
-
 .carrito-vacio-section .btn {
   background: black;
   color: white;
@@ -243,41 +306,34 @@
   border-radius: 8px;
   font-size: 15px;
 }
-
 .carrito-vacio-section .btn:hover {
   background: #333;
 }
 
-.carrito-container {
-  opacity: 0;
-  transform: translateY(50px);
-  transition: opacity 2s ease 1s, transform 2s ease 1s;
-}
-
-.carrito-container.fade-in-carrito {
-  opacity: 1;
-  transform: none;
-}
-
-
-
-
-
-/* === Responsive === */
+/* ========== 12. Responsividad para móviles ========== */
+/* Vista horizontal en móviles */
 @media (max-width: 600px) {
-  .carrito-item {
-    flex-direction: column;
-    align-items: flex-start;
+  .item-precio-cantidad {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   .item-precio,
-  .item-subtotal,
-  .carrito-resumen {
+  .item-subtotal {
     text-align: left;
+    font-size: 15px;
+    min-width: auto;
   }
 
-  .carrito-botones {
-    flex-direction: column;
-    align-items: flex-start;
+  .item-cantidad input.qty {
+    width: 36px;
+    font-size: 14px;
+  }
+
+  .item-cantidad .btn-minus,
+  .item-cantidad .btn-plus {
+    font-size: 18px;
   }
 }

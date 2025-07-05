@@ -12,8 +12,5 @@ export function setupScrollRestoration() {
     setTimeout(() => {
       document.querySelector('.banner-text')?.classList.add('fade-in');
     }, 1000);
-
-    document.querySelectorAll('.categoria-card')
-            .forEach(c => c.classList.add('visible'));
   });
 }

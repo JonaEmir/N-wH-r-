@@ -1,18 +1,19 @@
-/*  ===========================================================
-    DETALLE PRODUCTO – CSS unificado
-    (separación fija de 250 px entre <select> y bloque −1＋)
-    =========================================================== */
+/* ===========================================================
+   DETALLE PRODUCTO – CSS unificado
+   =========================================================== */
 
 /* ========== 1. Layout general ========== */
-.detalle-container{
+
+/* Contenedor principal: divide imagen e info en columnas */
+.detalle-container {
   display: flex;
   width: 100%;
   height: 100vh;
   overflow: hidden;
 }
 
-/* --- Imagen --- */
-.detalle-imagen{
+/* Imagen del producto */
+.detalle-imagen {
   width: 50%;
   height: 100vh;
   display: flex;
@@ -20,15 +21,15 @@
   justify-content: center;
   overflow: hidden;
 }
-.detalle-imagen img{
+.detalle-imagen img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-/* --- Panel info --- */
-.detalle-info{
+/* Panel de información del producto */
+.detalle-info {
   width: 50%;
   margin-top: 100px;
   padding: 120px 120px 60px;
@@ -39,30 +40,27 @@
   color: #1d1d1d;
   background: #fff;
 }
-.detalle-info h2{ 
-  font-size: 14px; 
-  font-weight: normal; 
-  margin-bottom: 10px; 
+
+.detalle-info h2,
+.detalle-info h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.detalle-info h2 { font-weight: normal; }
+
+.detalle-info p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
 }
 
-.detalle-info h3{ 
-  font-size: 14px; 
-  margin-bottom: 10px; 
+.detalle-info label {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
-.detalle-info p { 
-  font-size: 14px; 
-  line-height: 1.6; 
-  color: #444; 
-}
-
-.detalle-info label{ 
-  font-size: 12px; 
-  font-weight: bold; 
-  margin-bottom: 5px; 
-}
-
-.detalle-info select{
+.detalle-info select {
   font-size: 14px;
   padding: 6px 10px;
   margin-bottom: 15px;
@@ -72,8 +70,9 @@
   appearance: none;
 }
 
+/* Botones de contacto y asesor */
 .detalle-info .boton-contacto,
-.btn-asesor{
+.btn-asesor {
   background: #000;
   color: #fff;
   border: none;
@@ -85,17 +84,19 @@
   transition: opacity 0.2s;
 }
 .btn-asesor:hover,
-.detalle-info .boton-contacto:hover{ opacity: 0.85; }
-
-.guia-tallas{ 
-  font-size: 10px; 
-  color: #000;
-  margin-bottom: 15px;
-  margin-top: 25px;
+.detalle-info .boton-contacto:hover {
+  opacity: 0.85;
 }
 
-/* --- Flecha volver --- */
-.volver-atras{
+/* Guía de tallas */
+.guia-tallas {
+  font-size: 10px;
+  color: #000;
+  margin: 25px 0 15px;
+}
+
+/* Flecha de volver */
+.volver-atras {
   position: absolute;
   top: 40px;
   left: 20px;
@@ -103,26 +104,32 @@
   text-decoration: none;
   z-index: 10;
 }
-.volver-atras .chevron{
+.volver-atras .chevron {
   width: 16px;
   height: 16px;
   stroke: #1d1d1d;
   transition: transform 0.2s;
 }
-.volver-atras:hover .chevron{ transform: translateY(6px) scale(1.1); }
+.volver-atras:hover .chevron {
+  transform: translateY(6px) scale(1.1);
+}
 
-/* --- Animación sección --- */
-.detalle-section{
+/* Fade-in del contenedor info */
+.detalle-section {
   opacity: 0;
   transform: translateY(50px);
   transition: opacity 3s ease 1.5s, transform 3s ease 1.5s;
 }
-.detalle-section.fade-in{ opacity: 1; transform: none; }
+.detalle-section.fade-in {
+  opacity: 1;
+  transform: none;
+}
 
-/* ========== 2. UI tallas & cantidades ========== */
-/* Select inicial / extra (fuera de las filas) */
+/* ========== 2. UI de tallas y cantidades ========== */
+
+/* Select de tallas fuera de la línea de cantidad */
 #select-talla-inicial,
-#select-talla-extra{
+#select-talla-extra {
   width: 120px;
   height: 24px;
   line-height: 22px;
@@ -134,7 +141,7 @@
   appearance: none;
 }
 
-/* --- Fila: select | qty-wrap | ✖  (ESCRITORIO) --- */
+/* Línea con select de talla + cantidad + botón eliminar */
 .linea-talla {
   display: flex;
   align-items: center;
@@ -144,48 +151,46 @@
   max-height: 0;
   opacity: 0;
   transform: translateX(40px);
-  position: relative;      /* ⬅️ Necesario para que ::before funcione */
-  padding-top: 24px;       /* ⬅️ Deja espacio para el texto "Cantidad" */
-  overflow: visible;       /* ⬅️ Permite que el texto sobresalga hacia arriba */
+  position: relative;
+  padding-top: 24px;
+  overflow: visible;
 }
 
-
-/* Estado final (visible) */
-.linea-talla.expand{
-  max-height: 120px;      /* ≈ altura suficiente de tu fila */
+/* Línea expandida */
+.linea-talla.expand {
+  max-height: 120px;
   opacity: 1;
   transform: translateX(0);
 }
 
-/* Estado colapsado hacia la derecha (fade-out) */
-.linea-talla.collapse{
+/* Línea colapsada */
+.linea-talla.collapse {
   max-height: 0;
   opacity: 0;
-  transform: translateX(40px);   /* sale al mismo lado */
+  transform: translateX(40px);
 }
 
-/* Select dentro de la fila */
-.linea-talla select.talla-select{
-  width: 70px;             /* tu ancho original */
+/* Select dentro de la línea de cantidad */
+.linea-talla select.talla-select {
+  width: 70px;
   height: 24px;
-  line-height: 22px;
   font-size: 14px;
   padding: 0 6px;
   margin: 0;
   position: relative;
-  top: 7px;                /* pequeño ajuste vertical */
+  top: 7px;
 }
 
-/* Bloque − 1 ＋ */
-.qty-wrap{
+/* Bloque con botones − + y cantidad */
+.qty-wrap {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: 250px;      /* ⬅️ separación fija restaurada */
+  margin-left: 250px;
 }
 
-/* Input número sin caja */
-.qty-wrap input.qty{
+/* Input de cantidad sin bordes */
+.qty-wrap input.qty {
   width: 48px;
   text-align: center;
   font-size: 16px;
@@ -193,14 +198,20 @@
   background: transparent;
   outline: none;
 }
-/* sin spinners */
-.qty-wrap input.qty::-webkit-outer-spin-button,
-.qty-wrap input.qty::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
-.qty-wrap input.qty[type="number"]{ -moz-appearance: textfield; }
 
-/* Botones − y + sin borde/fondo */
+/* Quitar spinners del input número */
+.qty-wrap input.qty::-webkit-outer-spin-button,
+.qty-wrap input.qty::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.qty-wrap input.qty[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Botones − y ＋ */
 .btn-minus,
-.btn-plus{
+.btn-plus {
   border: none;
   background: transparent;
   font-size: 20px;
@@ -211,62 +222,55 @@
   cursor: pointer;
 }
 .btn-minus:hover,
-.btn-plus:hover{ opacity: .7; }
-
-/* Botón ✖ */
-.btn-remove{
-  width: auto;
-  height: auto;
-  background: none;
-  border: none;
-  color: #c00;
-  cursor: pointer;
-  font-size: 14px;
-  margin-left: 12px;       /* pequeño respiro entre ＋ y ✖ */
-  user-select: none;
+.btn-plus:hover {
+  opacity: .7;
 }
 
-/* ========== 3. Utilidades adicionales ========== */
-.tabla-tallas{
+/* ========== 3. Utilidades y extras ========== */
+
+/* Tabla de tallas */
+.tabla-tallas {
   width: 100%;
   border-collapse: collapse;
   margin: 15px 0;
   font-size: 14px;
 }
 .tabla-tallas th,
-.tabla-tallas td{
+.tabla-tallas td {
   border: 1px solid #ccc;
   text-align: center;
   padding: 10px;
 }
 
-.input-cantidad{
+/* Input alternativo de cantidad */
+.input-cantidad {
   width: 60px;
   padding: 5px;
   font-size: 14px;
   text-align: center;
 }
 
-.resumen-pedido{
+/* Resumen del pedido */
+.resumen-pedido {
   margin: 15px 0;
   font-size: 14px;
   line-height: 1.4;
 }
-.resumen-pedido strong{ font-weight: bold; }
+.resumen-pedido strong {
+  font-weight: bold;
+}
 
-/* ①  Quita la etiqueta a todos por defecto */
-.qty-wrap::before{
+/* Etiqueta "Cantidad" SOLO para la primera fila */
+.qty-wrap::before {
   content: none;
 }
-
-/* ②  Activa la etiqueta SOLO en la primera fila */
-#lineas-tallas > .linea-talla:first-child .qty-wrap{
-  position: relative;          /* referencia para el ::before */
+#lineas-tallas > .linea-talla:first-child .qty-wrap {
+  position: relative;
 }
-#lineas-tallas > .linea-talla:first-child .qty-wrap::before{
+#lineas-tallas > .linea-talla:first-child .qty-wrap::before {
   content: "Cantidad";
   position: absolute;
-  top: -32px;                  /* súbelo/ bájalo si hace falta */
+  top: -32px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 11px;
@@ -275,25 +279,50 @@
   pointer-events: none;
 }
 
-/* ─────────────────────────────────────────────
-   Animaciones de entrada / salida de cada fila
-   ───────────────────────────────────────────── */
+/* ========== 4. Animaciones ========== */
+
 @keyframes fadeInRight {
   from { opacity: 0; transform: translateX(40px); }
-  to   { opacity: 1; transform: translateX(0);   }
-}
-@keyframes fadeOutLeft {
-  from { opacity: 1; transform: translateX(0);   }
-  to   { opacity: 0; transform: translateX(40px);}
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Clase que se añade al crear la fila */
-.linea-talla.animate-in{
+@keyframes fadeOutLeft {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(40px); }
+}
+
+/* Animación al agregar línea */
+.linea-talla.animate-in {
   animation: fadeInRight 0.35s ease forwards;
 }
 
-/* Clase que se aplica antes de eliminar la fila */
-.linea-talla.fade-out{
+/* Animación al eliminar línea */
+.linea-talla.fade-out {
   animation: fadeOutLeft 0.35s ease forwards;
 }
 
+/* ========== 5. Ícono de basura animado (cuando cantidad = 1) ========== */
+
+.btn-minus.trash {
+  color: #000;
+  font-size: 12px;
+}
+
+.btn-minus.trash i {
+  pointer-events: none;
+  animation: fadeInIcon 0.2s ease-in;
+}
+
+.btn-minus.fade-out i {
+  animation: fadeOutIcon 0.2s ease-out;
+}
+
+@keyframes fadeInIcon {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeOutIcon {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.8); }
+}

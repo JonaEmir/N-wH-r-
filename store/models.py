@@ -178,12 +178,26 @@ class VarianteAtributo(models.Model):
 # ——————————————————————————————————————
 
 class Carrito(models.Model):
-    cliente    = models.OneToOneField(Cliente, on_delete=models.CASCADE)
-    status     = models.CharField(max_length=50, default="vacio")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # 📌  cliente puede ser NULL / opcional
+    cliente     = models.ForeignKey(
+        Cliente,
+        null=True, blank=True,               # ahora es opcional
+        on_delete=models.CASCADE,
+        related_name="carritos"              # puedes dejarlo sin related_name si prefieres
+    )
+    # 📌  nuevo campo para invitados
+    session_key = models.CharField(
+        max_length=40,
+        null=True, blank=True,
+        db_index=True
+    )
+
+    status      = models.CharField(max_length=50, default="vacio")
+    created_at  = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Carrito de {self.cliente.username} ({self.status})"
+        usuario = self.cliente.username if self.cliente else "Invitado"
+        return f"Carrito de {usuario} ({self.status})"
 
 class CarritoProducto(models.Model):
     carrito  = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='items')

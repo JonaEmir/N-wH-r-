@@ -6,11 +6,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}NöwHėrē – Calzado de Lujo{% endblock %}</title>
 
+  <!-- CSS global -->
   <link rel="stylesheet" href="{% static 'public/inicio/css/index.css' %}">
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         referrerpolicy="no-referrer">
+
   {% block extra_css %}{% endblock %}
+
+  <style>
+    /* — Aviso “inicia sesión para conservar favoritos” (panel) — */
+    .panel-hint{
+      margin-top:1rem;
+      padding:.75rem 1rem;
+      background:#fff8f8;
+      border:1px solid #ffd4d4;
+      border-radius:6px;
+      font-size:.85rem;
+      text-align:center;
+    }
+    .panel-hint a{
+      color:#c00;
+      font-weight:600;
+      text-decoration:underline;
+    }
+
+    /* — Estilos del banner de cookies (sin cambios) — */
+    .cookie-banner{
+      position:fixed; bottom:0; left:0; width:100%;
+      background:#fff; color:#000; padding:20px 40px;
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:14px; box-shadow:0 -2px 6px rgba(0,0,0,.1);
+      z-index:1000; opacity:0; transform:translateY(100%);
+      pointer-events:none; transition:opacity .4s, transform .4s;
+    }
+    .cookie-banner.visible{opacity:1; transform:translateY(0); pointer-events:auto;}
+    .cookie-banner.fade-out{opacity:0; transform:translateY(100%);}
+    .cookie-banner p{margin:0; flex:1;}
+    .cookie-banner a{text-decoration:underline; color:#000;}
+    .cookie-banner button{
+      background:#1e1e1e; color:#fff; padding:12px 30px; border:none;
+      border-radius:30px; font-weight:bold; cursor:pointer; margin-left:30px;
+      white-space:nowrap;
+    }
+    .cookie-banner button:hover{opacity:.85;}
+
+    /* 📱 responsive banner cookies */
+    @media(max-width:768px){
+      .cookie-banner{flex-direction:column; align-items:flex-start; padding:16px 20px; font-size:13px;}
+      .cookie-banner p{margin-bottom:12px;}
+      .cookie-banner button{margin-left:0; width:100%; text-align:center;}
+    }
+  </style>
 </head>
 <body>
 
@@ -18,23 +65,52 @@
   {% block content %}{% endblock %}
   {% include "public/includes/footer.html" %}
 
-  <!-- Inyección de sesión / CSRF para el frontend -->
-  <script>
-    /* ¿El usuario está logeado? */
-    window.IS_AUTHENTICATED = {{ request.session.cliente_username|yesno:"true,false" }};
+  {# — Inyección de datos para los scripts — #}
+  {# base.html  — justo antes de cargar main.js #}
+<script>
+  const _cid = {{ request.session.cliente_id|default:"null" }};
+  window.IS_AUTHENTICATED = _cid !== null;   // true ↔ hay id en sesión
+  window.CLIENTE_ID       = _cid;
+  window.CSRF_TOKEN       = "{{ csrf_token }}";
+</script>
 
-    /* ID del cliente (null si no hay sesión) */
-    {% if request.session.cliente_id %}
-      window.CLIENTE_ID = {{ request.session.cliente_id }};
-    {% else %}
-      window.CLIENTE_ID = null;
-    {% endif %}
 
-    /* Token CSRF para peticiones fetch() POST/PATCH/DELETE */
-    window.CSRF_TOKEN = "{{ csrf_token }}";
-  </script>
-
+  <!-- JS principal de la página -->
   <script type="module" src="{% static 'public/inicio/js/main.js' %}"></script>
   {% block extra_js %}{% endblock %}
+
+  <!-- Banner de Cookies -->
+  <div id="cookie-banner" class="cookie-banner">
+    <p>
+      <strong>NöwHėrē</strong>, con domicilio en México, utiliza cookies y tecnologías
+      similares propias y de terceros para mejorar su experiencia de navegación,
+      analizar el uso del sitio y personalizar contenido publicitario.
+      Parte de esta información puede considerarse como datos personales
+      conforme a la legislación mexicana. Usted puede desactivar las cookies
+      no esenciales desde la configuración de su navegador. Para más información,
+      consulte nuestro <a href="/aviso-privacidad" target="_blank">Aviso de Privacidad</a>.
+    </p>
+    <button id="cookie-close">CERRAR</button>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const banner   = document.getElementById('cookie-banner');
+      const closeBtn = document.getElementById('cookie-close');
+
+      if (!localStorage.getItem('cookiesAccepted')) {
+        requestAnimationFrame(() => banner.classList.add('visible'));
+      }
+
+      closeBtn.addEventListener('click', () => {
+        banner.classList.remove('visible');
+        banner.classList.add('fade-out');
+        setTimeout(() => {
+          banner.style.display = 'none';
+          localStorage.setItem('cookiesAccepted', 'true');
+        }, 400);
+      });
+    });
+  </script>
 </body>
 </html>

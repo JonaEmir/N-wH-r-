@@ -32,17 +32,24 @@ header.scrolled {
 }
 
 /* Alineación específica */
-.header-left    { justify-content: flex-start; gap: 4px; z-index: 200; }
-.header-center  { justify-content: center; }
-.header-right   { justify-content: flex-end; gap: 12px; }
+.header-left    { 
+  justify-content: flex-start; 
+  gap: 4px; 
+  z-index: 200; 
+}
+.header-center  { 
+  justify-content: center; 
+}
+
+.header-right   { 
+  justify-content: 
+  flex-end; gap: 12px; 
+}
 
 /* Opcional: SVGs del header derecho */
 .header-right svg {
   display: block;
 }
-
-
-
 
 /* Texto Menú / Cerrar */
 .menu-label{
@@ -55,23 +62,119 @@ header.scrolled {
   color:#1D1D1D;
   user-select:none;
 }
+
 .menu-label::before{content:"Menú"; transition:.3s;}
 /* cambia a “Cerrar” cuando el botón tiene la clase .active */
-.burger.active + .menu-label::before{content:"Cerrar";}
 
+
+.close-menu{
+  position: absolute;      /* lo fijamos dentro del panel */
+  top: 16px;               /* ajusta según tu padding */
+  left: 22px;
+  font-size: 28px;         /* tamaño de la “×” */
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 800;            /* mayor que los links (700) */
+}
+
+/* El botón cuando está dentro del panel */
+.nav-menu .burger{
+  position: absolute;       /* vive dentro del panel */
+  top: 18px;                /* ajusta a tu gusto */
+  left: 18px;
+  z-index: 800;             /* por encima de los links (panel = 700) */
+}
+
+/* ────────────────────────────────────────────────
+   4. NAV MENU lateral
+────────────────────────────────────────────────── */
+.nav-menu{
+  position:fixed; left:0; top:0;
+  height:100vh; width: 440px; max-width: 450px;;
+  background:#FFF;
+  transform:translateX(-100%);
+  transition:transform .4s ease;
+  display:flex; flex-direction:column;
+  padding:40px 16px;
+  z-index:700;
+}
+/* se desplaza dentro cuando añadimos .open desde JS */
+.nav-menu.open{transform:translateX(0);}
+
+/* Lista de enlaces (sin cambios) */
+.menu{
+  list-style:none;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:6px;
+}
+.menu li a{
+  display:block;
+  padding:8px 0;
+  color:#1D1D1D;
+  text-decoration:none;
+  font-size:18px;
+  font-weight:500;
+}
+
+/* Estado inicial de los <li> (invisibles y desplazados) */
+.menu li {
+  opacity: 0;
+  transform: translateY(8px);           /* o X si quieres que entren de lado */
+}
+
+/* Keyframes de la animación */
+@keyframes fadeSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cuando el menú tenga .open, dispara la animación */
+.nav-menu.open .menu li {
+  animation: fadeSlideIn .35s ease forwards;
+}
+
+/* Retrasos en cascada */
+.nav-menu.open .menu li:nth-child(1) { animation-delay: .25s; }
+.nav-menu.open .menu li:nth-child(2) { animation-delay: .35s; }
+.nav-menu.open .menu li:nth-child(3) { animation-delay: .45s; }
+.nav-menu.open .menu li:nth-child(4) { animation-delay: .55s; }
+.nav-menu.open .menu li:nth-child(5) { animation-delay: .65s; }
+
+
+/* ────────────────────────────────────────────────
+   5. Bloquear interacción con secciones detrás
+      (opcional, como hacías antes)
+────────────────────────────────────────────────── */
+/* si tu hero-banner y carousel están *después* del nav-menu
+   en el DOM: */
+.nav-menu.open ~ .hero-banner,
+.nav-menu.open ~ .carousel-container{
+  pointer-events:none;
+}
 /* ────────────────────────────────────────────────
    2. Botón HAMBURGUESA
 ────────────────────────────────────────────────── */
+/* 1. modifica tu regla existente */
 .burger{
-  position:relative;
-  width:12px;
-  height:9px;
-  cursor:pointer;
-  border:none;
-  background:none;
-  padding:0;
-  display:block;      /* mantiene tu layout */
+  position: relative;
+  width: 12px;
+  height: 9px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  display: block;
+  z-index: 601;               /* ← AÑADE ESTA LÍNEA */
 }
+
+
+
 .burger span{
   position:absolute;
   width:100%;
@@ -108,49 +211,6 @@ header.scrolled {
   pointer-events:auto;
 }
 
-/* ────────────────────────────────────────────────
-   4. NAV MENU lateral
-────────────────────────────────────────────────── */
-.nav-menu{
-  position:fixed; left:0; top:0;
-  height:100vh; width: 440px; max-width: 450px;;
-  background:#FFF;
-  transform:translateX(-100%);
-  transition:transform .4s ease;
-  display:flex; flex-direction:column;
-  padding:40px 16px;
-  z-index:500;
-}
-/* se desplaza dentro cuando añadimos .open desde JS */
-.nav-menu.open{transform:translateX(0);}
-
-/* Lista de enlaces (sin cambios) */
-.menu{
-  list-style:none;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:6px;
-}
-.menu li a{
-  display:block;
-  padding:8px 0;
-  color:#1D1D1D;
-  text-decoration:none;
-  font-size:18px;
-  font-weight:500;
-}
-
-/* ────────────────────────────────────────────────
-   5. Bloquear interacción con secciones detrás
-      (opcional, como hacías antes)
-────────────────────────────────────────────────── */
-/* si tu hero-banner y carousel están *después* del nav-menu
-   en el DOM: */
-.nav-menu.open ~ .hero-banner,
-.nav-menu.open ~ .carousel-container{
-  pointer-events:none;
-}
 
 /* ----- Logo ----- */
 #Logo {
@@ -325,7 +385,7 @@ header.scrolled {
     padding: 20px 30px;
   }
   .nav-menu{
-    width: 100vw;
+    width: 100%;
     padding: 20px 30px;
 }
 
@@ -433,7 +493,7 @@ header.scrolled {
   }
 
   .nav-menu{
-    width: 50vw;
+    width: 100%;
     padding: 45px 20px;
   }
 

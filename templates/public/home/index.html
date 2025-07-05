@@ -28,35 +28,37 @@
 </section>
 
 <!-- CATEGORÍAS GENERALES -->
-<section class="categorias categorias-generales">   <!-- ← clase extra -->
+<section class="categorias categorias-generales">
   <h2>Tu estilo empieza aquí — Explora nuestra colección premium.</h2>
 
-  <div class="categoria-grid categoria-grid-generales">  <!-- ← clase extra -->
+  <div class="categoria-grid categoria-grid-generales">
     <div class="categoria-card">
       <a href="{% url 'coleccion_genero' 'dama' %}">
         <img src="{% static 'images/20250604_1519_Tenis Louis Vuitton Elegante_simple_compose_01jwycyeyherft32svj1stky60.png' %}" alt="">
+        <div class="overlay-text">Dama</div>
       </a>
-      <h3>Dama</h3>
-    </div>
-
-    <div class="categoria-card">
-      <a href="{% url 'coleccion_genero' 'caballero' %}">
-        <img src="{% static 'images/20250604_1524_Zapatillas de Caballero_remix_01jwyd7hfeegt92gnagk5vm9nb.png' %}" alt="">
-      </a>
-      <h3>Caballero</h3>
-    </div>
-
-    <div class="categoria-card">
-      <img src="{% static 'images/20250604_1536_Zapatilla Azul Diseño Lujo_remix_01jwydy3axff7v2jyac9mzvk94.png' %}" alt="">
-      <h3>Accesorios</h3>
     </div>
 
     <div class="categoria-card">
       <img src="{% static 'images/20250604_1618_Accesorios de Lujo_remix_01jwygahkcf4vbmzebmxb45t1e.png' %}" alt="">
-      <h3>Ofertas</h3>
+      <div class="overlay-text">Ofertas</div>
+    </div>
+
+    <div class="categoria-card">
+      <img src="{% static 'images/20250604_1536_Zapatilla Azul Diseño Lujo_remix_01jwydy3axff7v2jyac9mzvk94.png' %}" alt="">
+      <div class="overlay-text">Accesorios</div>
+    </div>
+
+    <div class="categoria-card">
+
+      <a href="{% url 'coleccion_genero' 'caballero' %}">
+        <img src="{% static 'images/20250604_1524_Zapatillas de Caballero_remix_01jwyd7hfeegt92gnagk5vm9nb.png' %}" alt="">
+        <div class="overlay-text">Caballero</div>
+      </a>
     </div>
   </div>
 </section>
+
 
 
 <!-- BANNER DAMA -->

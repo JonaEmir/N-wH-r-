@@ -82,14 +82,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       <button class="btn-minus">−</button>
       <input type="number" min="1" value="1" class="qty">
       <button class="btn-plus">+</button>`;
+    
     const qty = qtyWrap.querySelector('.qty');
-    qtyWrap.querySelector('.btn-minus').onclick = () => { if (+qty.value > 1) qty.value--; };
-    qtyWrap.querySelector('.btn-plus').onclick = () => qty.value++;
+    const btnMinus = qtyWrap.querySelector('.btn-minus');
+    const btnPlus  = qtyWrap.querySelector('.btn-plus');
 
-    const btnX = document.createElement('button');
-    btnX.className = 'btn-remove';
-    btnX.textContent = '✖';
-    btnX.onclick = () => {
+    btnMinus.onclick = () => {
+      if (+qty.value > 1) {
+        qty.value--;
+        actualizarBtnMinus();
+      } else {
+        eliminarFila();
+      }
+    };
+
+    btnPlus.onclick = () => {
+      qty.value++;
+      actualizarBtnMinus();
+    };
+
+    function actualizarBtnMinus() {
+      const cantidad = +qty.value;
+      if (cantidad === 1) {
+        btnMinus.innerHTML = '<i class="fas fa-trash"></i>';
+        btnMinus.classList.add('trash');
+      } else {
+        btnMinus.textContent = '−';
+        btnMinus.classList.remove('trash');
+      }
+    }
+
+    function eliminarFila() {
       fila.style.maxHeight = '0';
       fila.style.opacity = '0';
       fila.style.transform = 'translateX(40px)';
@@ -98,13 +121,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         elegidas.delete(selectEl.value);
         if (!elegidas.size && stockInfo) stockInfo.textContent = '';
       }, { once: true });
-    };
+    }
+
+    actualizarBtnMinus();function actualizarBtnMinus() {
+   const cantidad = +qty.value;
+  if (cantidad === 1) {
+    btnMinus.innerHTML = '<i class="fas fa-trash"></i>';
+    btnMinus.classList.add('trash');
+  } else {
+    // Si era un ícono, primero aplica fade-out
+    if (btnMinus.classList.contains('trash')) {
+      btnMinus.classList.add('fade-out');
+
+      // Espera la animación antes de cambiar
+      setTimeout(() => {
+        btnMinus.textContent = '−';
+        btnMinus.classList.remove('trash', 'fade-out');
+      }, 200); // debe coincidir con el duration de fadeOutIcon
+    } else {
+      btnMinus.textContent = '−';
+      btnMinus.classList.remove('trash');
+    }
+  }
+}
+
+
 
     selectEl.className = 'talla-select';
     selectEl.dataset.old = talla;
     selectEl.onchange = () => cambioTalla(selectEl);
 
-    fila.append(selectEl, qtyWrap, btnX);
+    fila.append(selectEl, qtyWrap);
+
     contLineas.appendChild(fila);
 
     requestAnimationFrame(() => {
@@ -145,56 +193,65 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  btnAddCart.addEventListener('click', async () => {
-    if (!cliId) {
-      const seleccion = [];
-      contLineas.querySelectorAll('.linea-talla').forEach(fila => {
-        seleccion.push({
-          talla: fila.dataset.talla,
-          cantidad: +fila.querySelector('.qty').value
-        });
+btnAddCart.addEventListener('click', async () => {
+  const seleccion = [];
+  contLineas.querySelectorAll('.linea-talla').forEach(fila => {
+    seleccion.push({
+      talla: fila.dataset.talla,
+      cantidad: +fila.querySelector('.qty').value
+    });
+  });
+
+  if (!seleccion.length) {
+    msg.style.color = 'orange';
+    msg.textContent = '⚠️ No has añadido tallas.';
+    return;
+  }
+
+  msg.textContent = '';
+  let total = 0;
+
+  for (const item of seleccion) {
+    try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      let endpoint = '';
+      if (cliId) {
+        headers['X-CSRFToken'] = getCSRF();
+        endpoint = `/api/carrito/create/${cliId}/`;
+      } else {
+        headers['X-Session-Key'] = window.SESSION_KEY || '';
+        endpoint = `/api/carrito/guest/`;
+      }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          producto_id: prodId,
+          talla: item.talla,
+          cantidad: item.cantidad
+        })
       });
-      sessionStorage.setItem('prelogin_carrito', JSON.stringify({
-        producto_id: prodId,
-        items: seleccion
-      }));
-      window.mostrarLoginPanel?.();
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al agregar producto');
+
+      total += item.cantidad;
+
+    } catch (e) {
+      msg.style.color = 'red';
+      msg.textContent = '❌ ' + e.message;
       return;
     }
+  }
 
-    let total = 0;
-    msg.textContent = '';
+  msg.style.color = 'green';
+  msg.textContent = `✔️ Se agregaron ${total} unidades al carrito.`;
+});
 
-    for (const fila of contLineas.querySelectorAll('.linea-talla')) {
-      const talla = fila.dataset.talla;
-      const cant = +fila.querySelector('.qty').value;
-      if (cant < 1) continue;
-
-      try {
-        const r = await fetch(`/api/carrito/create/${cliId}/`, {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRF()
-          },
-          body: JSON.stringify({ producto_id: prodId, talla, cantidad: cant })
-        });
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error || 'Error');
-        total += cant;
-      } catch (e) {
-        msg.style.color = 'red';
-        msg.textContent = '❌ ' + e.message;
-        return;
-      }
-    }
-
-    msg.style.color = total ? 'green' : 'orange';
-    msg.textContent = total
-      ? `✔️ Se agregaron ${total} unidades al carrito.`
-      : '⚠️ No has añadido tallas.';
-  });
 
   document.querySelectorAll('.detalle-section')
           .forEach(sec => sec.classList.add('fade-in'));

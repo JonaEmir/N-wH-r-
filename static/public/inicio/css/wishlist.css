@@ -312,3 +312,48 @@
   from { transform: translate(-50%, 100%); }
   to   { transform: translate(-50%, 0);   }
 }
+
+.in-cart-note{
+  display:block;
+  font-size:11px;
+  color:#0a0;
+  margin-bottom:4px;
+  text-align:center;
+}
+
+.toast-message {
+  position: fixed;
+  background: #222;
+  color: #fff;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  /* Modo escritorio – aparece dentro del wishlist */
+  right: 110px;
+  bottom: 40px;
+  transform: translateY(20px);
+}
+
+/* Animación de aparición */
+.toast-message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Pantallas pequeñas: vuelve al centro inferior */
+@media (max-width: 768px) {
+  .toast-message {
+    left: 50%;
+    right: auto;
+    bottom: 2rem;
+    transform: translateX(-50%) translateY(20px);
+  }
+  .toast-message.show {
+    transform: translateX(-50%) translateY(0);
+  }
+}

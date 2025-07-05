@@ -30,48 +30,50 @@
   </div>
 
   <!-- 🛒 Contenido activo del carrito -->
-  <div id="carrito-activo" style="{% if not productos %}display:none;{% endif %}">
-    <div class="carrito-items">
-      {% for item in productos %}
-      <div class="carrito-item"
-           data-variante-id="{{ item.variante_id }}"
-           data-cantidad="{{ item.cantidad }}"
-           data-precio-menudeo="{{ item.precio }}"
-           data-precio-mayorista="{{ item.precio_mayorista }}">
+  <div id="carrito-activo" style="display: none;">
+    <div class="carrito-items" id="carrito-items">
+      <!-- Cada producto se inyectará aquí dinámicamente vía JS -->
 
+      <!-- EJEMPLO DE ESTRUCTURA (se genera con JS dinámicamente) -->
+      <!--
+      <div class="carrito-item" data-id="VARIANTE_ID">
         <div class="item-imagen">
-          <img src="{{ item.imagen|default:'/static/img/no-image.jpg' }}" alt="{{ item.nombre }}">
+          <img src="/ruta/a/imagen.jpg" alt="Nombre del producto">
         </div>
 
         <div class="item-detalles">
-          <h4>{{ item.nombre }}</h4>
-          <span>Talla: {{ item.talla }}</span>
-        </div>
+  <h4>${item.producto}</h4>
+  <span>${item.atributos?.join(', ') || 'Talla única'}</span>
 
-        <div class="item-precio">
-          $<span class="precio-unitario">0.00</span>
-          <span class="badge badge-menudeo">(menudeo)</span>
-        </div>
+  <div class="item-precio-cantidad">
+    <div class="item-precio">
+    <span class="precio-unitario-wrapper">
+      $<span class="precio-unitario">${precio.toFixed(2)}</span>
+    </span>
+    <span class="badge ${data.mayoreo ? 'badge-mayoreo' : 'badge-menudeo'}">
+      (${data.mayoreo ? 'mayoreo' : 'menudeo'})
+    </span>
+  </div>
 
-        <div class="item-cantidad qty-wrap">
-          <button class="btn-minus">−</button>
-          <input type="number" class="qty" min="1" value="{{ item.cantidad }}">
-          <button class="btn-plus">＋</button>
-        </div>
+    <div class="item-cantidad qty-wrap">
+      ${minusBtn}
+      <input type="number" class="qty" min="1" value="${item.cantidad}">
+      <button class="btn-plus">＋</button>
+    </div>
+  </div>
+</div>
+
 
         <div class="item-subtotal">
-          $<span class="subtotal">0.00</span>
+          $1199.00
         </div>
-
-        <button class="item-remove btn-eliminar" data-variante-id="{{ item.variante_id }}">×</button>
       </div>
-      {% endfor %}
+      -->
     </div>
 
     <div class="carrito-resumen">
       <p>Subtotal: <strong id="carrito-subtotal">$0.00</strong></p>
       <div class="carrito-botones">
-
         <button class="btn-vaciar">Vaciar Carrito</button>
         <a href="{% url 'finalizar_compra' %}" class="btn-finalizar">Finalizar compra</a>
         <a href="{% url 'index' %}" class="btn-seguir">Seguir comprando</a>
@@ -80,7 +82,7 @@
   </div>
 
   <!-- 🪣 Vista carrito vacío -->
-  <div id="carrito-vacio" style="{% if productos %}display:none;{% endif %}">
+  <div id="carrito-vacio" style="display: none;">
     <section class="carrito-vacio-section">
       {% if request.session.cliente_id %}
         <h2>Tu carrito está vacío</h2>
@@ -98,8 +100,10 @@
 
 {% block extra_js %}
 <script>
-  const CLIENTE_ID = {{ request.session.cliente_id|default:"null" }};
+  const CLIENTE_ID   = {{ request.session.cliente_id|default:"0" }};
+  const SESSION_KEY  = "{{ request.session.session_key|default:'' }}";
 </script>
+
 <script src="{% static 'public/carrito/js/carrito.js' %}"></script>
 <script type="module" src="{% static 'public/inicio/js/main.js' %}" defer></script>
 {% endblock %}

@@ -1,277 +1,393 @@
 /**
- * initWishlist – versión multi-usuario robusta
- *   • Una clave de localStorage por usuario (o "guest").
- *   • Migración automática de wishlist_ids_guest → wishlist_ids_<clienteId>.
- *   • Retorna { clearWishlist } para que puedas vaciar la lista al hacer logout.
+ * initWishlist – invitado + multi-usuario
+ * (versión con selector de tallas y carrito invitado)
  * --------------------------------------------------------------------------
+ *  Invitado  → localStorage (wishlist_ids_guest)
+ *  Login     → migra guest → wishlist_ids_<userId> y sincroniza backend
+ *  Logout    → nukeAllKeys() borra TODAS las claves wishlist_ids_*
  */
 export function initWishlist({
   selector          = '.wishlist-btn',
-  storageKey        = 'wishlist_ids',   // clave base (se versiona internamente)
-  backendURL        = null,
+  storageKey        = 'wishlist_ids',
+  backendURL        = '/api/wishlist/',          //  /<id_cliente>/
   csrfToken         = null,
   isAuthenticated   = false,
-  onRequireLogin    = null,
-  fetchProductoURL  = null,
+  fetchProductoURL  = '/api/productos_por_ids/?ids=',
   clienteId         = null
 } = {}) {
 
-/* ─────────────── 0. Clave de almacenamiento y migración ─────────────── */
-const storageKeyBase = storageKey;
-const storageKeyUser = (isAuthenticated && clienteId != null)
-      ? `${storageKeyBase}_${clienteId}`   // p.ej. wishlist_ids_42
-      : `${storageKeyBase}_guest`;         // navegación sin login
 
-if (isAuthenticated && clienteId != null) {
-  // Pasa los likes del invitado al usuario que acaba de iniciar sesión
-  try {
-    const guestKey   = `${storageKeyBase}_guest`;
-    const guestRaw   = localStorage.getItem(guestKey);
-    if (guestRaw) {
-      const guestList = JSON.parse(guestRaw) || [];
-      const userRaw   = localStorage.getItem(storageKeyUser);
-      const userList  = userRaw ? JSON.parse(userRaw) : [];
-      const merged    = [...new Set([...userList, ...guestList])];
-      localStorage.setItem(storageKeyUser, JSON.stringify(merged));
-      localStorage.removeItem(guestKey);
-    }
-  } catch { /* Si hay error de parseo, simplemente lo ignoramos */ }
-}
 
-/* ───────────────────── 1. Referencias DOM ───────────────────────────── */
-const wishlistIcon    = document.querySelector('#btn-wishlist-panel i');
-const wishlistCount   = document.querySelector('#btn-wishlist-panel .wishlist-count');
-const wishlistBtn     = document.getElementById('btn-wishlist-panel');
-const wishlistPanel   = document.getElementById('wishlist-panel');
-const closeBtn        = document.getElementById('close-wishlist-panel');
-const wishlistContent = wishlistPanel?.querySelector('.wishlist-content');
-const overlay         = document.querySelector('.page-overlay');
+/* ────────────────────────── 0. helpers de LS ────────────────────────── */
+const IS_GUEST_ID   = 0;                     // 🟢 id ficticio para invitados
+const safeClienteId = clienteId ?? IS_GUEST_ID;
 
-/* ───────────────────── 2. LocalStorage helpers ──────────────────────── */
+const keyUser = isAuthenticated && clienteId
+  ? `${storageKey}_${clienteId}` : `${storageKey}_guest`;
+
 const getList = () => {
-  try { return JSON.parse(localStorage.getItem(storageKeyUser)) || []; }
+  try { return JSON.parse(localStorage.getItem(keyUser)) || []; }
   catch { return []; }
 };
 const setList = list => {
-  localStorage.setItem(storageKeyUser, JSON.stringify(list));
+  localStorage.setItem(keyUser, JSON.stringify(list));
   updateHeaderUI(list);
 };
 
-/* ───────────────────── 3. Header UI helpers ─────────────────────────── */
-const toggleBtn = (btn, on) => {
-  btn.classList.toggle('active', on);
-  const ic = btn.querySelector('i');
-  if (ic) { ic.classList.toggle('fa-solid', on);
-            ic.classList.toggle('fa-regular', !on); }
-};
-const updateHeaderUI = list => {
-  wishlistIcon?.classList.toggle('fa-solid', !!list.length);
-  wishlistIcon?.classList.toggle('fa-regular', !list.length);
-  if (wishlistIcon) wishlistIcon.style.color = list.length ? '#ff4d6d' : '';
-  if (wishlistCount) {
-    wishlistCount.textContent = list.length;
-    wishlistCount.hidden = list.length === 0;
-  }
-};
-const hydrate = () => {
-  const list = getList();
-  list.forEach(id => {
-    const btn = document.querySelector(
-      `${selector}[data-product-id="${id}"]`);
-    btn && toggleBtn(btn, true);
-  });
-  updateHeaderUI(list);
-};
+/* ─────────────────── 1. migración guest → user + sync ───────────────── */
+if (isAuthenticated && clienteId){
+  try{
+    const guestRaw = localStorage.getItem(`${storageKey}_guest`);
+    const userRaw  = localStorage.getItem(keyUser);
+    const merged   = [...new Set([
+      ...(JSON.parse(userRaw  || '[]')),
+      ...(JSON.parse(guestRaw || '[]'))
+    ])];
+    localStorage.setItem(keyUser, JSON.stringify(merged));
+    localStorage.removeItem(`${storageKey}_guest`);
 
-/* ───────────────────── 4. clearWishlist (API pública) ───────────────── */
-function clearWishlist() {
-  localStorage.removeItem(storageKeyUser);
-  updateHeaderUI([]);
-  document.querySelectorAll(`${selector}.active`)
-          .forEach(btn => toggleBtn(btn, false));
+    /* sube likes heredados */
+    if (guestRaw){
+      for (const id of JSON.parse(guestRaw)){
+        fetch(`${backendURL}${clienteId}/`,{
+          method : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(csrfToken && { 'X-CSRFToken': csrfToken })
+          },
+          body: JSON.stringify({ producto_id: id })
+        }).catch(console.error);
+      }
+    }
+  }catch{/* ignore */}
+}else{
+  /* invitado: borra listas de otros usuarios */
+  Object.keys(localStorage)
+        .filter(k=>k.startsWith(storageKey) && !k.endsWith('_guest'))
+        .forEach(k=>localStorage.removeItem(k));
 }
 
-/* ───────────────────── 5. Panel show/hide ───────────────────────────── */
-const showWishlist = () => {
-  wishlistPanel?.classList.add('open');
-  overlay?.classList.add('active');
+/* ────────────────────────── 2. refs DOM ─────────────────────────────── */
+const wishlistPanel   = document.getElementById('wishlist-panel');
+const wishlistContent = wishlistPanel?.querySelector('.wishlist-content');
+const overlay         = document.querySelector('.page-overlay');
+const wishlistBtn     = document.getElementById('btn-wishlist-panel');
+const closeBtn        = document.getElementById('close-wishlist-panel');
+const wishlistIcon    = document.querySelector('#btn-wishlist-panel i');
+const wishlistCount   = document.querySelector('#btn-wishlist-panel .wishlist-count');
+
+/* ────────────────────────── 3. utilidades UI ───────────────────────── */
+const toggleBtn = (btn,on)=>{
+  btn.classList.toggle('active',on);
+  const ic=btn.querySelector('i');
+  ic?.classList.toggle('fa-solid',on);
+  ic?.classList.toggle('fa-regular',!on);
 };
-const hideWishlist = () => {
-  const picker = wishlistPanel.querySelector('.size-picker');
-  if (picker) closeSizePicker(picker, 'side');
+const updateHeaderUI = l=>{
+  wishlistIcon?.classList.toggle('fa-solid',!!l.length);
+  wishlistIcon?.classList.toggle('fa-regular',!l.length);
+  wishlistIcon && (wishlistIcon.style.color = l.length ? '#ff4d6d':'');
+  if (wishlistCount){ wishlistCount.textContent=l.length;
+                      wishlistCount.hidden=!l.length; }
+};
+
+/* ────────── 4. hydrate inicial (pull servidor si login) ─────────────── */
+const hydrateDone = (async ()=>{
+  if (isAuthenticated && clienteId){
+    try{
+      const r = await fetch(`${backendURL}${clienteId}/`);
+      if(r.ok){
+        const {productos=[]}=await r.json();
+        setList([...new Set([...getList(),...productos.map(String)])]);
+      }
+    }catch(err){ console.error('[Wishlist] pull',err); }
+  }
+  const idsSet = new Set(getList());
+  document.querySelectorAll(selector)
+          .forEach(btn=>toggleBtn(btn,idsSet.has(btn.dataset.productId)));
+})();
+
+/* ───────────────────────── 5. show / hide panel ─────────────────────── */
+const showWishlist = async ()=>{
+  await hydrateDone;
+  renderWishlistPanel();
+  wishlistPanel.classList.add('open');
+  overlay.classList.add('active');
+};
+const hideWishlist = ()=>{
+  closeSizePicker(wishlistPanel.querySelector('.size-picker'),'side');
   wishlistPanel.classList.remove('open');
   overlay.classList.remove('active');
 };
-overlay?.addEventListener('click', hideWishlist);
+wishlistBtn ?.addEventListener('click',showWishlist);
+closeBtn    ?.addEventListener('click',hideWishlist);
+overlay     ?.addEventListener('click',hideWishlist);
 
-/* ───────────────────── 6. Corazones del catálogo ───────────────────── */
-document.body.addEventListener('click', e => {
-  const heart = e.target.closest(selector);
-  if (!heart) return;
+/* ───────────────── 6. corazones en catálogo (LS + backend) ──────────── */
+document.body.addEventListener('click', e=>{
+  const heart=e.target.closest(selector);
+  if(!heart) return;
 
-  if (!isAuthenticated) { onRequireLogin?.(); return; }
+  const id=heart.dataset.productId;
+  let l=getList();
+  const add=!heart.classList.contains('active');
 
-  const id   = heart.dataset.productId;
-  let   list = getList();
-  const add  = !heart.classList.contains('active');
+  toggleBtn(heart,add);
+  add?l.push(id):l=l.filter(x=>x!==id);
+  setList(l);
 
-  toggleBtn(heart, add);
-  add ? list.push(id) : list = list.filter(x => x !== id);
-  setList(list);
-
-  if (backendURL && clienteId != null) {
-    fetch(`${backendURL}${clienteId}/`, {
-      method : add ? 'PATCH' : 'DELETE',
-      headers: { 'Content-Type':'application/json',
-                 ...(csrfToken && { 'X-CSRFToken': csrfToken })},
-      body   : JSON.stringify({ producto_id: id })
-    }).catch(err => console.error('Wishlist sync', err));
-  }
+  if(!isAuthenticated) return;
+  fetch(`${backendURL}${clienteId}/`,{
+    method : add?'POST':'DELETE',
+    headers: {
+      'Content-Type':'application/json',
+      ...(csrfToken && {'X-CSRFToken':csrfToken})
+    },
+    body: JSON.stringify({producto_id:id})
+  }).catch(console.error);
 });
 
-/* ───────────────────── 7. Placeholder “add to cart” ─────────────────── */
-const addToCart = (productoId, talla) => {
-  console.log(`addToCart → id=${productoId} talla=${talla}`);
-  /* TODO: fetch('/carrito/', { body:{productoId, talla} }) */
-};
+/* ─────────── 7. panel: add-to-cart + selector de talla ─────────────── */
+wishlistPanel?.addEventListener('click', async e=>{
 
-/* ───────────────────── 8. Render del panel ─────────────────────────── */
-const renderWishlistPanel = async () => {
-  wishlistContent.textContent = 'Cargando…';
-  if (!fetchProductoURL || !clienteId) {
-    wishlistContent.textContent = 'No tienes productos en tu wishlist.';
-    return;
+  /* 7-A · Cierre automático si hace clic en cualquier zona “no picker” */
+  const pickerOpen = wishlistPanel.querySelector('.size-picker');
+  if (pickerOpen && !e.target.closest('.size-picker') &&
+                    !e.target.matches('.btn-carrito-mini')){
+    closeSizePicker(pickerOpen,'down');
   }
-  try {
-    const res = await fetch(`${fetchProductoURL}${clienteId}/`);
-    if (!res.ok) throw new Error('Error al obtener productos');
-    const { productos = [] } = await res.json();
-    if (!productos.length) {
-      wishlistContent.textContent = 'No tienes productos en tu wishlist.';
-      return;
-    }
-    const frag = document.createDocumentFragment();
-    for (const p of productos) {
-      const sizes = Array.isArray(p.tallas) && p.tallas.length
-        ? p.tallas.join(',') : '';
-      const item = document.createElement('div');
-      item.className = 'wishlist-item';
-      item.innerHTML = `
-        <img src="${p.imagen || '/static/img/no-image.jpg'}" alt="${p.nombre}">
-        <div class="wishlist-details">
-          <h4>${p.nombre}</h4>
-          <span class="precio">$${p.precio}</span>
-        </div>
-        <div class="wishlist-actions">
-          <button class="btn-carrito-mini"
-                  data-id="${p.id}"
-                  data-sizes="${sizes}">
-            Agregar
-          </button>
-        </div>`;
-      frag.appendChild(item);
-    }
-    wishlistContent.innerHTML = '';
-    wishlistContent.appendChild(frag);
-  } catch (err) {
-    console.error(err);
-    wishlistContent.textContent = 'Hubo un error al cargar tu wishlist.';
-  }
-};
 
-/* ============== 9. Selector de talla dinámico ======================== */
-wishlistContent?.addEventListener('click', async e => {
-  /* —— click en “Agregar” —— */
-  if (e.target.matches('.btn-carrito-mini')) {
-    const pid  = e.target.dataset.id;
-    const open = wishlistPanel.querySelector('.size-picker');
-    if (open) {
-      if (open.dataset.productId === pid) { closeSizePicker(open); return; }
-      closeSizePicker(open);
+  /* 7-B · Botón “Agregar” (abre el picker) */
+  if (e.target.matches('.btn-carrito-mini')){
+
+    const pid=e.target.dataset.id;
+    if (pickerOpen && pickerOpen.dataset.productId===pid){
+      closeSizePicker(pickerOpen,'down'); return;
     }
-    /* 1. solicitar tallas al back-end */
-    let sizes = [];
-    try {
-      const res  = await fetch(`/api/productos/${pid}/`);
-      if (!res.ok) throw new Error('Error fetch tallas');
-      const data = await res.json();
-      sizes = Array.isArray(data.tallas) && data.tallas.length
-              ? data.tallas : ['Única'];
-    } catch {
-      sizes = ['Única'];
-    }
-    /* 2. construir el selector */
-    const picker = document.createElement('div');
-    picker.className = 'size-picker slide-up-full';
-    picker.dataset.productId = pid;
-    picker.innerHTML = `
+    pickerOpen && closeSizePicker(pickerOpen,'down');
+
+    let tallas=[];
+    try{ const r=await fetch(`/api/productos/${pid}/`);
+         tallas=(await r.json()).tallas||['Única']; }
+    catch{ tallas=['Única']; }
+
+    const picker=document.createElement('div');
+    picker.className='size-picker slide-up-full';
+    picker.dataset.productId=pid;
+    picker.innerHTML=`
       <div class="size-picker-inner">
         <h3>Selecciona tu talla</h3>
         <div class="size-options">
-          ${sizes.map(s => `<button class="size-option" data-size="${s.trim()}">${s.trim()}</button>`).join('')}
+          ${tallas.map(t=>`<button class="size-option" data-size="${t}">${t}</button>`).join('')}
         </div>
         <button class="close-size-picker">✕</button>
       </div>`;
-    picker.addEventListener('click', ev => {
-      if (ev.target.matches('.close-size-picker')) {
-        closeSizePicker(picker);
-      }
-    });
     wishlistPanel.appendChild(picker);
-    /* 3. posicionar y bloquear scroll interno */
-    const rect = wishlistPanel.getBoundingClientRect();
-    picker.style.position = 'fixed';
-    picker.style.left     = `${rect.left}px`;
-    picker.style.width    = `${rect.width}px`;
-    picker.style.bottom   = '0';
-    wishlistPanel.dataset.prevOverflow = wishlistPanel.style.overflowY || '';
-    wishlistPanel.style.overflowY = 'hidden';
+
+    /* posición y efecto blur */
+    const r=wishlistPanel.getBoundingClientRect();
+    picker.style.left=`${r.left}px`;
+    picker.style.width=`${r.width}px`;
+    wishlistPanel.dataset.prevOverflow = wishlistPanel.style.overflowY||'';
+    wishlistPanel.style.overflowY='hidden';
     wishlistContent.classList.add('blurred');
-    return;
   }
-  /* —— click en talla —— */
-  if (e.target.matches('.size-option')) {
-    const talla = e.target.dataset.size;
-    const pid   = e.target.closest('.size-picker').dataset.productId;
-    addToCart(pid, talla);
+
+  /* 7-C · Clic en talla */
+  if (e.target.matches('.size-option')){
+    const talla=e.target.dataset.size;
+    const pid  =e.target.closest('.size-picker').dataset.productId;
     e.target.classList.add('chosen');
-    setTimeout(() => closeSizePicker(
-                 e.target.closest('.size-picker')), 150);
-    return;
+    await addToCart(pid,talla,1);
+    setTimeout(()=>closeSizePicker(
+      e.target.closest('.size-picker'),'down'),160);
+  }
+
+  /* 7-D · Botón ✕ dentro del picker */
+  if (e.target.matches('.close-size-picker')){
+    closeSizePicker(e.target.closest('.size-picker'),'down');
   }
 });
 
-/* —— cerrar picker haciendo click fuera —— */
-wishlistPanel.addEventListener('click', e => {
-  const picker = wishlistPanel.querySelector('.size-picker');
-  if (!picker) return;
-  const inside = picker.contains(e.target);
-  const addBtn = e.target.matches('.btn-carrito-mini');
-  if (!inside && !addBtn) closeSizePicker(picker);
-});
 
-/* ─── animación de cierre ─── */
-function closeSizePicker(node, mode = 'down') {
-  if (!node) return;
-  node.classList.add(mode === 'side' ? 'fade-out-side' : 'fade-out-down');
+
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'toast-message';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.classList.add('show'), 100);
+  setTimeout(() => toast.classList.remove('show'), 2500);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+/* POST carrito */
+async function addToCart(pid, talla, cant = 1) {
+  try {
+    const r = await fetch(`/api/carrito/create/${safeClienteId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(csrfToken && { 'X-CSRFToken': csrfToken })
+      },
+      body: JSON.stringify({ producto_id: pid, talla, cantidad: cant })
+    });
+
+    if (!r.ok) throw new Error(await r.text());
+    console.log('🛒', await r.json());
+
+    const card = wishlistPanel.querySelector(`.wishlist-item .btn-carrito-mini[data-id="${pid}"]`)?.closest('.wishlist-item');
+    if (card) {
+      const actions = card.querySelector('.wishlist-actions');
+      const btn = actions.querySelector('.btn-carrito-mini');
+
+      if (btn) {
+        btn.classList.add('fade-out');
+        btn.addEventListener('animationend', () => {
+          btn.remove();
+          const span = document.createElement('span');
+          span.className = 'in-cart-note fade-in';
+          span.textContent = 'Ya en carrito';
+          actions.appendChild(span);
+        }, { once: true });
+      }
+    }
+
+    showToast('Producto agregado al carrito');
+
+    // 🔔 Actualiza carrito en vivo
+    document.dispatchEvent(new CustomEvent('carrito-actualizado'));
+
+  } catch (err) {
+    alert('No se pudo agregar.\n' + err.message);
+  }
+}
+
+
+/* util: cierra selector con animación */
+function closeSizePicker(node,dir='down'){
+  if(!node) return;
+  node.classList.add(dir==='side'?'fade-out-side':'fade-out-down');
   wishlistPanel.style.overflowY =
     wishlistPanel.dataset.prevOverflow || 'auto';
   delete wishlistPanel.dataset.prevOverflow;
   wishlistContent.classList.remove('blurred');
-  node.addEventListener('animationend', () => node.remove(), { once: true });
+  node.addEventListener('animationend',()=>node.remove(),{once:true});
 }
 
-/* ───────────────────── 10. Bootstrap ─────────────────────────────── */
-hydrate();
-wishlistBtn?.addEventListener('click', () => { renderWishlistPanel(); showWishlist(); });
-closeBtn  ?.addEventListener('click', hideWishlist);
-document.getElementById('link-wishlist')
-  .addEventListener('click', e => {
-      e.preventDefault();
-      renderWishlistPanel();
-      showWishlist();
+/* ─────────── 8. render panel con nota “Ya en carrito” ─────────────── */
+async function getCartIds(){
+  if(!isAuthenticated) return new Set();
+  try{
+    const r=await fetch(`/api/carrito/${clienteId}/`,{credentials:'same-origin'});
+    if(!r.ok) throw new Error(r.status);
+    const {items=[]}=await r.json();
+    return new Set(items.map(it=>String(it.producto_id)));
+  }catch(err){ console.error(err); return new Set(); }
+}
+
+async function renderWishlistPanel(){
+  const ids=getList();
+  if(!ids.length){
+    wishlistContent.textContent='No tienes productos en tu wishlist.';
+    if(!isAuthenticated) injectHint();       // 🟢 invitado, muestra hint
+    return;
+  }
+
+  try{
+    wishlistContent.textContent='Cargando…';
+    const url=isAuthenticated
+      ?`${backendURL}${clienteId}/?full=true`
+      :`${fetchProductoURL}${ids.join(',')}`;
+    const {productos=[]}=await (await fetch(url)).json();
+    const inCart=await getCartIds();
+    wishlistContent.innerHTML = productos.length
+      ? buildCards(productos,inCart)
+      : 'No tienes productos en tu wishlist.';
+  }catch(err){
+    wishlistContent.textContent='Error al cargar tu wishlist.';
+  }
+  if(!isAuthenticated) injectHint();         // 🟢 siempre al final
+}
+
+const buildCards=(arr,set=new Set())=>arr.map(p=>`
+  <div class="wishlist-item">
+    <img src="${p.imagen||'/static/img/no-image.jpg'}" alt="${p.nombre}">
+    <div class="wishlist-details">
+      <h4>${p.nombre}</h4><span class="precio">$${p.precio}</span>
+    </div>
+    <div class="wishlist-actions">
+      ${set.has(String(p.id))?'<span class="in-cart-note">Ya en carrito</span>':''}
+      <button class="btn-carrito-mini" data-id="${p.id}">Agregar</button>
+    </div>
+  </div>`).join('');
+
+/* Aviso para invitados */
+function injectHint(){
+  wishlistContent.insertAdjacentHTML('beforeend', `
+    <div class="wishlist-hint">
+      ¿Quieres conservar tus favoritos?
+      <a href="#" id="open-login-hint">Inicia sesión</a> o
+      <a href="/registrarse/">crea una cuenta</a>.
+    </div>`);
+}
+
+/* abrir login desde aviso */
+document.body.addEventListener('click',e=>{
+  if(e.target.id==='open-login-hint'){ e.preventDefault(); window.mostrarLoginPanel?.();}
+});
+
+/* ───────────────────────── 9. nuevas utilidades ────────────────────── */
+function clearWishlist(){
+  const ids = getList();
+  localStorage.removeItem(keyUser);
+  updateHeaderUI([]);
+  wishlistContent && (wishlistContent.textContent = 'No tienes productos en tu wishlist.');
+
+  if (isAuthenticated && clienteId && ids.length){
+    ids.forEach(id=>{
+      fetch(`${backendURL}${clienteId}/`,{
+        method : 'DELETE',
+        headers: {
+          'Content-Type':'application/json',
+          ...(csrfToken && {'X-CSRFToken':csrfToken})
+        },
+        body: JSON.stringify({producto_id:id})
+      }).catch(console.error);
+    });
+  }
+}
+
+function nukeAllKeys(){
+  Object.keys(localStorage)
+        .filter(k=>k.startsWith(storageKey))
+        .forEach(k=>localStorage.removeItem(k));
+  updateHeaderUI([]);
+}
+
+
+// ✅ Expone la función global para que pueda usarse fuera
+window.renderWishlistPanel = renderWishlistPanel;
+
+/* ─────────────────────── export API público ──────────────────────── */
+const api = { clearWishlist, nukeAllKeys };
+window.__wishlistAPI = api;
+return api;
+}
+
+// ✅ Ahora sí, cuando ya existe renderWishlistPanel
+if (!window.__wishlistCarritoListenerRegistered) {
+  window.__wishlistCarritoListenerRegistered = true;
+
+  document.addEventListener('carrito-actualizado', async () => {
+    const panel = document.getElementById('wishlist-panel');
+    if (
+      panel?.classList.contains('open') &&
+      typeof window.renderWishlistPanel === 'function'
+    ) {
+      await window.renderWishlistPanel();
+    }
   });
-
-/* ─── Devuelve API pública ─── */
-return { clearWishlist };
 }
+

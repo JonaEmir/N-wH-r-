@@ -1,89 +1,41 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contraseña restablecida</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contraseña restablecida</title>
 
-    <!-- CSS global -->
-    <link rel="stylesheet" href="{% static 'public/registro_usuario/css/main.css' %}">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
-    <!-- CSS específico de recuperación -->
-    <link rel="stylesheet" href="{% static 'public/recuperar-password/css/main.css' %}">
+  <!-- CSS global -->
+  <link rel="stylesheet" href="{% static 'public/registro_usuario/css/main.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+  <link rel="stylesheet" href="{% static 'public/recuperar-password/css/main.css' %}">
+
+  <!-- Redirección automática -->
+  <script>
+    setTimeout(() => {
+      window.location.href = "{% url 'index' %}";
+    }, 3000); // redirige en 3 segundos
+  </script>
 </head>
 <body>
 
 <header>
-    <div class="header-left">
-        <a href="{% url 'index' %}">
-            <img src="{% static 'images/NowHere.svg' %}" id="Logo" class="fade-in" alt="NöwHėrē">
-        </a>
-        <h2>| Creación de cuenta N:</h2>
-    </div>
+  <div class="header-left">
+    <a href="{% url 'index' %}">
+      <img src="{% static 'images/NowHere.svg' %}" id="Logo" class="fade-in" alt="NöwHėrē">
+    </a>
+    <h2>| Creación de cuenta N:</h2>
+  </div>
 </header>
 
 <main>
   <section class="recovery-section">
     <h1>✅ Contraseña actualizada con éxito</h1>
-    <p>Tu contraseña ha sido cambiada correctamente. Ahora puedes iniciar sesión con tu nueva contraseña.</p>
-    <a href="{% url 'index' %}" class="btn-primary">Ir a iniciar sesión</a>
+    <p>Tu contraseña ha sido cambiada exitosamente. Serás redirigido al inicio.</p>
   </section>
 </main>
 
-<section class="info-footer">
-  <div class="info-col">
-    <h4 class="accordion-toggle">AYUDA</h4>
-    <div class="accordion-content">
-      <p>¿Tienes dudas sobre tu pedido?</p>
-      <p>Contáctanos vía <a href="https://api.whatsapp.com/send/?phone=523322118360&text&type=phone_number&app_absent=0">WhatsApp</a>
-         o envíanos un correo a <a href="mailto:jona.emir@hotmail.com">jona.emir@hotmail.com</a></p>
-      <p><a href="#">Preguntas Frecuentes</a></p>
-      <p><a href="#">Guía de Tallas</a></p>
-    </div>
-  </div>
-  <div class="info-col">
-    <h4 class="accordion-toggle">SERVICIOS</h4>
-    <div class="accordion-content">
-      <p><a href="#">Compra por Mayoreo</a></p>
-      <p><a href="#">Seguimiento de Envíos</a></p>
-      <p><a href="#">Política de Cambios</a></p>
-      <p><a href="#">Atención Personalizada</a></p>
-    </div>
-  </div>
-  <div class="info-col">
-    <h4 class="accordion-toggle">INFORMACIÓN</h4>
-    <div class="accordion-content">
-      <p><a href="#">Sobre Nosotros</a></p>
-      <p><a href="#">Métodos de Pago</a></p>
-      <p><a href="#">Privacidad y Seguridad</a></p>
-      <p><a href="#">Términos y Condiciones</a></p>
-    </div>
-  </div>
-  <div class="info-col">
-    <h4 class="accordion-toggle">MAYOREO</h4>
-    <div class="accordion-content">
-      <p>¿Eres revendedor o tienda?</p>
-      <p>Mayoreo a partir de 6 pzs.</p>
-      <p><a href="#">Solicita Cotización</a></p>
-    </div>
-  </div>
-</section>
-
-<footer class="site-footer">
-  <div class="footer-container">
-    <div class="footer-links">
-      <a href="#">Avisos Legales</a>
-    </div>
-    <img src="{% static 'images/NowHere.svg' %}" id="Logo-footer" class="fade-in" alt="NöwHėrē">
-    <div class="footer-social">
-      <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-      <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
-      <a href="https://api.whatsapp.com/send/?phone=523322118360&text&type=phone_number&app_absent=0" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
-    </div>
-  </div>
-</footer>
 
 </body>
 </html>

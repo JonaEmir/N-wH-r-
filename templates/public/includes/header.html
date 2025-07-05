@@ -1,6 +1,8 @@
 {% load static %}
 <!-- HEADER -->
-<header>
+{% load static %}
+<!-- HEADER -->
+<header data-auth="{{ request.session.cliente_username|yesno:'true,false' }}">
   <div class="header-left fade-in">
     <button id="btn-burger" class="burger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -17,25 +19,21 @@
   <div class="header-right fade-in">
     <button id="btn-contacto" class="btn-contacto">Contáctanos</button>
 
-    {% if request.session.cliente_username %}
-
-    <!-- ❤️ Wishlist -->
+    <!-- ❤️ Wishlist (SIEMPRE visible) -->
     <button id="btn-wishlist-panel" class="user-icon" aria-label="Ver wishlist">
       <i class="fa-regular fa-heart user-icon-icon"></i>
       <span id="wishlist-count" class="wishlist-count" hidden>0</span>
     </button>
 
-    <!-- 🛒 Carrito -->
-    <!-- 🛒 Carrito - SVG de contorno -->
-    <a href="{% url 'carrito_cliente' %}" class="user-icon" aria-label="Ver carrito">
-      <svg xmlns="http://www.w3.org/2000/svg"
-          width="24" height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.2"
-          stroke-linecap="round"
-          stroke-linejoin="round">
+    <!-- 🛒 Carrito (SIEMPRE visible) -->
+    <a id="btn-cart-panel"
+        href="{% url 'ver_carrito' %}"
+       class="user-icon"
+       aria-label="Ver carrito">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+           viewBox="0 0 24 24" fill="none"
+           stroke="black" stroke-width="1.2"
+           stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 6h14l-1.4 7.2a1 1 0 0 1-1 .8H8.5a1 1 0 0 1-1-.8L6 6z" />
         <circle cx="9" cy="20" r="1.3" />
         <circle cx="17" cy="20" r="1.3" />
@@ -43,34 +41,39 @@
       </svg>
     </a>
 
-
-    <div class="usuario-dropdown">
-      <svg id="btn-user-menu" class="user-icon" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none"
-           stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-           viewBox="0 0 24 24">
+    {% if request.session.cliente_username %}
+      <!-- ▼ Menú de usuario (logueado) -->
+      <div class="usuario-dropdown">
+        <svg id="btn-user-menu" class="user-icon" xmlns="http://www.w3.org/2000/svg"
+             width="25" height="25" fill="none"
+             stroke="#1D1D1D" stroke-width="1" stroke-linecap="round"
+             stroke-linejoin="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+        </svg>
+      </div>
+    {% else %}
+      <!-- ▼ Icono login (invitado) -->
+      <svg id="btn-login" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+           fill="none" stroke="#1D1D1D" stroke-width="1" stroke-linecap="round"
+           stroke-linejoin="round" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="4"/>
         <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
       </svg>
-    </div>
-    {% else %}
-    <svg id="btn-login" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-         stroke="#1D1D1D" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-         viewBox="0 0 24 24">
-      <circle cx="12" cy="8" r="4"/>
-      <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
-    </svg>
     {% endif %}
   </div>
-
-    
 </header>
+
 
 <!-- NAV MENU -->
 <nav class="nav-menu">
+   <button class="close-menu" id="btn-close-menu" aria-label="Cerrar menú">×</button>
   <ul class="menu">
     <li><a href="{% url 'index' %}">Inicio</a></li>
     <li><a href="{% url 'coleccion_genero' 'dama' %}">Dama</a></li>
     <li><a href="{% url 'coleccion_genero' 'caballero' %}">Caballero</a></li>
+    <li><a href="{% url 'coleccion_genero' 'accesorios' %}">Accesorios</a></li>
+    <li><a href="{% url 'coleccion_genero' '#' %}">Todo</a></li>
   </ul>
 </nav>
 
