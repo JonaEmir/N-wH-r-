@@ -1,12 +1,13 @@
 # store/views/carrito.py
 # ==============================================================
+from decimal import Decimal
 from django.shortcuts            import get_object_or_404, render
 from django.http                 import JsonResponse
 from django.db                   import models, transaction
 from django.db.models            import Sum
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-
+from twilio.rest import Client
 from store.views.decorators      import login_required_client
 from ..models import (
     Cliente, Carrito, Producto, AtributoValor,
@@ -455,6 +456,128 @@ def eliminar_item_guest(request, variante_id):
 # -----------------------------------------------------------------
 # 9. Checkout (solo para clientes logueados)
 # -----------------------------------------------------------------
+twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+@csrf_exempt
+@require_http_methods(["POST"])
+def finalizar_compra(request, carrito_id):
+    """
+    El carrito_id viene desde la URL: /ordenar/123/
+    """
+    # 1) Obtener carrito y cliente
+    carrito = get_object_or_404(Carrito, id=carrito_id)
+    cliente = carrito.cliente
+
+    # 2) Traer productos del carrito
+    qs = (
+        CarritoProducto.objects
+        .filter(carrito=carrito)
+        .select_related('variante__producto')
+        .prefetch_related('variante__attrs__atributo_valor')
+    )
+
+    # 3) Construir lista de ítems y calcular totales
+    items = []
+    total_amount = Decimal('0.00')
+    total_piezas = 0
+
+    for cp in qs:
+        var        = cp.variante
+        prod       = var.producto
+        precio_unit= var.precio if var.precio is not None else prod.precio
+        subtotal   = precio_unit * cp.cantidad
+
+        items.append({
+            "producto":        prod.nombre,
+            "variante_id":     var.id,
+            "cantidad":        cp.cantidad,
+            "precio_unitario": float(precio_unit),
+            "subtotal":        float(subtotal),
+            "atributos":       [str(av) for av in var.attrs.all()],
+        })
+
+        total_amount += subtotal
+        total_piezas += cp.cantidad
+
+    # 4) Armar el payload JSON
+    payload = {
+        "cliente": {
+            "username": cliente.username,
+            "nombre":   cliente.nombre,
+            "correo":   cliente.correo,
+            "telefono": cliente.telefono,
+        },
+        "carrito_id":   carrito.id,
+        "total_piezas": total_piezas,
+        "total_amount": float(round(total_amount, 2)),
+        "items":        items,
+    }
+
+    # 5) Debug: imprimo en consola
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+    # … arriba queda todo igual …
+
+    # 6) Envío por WhatsApp
+    try:
+        # Validar teléfono (si no lo tienes hardcodeado)
+        
+        # Usar número fijo o dinámico:
+        to_whatsapp = "whatsapp:+5213322118360"  # <- temporalmente fijo
+
+        # Construcción del cuerpo del mensaje con talla incluida
+        body_lines = [
+            f"Hola {cliente.nombre}, gracias por tu compra.",
+            "",
+            f"Resumen (#{carrito.id}): {total_piezas} artículos → ${payload['total_amount']}",
+            "",
+            "Detalles:"
+        ]
+
+        for it in items:
+            talla = None
+            for attr in it['atributos']:
+                if attr.lower().startswith("talla"):
+                    _, valor = attr.split(":", 1)
+                    talla = valor.strip()
+                    break
+                
+            talla_text = f", Talla: {talla}" if talla else ""
+            line = (
+                f"· Modelo: {it['producto']}"
+                f"{talla_text}, Cantidad: x{it['cantidad']}: "
+                f"${it['precio_unitario']} c/u → ${it['subtotal']}"
+            )
+            body_lines.append(line)
+
+        # Unimos todo con saltos de línea
+        body = "\n".join(body_lines)
+
+        msg = twilio_client.messages.create(
+            body=body,
+            from_=TWILIO_WHATSAPP_FROM,
+            to=to_whatsapp
+        )
+        print("SID Twilio:", msg.sid)
+
+    except Exception as e:
+        print("Error Twilio:", e)
+        return JsonResponse(
+            {"error": "Fallo al enviar WhatsApp."},
+            status=500
+        )
+
+    # 7) Respondo al front
+    return JsonResponse({"status": "ok", "payload": payload})
+
+
+
+    """
 @login_required_client
 def finalizar_compra(request):
+    #enviar carrito a ordenar
+    return render(request, 'public/carrito/finalizar_compra.html')
+
+"""
+
+
     return render(request, "public/carrito/finalizar_compra.html")

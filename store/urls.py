@@ -81,7 +81,7 @@ urlpatterns = [
 
     path("carrito/",             carrito_publico,  name="ver_carrito"),      # pública
     path("carrito/cliente/",     carrito_cliente,  name="carrito_cliente"),  # protegida opcional
-    path("carrito/finalizar/",   finalizar_compra, name="finalizar_compra"),
+    
 
     # ---------- Carrito API ----------
     path('api/carrito/guest/',            detalle_carrito_session, name='detalle_carrito_session'),  # 
@@ -137,6 +137,9 @@ urlpatterns = [
     path("wishlist/all/<int:id_cliente>/",   wishlist_all,    name="wishlist_all"),
     path("api/productos/<int:id_producto>/", producto_tallas, name="producto_tallas"),
     path("api/productos_por_ids/",           productos_por_ids, name="productos_por_ids"),
+
+    #------------ Ordenar ------------
+    path("ordenar/<int:cliente_id>",   finalizar_compra, name="finalizar_compra"),
 
     # ---------- Alias antiguo ----------
     path("registro/", alta, name="alta"),
