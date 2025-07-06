@@ -132,9 +132,14 @@
   -webkit-appearance: none;
   margin: 0;
 }
+
 .item-cantidad input.qty[type="number"] {
-  -moz-appearance: textfield;
+  -moz-appearance: textfield;        /* Firefox */
+  -webkit-appearance: none;          /* Chrome, Safari, Opera */
+  appearance: none;                  /* Estándar */
+  margin: 0;                         /* Elimina margen por defecto en Firefox */
 }
+
 
 /* Botones ± */
 .item-cantidad .btn-minus,
